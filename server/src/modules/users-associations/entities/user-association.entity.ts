@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AssociationAnnouncement } from 'src/modules/associations-announcements/entities/association-announcement.entity';
-import { AssociationRole } from 'src/modules/associations-roles/entities/association-role.entity';
-import { Association } from 'src/modules/associations/entities/association.entity';
-import { Fundraising } from 'src/modules/fundraisings/entities/fundraising.entity';
-import { User } from 'src/modules/users/entities/user.entity';
+import { AssociationAnnouncement } from '../../../modules/associations-announcements/entities/association-announcement.entity';
+import { AssociationRole } from '../../../modules/associations-roles/entities/association-role.entity';
+import { Association } from '../../../modules/associations/entities/association.entity';
+import { Fundraising } from '../../../modules/fundraisings/entities/fundraising.entity';
+import { User } from '../../../modules/users/entities/user.entity';
 import {
   Entity,
   JoinColumn,

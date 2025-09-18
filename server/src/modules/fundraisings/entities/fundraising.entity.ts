@@ -52,7 +52,7 @@ export class Fundraising {
     default: () => 'CURRENT_TIMESTAMP',
     nullable: true,
   })
-  endDate: Date;
+  endDate?: Date;
 
   @ApiProperty({
     type: UserAssociation,

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/modules/users/entities/user.entity';
+import { Categories } from '../../../common/enums/categories';
+import { User } from '../../../modules/users/entities/user.entity';
 import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 
 @Entity()
@@ -8,9 +9,10 @@ export class Favorite {
     example: 'Association',
     description:
       "Type de l'élément favori (e.g., 'Association', 'Announcement')",
+    enum: Categories,
   })
   @PrimaryColumn()
-  relatedTo: string;
+  relatedTo: Categories;
 
   @ApiProperty({
     example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
