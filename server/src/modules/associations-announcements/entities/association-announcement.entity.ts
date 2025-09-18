@@ -24,8 +24,8 @@ export class AssociationAnnouncement {
     example: "Nous sommes ravis d'annoncer une nouvelle annonce...",
     description: "Contenu de l'annonce",
   })
-  @Column({ type: 'text' })
-  content: string;
+  @Column({ type: 'text', nullable: true })
+  content?: string;
 
   @Column(() => Timestamps)
   timestamps: Timestamps;

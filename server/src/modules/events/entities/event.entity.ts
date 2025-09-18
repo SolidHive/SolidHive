@@ -1,8 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Address } from '../../../common/embeddeds/address.embedded';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Image } from '../../../common/embeddeds/image.embedded';
 import { EventPricing } from '../../../modules/events-pricings/entities/event-pricing.entity';
+import { Association } from '../../../modules/associations/entities/association.entity';
 
 @Entity()
 export class Event {
@@ -53,11 +60,18 @@ export class Event {
     default: () => 'CURRENT_TIMESTAMP',
     nullable: true,
   })
-  endDate: Date;
+  endDate?: Date;
 
   @Column(() => Address)
   address: Address;
 
   @OneToMany(() => EventPricing, (pricing) => pricing.event)
   pricings: EventPricing[];
+
+  @ApiProperty({
+    type: Association,
+    description: "Association organisatrice de l'événement",
+  })
+  @ManyToOne(() => Association, (association) => association.events)
+  association: Association;
 }
