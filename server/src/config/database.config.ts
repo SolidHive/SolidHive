@@ -19,7 +19,7 @@ export const getBaseConfig = (): DataSourceOptions => ({
 // Configuration pour NestJS
 export const getNestConfig = (): DataSourceOptions => ({
   ...getBaseConfig(),
-  entities: [join(__dirname, '..', '**', '*.entity{.ts,.js}')],
+  entities: [join(__dirname, '..', 'modules', '**', '*.entity{.ts,.js}')],
   migrations: [join(__dirname, '../..', 'migrations', '**', '*{.ts,.js}')],
 });
 
