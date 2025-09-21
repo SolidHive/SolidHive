@@ -1,6 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Address } from '../../../common/embeddeds/address.embedded';
-import { Image } from '../../../common/embeddeds/image.embedded';
 import {
   IsDate,
   IsNotEmpty,
@@ -9,7 +7,10 @@ import {
   IsString,
   IsUUID,
   Length,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CreateAddressDto } from 'src/common/dto/create-address.dto';
 
 export class CreateEventDto {
   @ApiProperty({
@@ -49,17 +50,12 @@ export class CreateEventDto {
   amount: number;
 
   @ApiProperty({
-    type: Image,
-    description: "Image de l'événement",
-  })
-  image: Image;
-
-  @ApiProperty({
     example: '2023-03-15T12:00:00Z',
     description: "Date de début de l'événement",
   })
   @IsNotEmpty({ message: "La date de début de l'événement est requise" })
   @IsDate({ message: "La date de début de l'événement doit être une date" })
+  @Type(() => Date)
   startDate: Date;
 
   @ApiProperty({
@@ -68,19 +64,27 @@ export class CreateEventDto {
   })
   @IsDate({ message: "La date de fin de l'événement doit être une date" })
   @IsOptional()
+  @Type(() => Date)
   endDate?: Date;
 
   @ApiProperty({
-    type: Address,
+    type: () => CreateAddressDto,
     description: "Adresse de l'événement",
   })
-  address: Address;
+  @ValidateNested()
+  @Type(() => CreateAddressDto)
+  address: CreateAddressDto;
 
   @ApiProperty({
-    example: '550e8400-e29b-41d4-a716-446655440000',
-    description: "ID de l'association organisatrice de l'événement",
+    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+    description: "Identifiant de l'association de l'utilisateur (UUID)",
   })
-  @IsUUID('4', { message: "L'ID de l'association doit être un UUID valide" })
-  @IsNotEmpty({ message: "L'ID de l'association est requis" })
-  associationId: string;
+  @IsNotEmpty({
+    message: "L'identifiant de l'association de l'utilisateur est requis",
+  })
+  @IsUUID('4', {
+    message:
+      "L'identifiant de l'association de l'utilisateur doit être un UUID valide",
+  })
+  userAssociationId: string;
 }

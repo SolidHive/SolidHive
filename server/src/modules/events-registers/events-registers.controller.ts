@@ -3,13 +3,19 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { EventsRegistersService } from './events-registers.service';
 import { CreateEventRegisterDto } from './dto/create-event-register.dto';
-import { UpdateEventRegisterDto } from './dto/update-events-register.dto';
+import { Roles, RolesGuard } from '../auth/guards/roles.guard';
+import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
+import { RateLimitGuard } from 'src/common/guards/rate-limit.guard';
+import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { User } from 'src/common/decorators/user.decorator';
+import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
 
 @Controller('events-registers')
 export class EventsRegistersController {
@@ -18,30 +24,33 @@ export class EventsRegistersController {
   ) {}
 
   @Post()
-  create(@Body() createEventRegisterDto: CreateEventRegisterDto) {
-    return this.eventsRegistersService.create(createEventRegisterDto);
+  @UseGuards(RateLimitGuard)
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Accès refusé' })
+  create(
+    @Body() createEventRegisterDto: CreateEventRegisterDto,
+    @User('id') userId?: string,
+  ) {
+    return this.eventsRegistersService.create(createEventRegisterDto, userId);
   }
 
   @Get()
-  findAll() {
-    return this.eventsRegistersService.findAll();
+  findAll(@Query() options?: FindAllQueryDto) {
+    return this.eventsRegistersService.findAll(options);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.eventsRegistersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateEventRegisterDto: UpdateEventRegisterDto,
-  ) {
-    return this.eventsRegistersService.update(+id, updateEventRegisterDto);
+  findOne(@Param('id') id: string, @Query() options?: FindAllQueryDto) {
+    return this.eventsRegistersService.findOne(id, options);
   }
 
   @Delete(':id')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
+  @Roles('admin')
+  @ApiCookieAuth()
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Accès refusé' })
   remove(@Param('id') id: string) {
-    return this.eventsRegistersService.remove(+id);
+    return this.eventsRegistersService.remove(id);
   }
 }

@@ -1,4 +1,15 @@
-import { PartialType } from '@nestjs/swagger';
+import { OmitType, PartialType } from '@nestjs/swagger';
 import { CreateEventDto } from './create-event.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { UpdateAddressDto } from 'src/common/dto/update-address.dto';
 
-export class UpdateEventDto extends PartialType(CreateEventDto) {}
+export class UpdateEventDto extends PartialType(
+  OmitType(CreateEventDto, ['userAssociationId', 'address']),
+) {
+  @ApiProperty({ type: () => UpdateAddressDto })
+  @ValidateNested()
+  @Type(() => UpdateAddressDto)
+  address?: UpdateAddressDto;
+}

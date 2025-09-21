@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsDate,
   IsNotEmpty,
@@ -8,7 +9,6 @@ import {
   IsUUID,
   Length,
 } from 'class-validator';
-import { Image } from 'src/common/embeddeds/image.embedded';
 
 export class CreateFundraisingDto {
   @ApiProperty({ example: 'Aide pour les enfants', description: 'Titre' })
@@ -40,15 +40,13 @@ export class CreateFundraisingDto {
   @IsNumber({}, { message: 'Le montant souhaité doit être un nombre' })
   wantedAmount: number;
 
-  @ApiProperty({ type: Image })
-  image: Image;
-
   @ApiProperty({
     example: '2023-03-15T12:00:00Z',
     description: 'Date de début de la collecte',
   })
   @IsNotEmpty({ message: 'La date de début est requise' })
   @IsDate({ message: 'La date de début doit être une date' })
+  @Type(() => Date)
   startDate: Date;
 
   @ApiProperty({
@@ -57,6 +55,7 @@ export class CreateFundraisingDto {
   })
   @IsOptional()
   @IsDate({ message: 'La date de fin doit être une date' })
+  @Type(() => Date)
   endDate?: Date;
 
   @ApiProperty({
@@ -68,4 +67,17 @@ export class CreateFundraisingDto {
     message: "L'identifiant de l'association doit être un UUID valide",
   })
   associationId: string;
+
+  @ApiProperty({
+    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+    description: "Identifiant de l'association de l'utilisateur (UUID)",
+  })
+  @IsNotEmpty({
+    message: "L'identifiant de l'association de l'utilisateur est requis",
+  })
+  @IsUUID('4', {
+    message:
+      "L'identifiant de l'association de l'utilisateur doit être un UUID valide",
+  })
+  userAssociationId: string;
 }

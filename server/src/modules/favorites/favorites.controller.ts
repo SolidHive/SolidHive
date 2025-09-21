@@ -3,43 +3,64 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { UpdateFavoriteDto } from './dto/update-favorite.dto';
+import { RateLimitGuard } from 'src/common/guards/rate-limit.guard';
+import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
+import { User } from 'src/common/decorators/user.decorator';
+import { Categories } from 'src/common/enums/categories';
+import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
 
 @Controller('favorites')
 export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
   @Post()
-  create(@Body() createFavoriteDto: CreateFavoriteDto) {
-    return this.favoritesService.create(createFavoriteDto);
+  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @ApiCookieAuth()
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  create(
+    @Body() createFavoriteDto: CreateFavoriteDto,
+    @User('id') userId: string,
+  ) {
+    return this.favoritesService.create(createFavoriteDto, userId);
   }
 
   @Get()
-  findAll() {
-    return this.favoritesService.findAll();
+  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @ApiCookieAuth()
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  findAll(@User('id') userId: string, @Query() options?: FindAllQueryDto) {
+    return this.favoritesService.findAll(userId, options);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.favoritesService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateFavoriteDto: UpdateFavoriteDto,
+  @Get(':relatedTo/:relatedBy')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @ApiCookieAuth()
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  findOne(
+    @Param('relatedTo') relatedTo: Categories,
+    @Param('relatedBy') id: string,
+    @User('id') userId: string,
   ) {
-    return this.favoritesService.update(+id, updateFavoriteDto);
+    return this.favoritesService.findOne(relatedTo, id, userId);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.favoritesService.remove(+id);
+  @Delete(':relatedTo/:relatedBy')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @ApiCookieAuth()
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  remove(
+    @Param('relatedTo') relatedTo: Categories,
+    @Param('relatedBy') relatedBy: string,
+    @User('id') userId: string,
+  ) {
+    return this.favoritesService.remove(relatedTo, relatedBy, userId);
   }
 }

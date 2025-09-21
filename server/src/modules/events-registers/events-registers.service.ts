@@ -1,24 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { EventRegister } from './entities/event-register.entity';
+import { User } from '../users/entities/user.entity';
+import { CreateEventRegisterDto } from './dto/create-event-register.dto';
+import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { EventPricing } from '../events-pricings/entities/event-pricing.entity';
 
 @Injectable()
 export class EventsRegistersService {
-  create() {
-    return 'This action adds a new eventsRegister';
+  constructor(
+    @InjectRepository(EventRegister)
+    private readonly eventsRegisterRepository: Repository<EventRegister>,
+    @InjectRepository(EventPricing)
+    private readonly eventsPricingRepository: Repository<EventPricing>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
+
+  async create(
+    createEventRegisterDto: CreateEventRegisterDto,
+    userId?: string,
+  ) {
+    const user = userId
+      ? await this.usersRepository.findOne({ where: { id: userId } })
+      : null;
+
+    const eventPricing = await this.eventsPricingRepository.findOne({
+      where: { id: createEventRegisterDto.eventPricingId },
+    });
+
+    if (!eventPricing) {
+      throw new HttpException('Event pricing not found', HttpStatus.NOT_FOUND);
+    }
+
+    const eventRegister = this.eventsRegisterRepository.create({
+      eventPricing,
+      user,
+    });
+
+    return this.eventsRegisterRepository.save(eventRegister);
   }
 
-  findAll() {
-    return `This action returns all eventsRegisters`;
+  findAll(options?: FindAllQueryDto) {
+    return this.eventsRegisterRepository.find(options);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} eventsRegister`;
+  findOne(id: string, options?: FindAllQueryDto) {
+    return this.eventsRegisterRepository.findOne({
+      where: { id },
+      ...options,
+    });
   }
 
-  update(id: number) {
-    return `This action updates a #${id} eventsRegister`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} eventsRegister`;
+  async remove(id: string) {
+    return this.eventsRegisterRepository.delete(id);
   }
 }

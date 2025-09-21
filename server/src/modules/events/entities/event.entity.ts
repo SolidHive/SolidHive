@@ -7,9 +7,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Image } from '../../../common/embeddeds/image.embedded';
 import { EventPricing } from '../../../modules/events-pricings/entities/event-pricing.entity';
 import { Association } from '../../../modules/associations/entities/association.entity';
+import { UserAssociation } from 'src/modules/users-associations/entities/user-association.entity';
 
 @Entity()
 export class Event {
@@ -41,9 +41,6 @@ export class Event {
   @Column({ type: 'float', default: 0 })
   amount: number;
 
-  @Column(() => Image)
-  image: Image;
-
   @ApiProperty({
     example: '2023-03-15T12:00:00Z',
     description: "Date de début de l'événement",
@@ -67,6 +64,13 @@ export class Event {
 
   @OneToMany(() => EventPricing, (pricing) => pricing.event)
   pricings: EventPricing[];
+
+  @ApiProperty({
+    type: UserAssociation,
+    description: "Utilisateur ayant créé l'événement",
+  })
+  @ManyToOne(() => UserAssociation, (userAssociation) => userAssociation.events)
+  createdBy: UserAssociation;
 
   @ApiProperty({
     type: Association,

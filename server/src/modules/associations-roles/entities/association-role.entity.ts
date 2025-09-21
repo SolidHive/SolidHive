@@ -7,11 +7,13 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { UserAssociation } from 'src/modules/users-associations/entities/user-association.entity';
 import { Timestamps } from 'src/common/embeddeds/timestamps.embedded';
 
 @Entity()
+@Unique(['name', 'association'])
 export class AssociationRole {
   @ApiProperty({
     example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
@@ -21,7 +23,7 @@ export class AssociationRole {
   id: string;
 
   @ApiProperty({ example: 'Gestionnaire', description: 'Nom du rôle' })
-  @Column({ length: 12, unique: true })
+  @Column({ length: 12 })
   name: string;
 
   @ApiProperty({
@@ -38,8 +40,12 @@ export class AssociationRole {
     type: UserAssociation,
     description: 'Utilisateur ayant créé le rôle',
   })
-  @ManyToOne(() => UserAssociation, (userAssociation) => userAssociation.roles)
-  createdBy: UserAssociation;
+  @ManyToOne(
+    () => UserAssociation,
+    (userAssociation) => userAssociation.roles,
+    { nullable: true },
+  )
+  createdBy: UserAssociation | null;
 
   @ApiProperty({
     type: Association,

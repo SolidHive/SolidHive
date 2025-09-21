@@ -5,6 +5,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
 } from 'class-validator';
 
@@ -41,12 +42,14 @@ export class CreateAssociationRoleDto {
 
   @ApiProperty({
     example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-    description: "Identifiant unique (UUID) de l'association",
+    description: "Identifiant de l'association de l'utilisateur (UUID)",
   })
-  @IsString({
+  @IsNotEmpty({
+    message: "L'identifiant de l'association de l'utilisateur est requis",
+  })
+  @IsUUID('4', {
     message:
-      "L'identifiant de l'association doit être une chaîne de caractères",
+      "L'identifiant de l'association de l'utilisateur doit être un UUID valide",
   })
-  @IsNotEmpty({ message: "L'identifiant de l'association est requis" })
-  associationId: string;
+  userAssociationId: string;
 }

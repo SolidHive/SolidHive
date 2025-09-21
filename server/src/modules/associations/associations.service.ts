@@ -1,24 +1,101 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Association } from './entities/association.entity';
+import { Repository } from 'typeorm';
+import { User } from '../users/entities/user.entity';
+import { CreateAssociationDto } from './dto/create-association.dto';
+import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { UpdateAssociationDto } from './dto/update-association.dto';
+import { AssociationRole } from '../associations-roles/entities/association-role.entity';
+import { UserAssociation } from '../users-associations/entities/user-association.entity';
+import { Permissions } from 'src/common/enums/permissions';
 
 @Injectable()
 export class AssociationsService {
-  create() {
-    return 'This action adds a new association';
+  constructor(
+    @InjectRepository(AssociationRole)
+    private associationsRolesRepository: Repository<AssociationRole>,
+    @InjectRepository(UserAssociation)
+    private readonly usersAssociationsRepository: Repository<UserAssociation>,
+    @InjectRepository(Association)
+    private readonly associationsRepository: Repository<Association>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
+
+  async create(createAssociationDto: CreateAssociationDto, userId: string) {
+    const user: User | null = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return await this.associationsRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        // 1. créer l'association
+        const addAssociation = transactionalEntityManager.create(Association, {
+          ...createAssociationDto,
+          createdBy: user,
+        });
+        const savedAssociation = await transactionalEntityManager.save(
+          Association,
+          addAssociation,
+        );
+
+        // 2. créer le rôle par défaut
+        const addDefaultRole = transactionalEntityManager.create(
+          AssociationRole,
+          {
+            name: 'owner',
+            association: savedAssociation,
+            description: "Rôle propriétaire de l'association",
+            createdBy: null,
+            permissions: [Permissions.ALL],
+          },
+        );
+        const savedRole = await transactionalEntityManager.save(
+          AssociationRole,
+          addDefaultRole,
+        );
+
+        // 3. ajouter le lien user ↔ association ↔ rôle
+        const addUserAssociation = transactionalEntityManager.create(
+          UserAssociation,
+          {
+            user,
+            association: savedAssociation,
+            role: savedRole,
+          },
+        );
+        await transactionalEntityManager.save(
+          UserAssociation,
+          addUserAssociation,
+        );
+
+        return savedAssociation;
+      },
+    );
   }
 
-  findAll() {
-    return `This action returns all associations`;
+  findAll(options?: FindAllQueryDto) {
+    return this.associationsRepository.find(options);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} association`;
+  findOne(id: string, options?: FindAllQueryDto) {
+    return this.associationsRepository.findOne({
+      where: { id },
+      ...options,
+    });
   }
 
-  update(id: number) {
-    return `This action updates a #${id} association`;
+  async update(id: string, updateAssociationDto: UpdateAssociationDto) {
+    await this.associationsRepository.update(id, updateAssociationDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} association`;
+  async remove(id: string) {
+    return this.associationsRepository.delete(id);
   }
 }

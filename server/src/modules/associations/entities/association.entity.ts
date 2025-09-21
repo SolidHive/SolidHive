@@ -11,7 +11,6 @@ import {
 } from 'typeorm';
 import { UserAssociation } from '../../../modules/users-associations/entities/user-association.entity';
 import { Fundraising } from '../../../modules/fundraisings/entities/fundraising.entity';
-import { Image } from '../../../common/embeddeds/image.embedded';
 import { Timestamps } from '../../../common/embeddeds/timestamps.embedded';
 import { User } from '../../../modules/users/entities/user.entity';
 import { Event } from '../../../modules/events/entities/event.entity';
@@ -38,18 +37,6 @@ export class Association {
   })
   @Column({ type: 'text', nullable: true })
   description?: string;
-
-  @ApiProperty({
-    description: "Logo de l'association",
-  })
-  @Column(() => Image, { prefix: 'logo' })
-  logo?: Image;
-
-  @ApiProperty({
-    description: "Image de fond de l'association",
-  })
-  @Column(() => Image, { prefix: 'background' })
-  background?: Image;
 
   @ApiProperty({
     example: '#000000',

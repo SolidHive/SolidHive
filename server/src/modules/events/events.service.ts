@@ -1,24 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserAssociation } from '../users-associations/entities/user-association.entity';
+import { Repository } from 'typeorm';
+import { CreateEventDto } from './dto/create-event.dto';
+import { Event } from './entities/event.entity';
+import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
 
 @Injectable()
 export class EventsService {
-  create() {
-    return 'This action adds a new event';
+  constructor(
+    @InjectRepository(UserAssociation)
+    private readonly usersAssociationsRepository: Repository<UserAssociation>,
+    @InjectRepository(Event)
+    private readonly eventsRepository: Repository<Event>,
+  ) {}
+
+  async create(createEventDto: CreateEventDto) {
+    const userAssociation: UserAssociation | null =
+      await this.usersAssociationsRepository.findOne({
+        where: { id: createEventDto.userAssociationId },
+        relations: ['association'],
+      });
+
+    if (!userAssociation) {
+      throw new HttpException(
+        'User association not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const event = this.eventsRepository.create({
+      ...createEventDto,
+      createdBy: userAssociation,
+      association: userAssociation.association,
+    });
+
+    return this.eventsRepository.save(event);
   }
 
-  findAll() {
-    return `This action returns all events`;
+  findAll(options?: FindAllQueryDto) {
+    return this.eventsRepository.find(options);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} event`;
+  findOne(id: string, options?: FindAllQueryDto) {
+    return this.eventsRepository.findOne({
+      where: { id },
+      ...options,
+    });
   }
 
-  update(id: number) {
-    return `This action updates a #${id} event`;
+  async update(id: string, updateEventDto: UpdateEventDto) {
+    await this.eventsRepository.update(id, updateEventDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} event`;
+  async remove(id: string) {
+    return this.eventsRepository.delete(id);
   }
 }

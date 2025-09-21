@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Image } from 'src/common/embeddeds/image.embedded';
 import { Timestamps } from 'src/common/embeddeds/timestamps.embedded';
 import { Association } from 'src/modules/associations/entities/association.entity';
 import { UserAssociation } from 'src/modules/users-associations/entities/user-association.entity';
@@ -32,9 +31,6 @@ export class Fundraising {
   @ApiProperty({ example: 5000, description: 'Montant souhaité' })
   @Column({ type: 'float', default: 0 })
   wantedAmount: number;
-
-  @Column(() => Image)
-  image: Image;
 
   @ApiProperty({
     example: '2023-03-15T12:00:00Z',
