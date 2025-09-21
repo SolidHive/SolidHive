@@ -12,11 +12,11 @@ import {
 import { FundraisingsService } from './fundraisings.service';
 import { CreateFundraisingDto } from './dto/create-fundraising.dto';
 import { UpdateFundraisingDto } from './dto/update-fundraising.dto';
-import { RateLimitGuard } from 'src/common/guards/rate-limit.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 
 @Controller('fundraisings')
 export class FundraisingsController {
@@ -33,12 +33,12 @@ export class FundraisingsController {
   }
 
   @Get()
-  findAll(@Query() options?: FindAllQueryDto) {
+  findAll(@Query() options?: FindOptionsDto) {
     return this.fundraisingsService.findAll(options);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Query() options?: FindAllQueryDto) {
+  findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
     return this.fundraisingsService.findOne(id, options);
   }
 

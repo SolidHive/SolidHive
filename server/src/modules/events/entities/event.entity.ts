@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { EventPricing } from '../../../modules/events-pricings/entities/event-pricing.entity';
 import { Association } from '../../../modules/associations/entities/association.entity';
-import { UserAssociation } from 'src/modules/users-associations/entities/user-association.entity';
+import { UserAssociation } from '../../../modules/users-associations/entities/user-association.entity';
 
 @Entity()
 export class Event {

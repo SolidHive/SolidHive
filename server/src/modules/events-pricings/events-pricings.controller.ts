@@ -12,11 +12,11 @@ import {
 import { EventsPricingsService } from './events-pricings.service';
 import { CreateEventPricingDto } from './dto/create-event-pricing.dto';
 import { UpdateEventPricingDto } from './dto/update-event-pricing.dto';
-import { RateLimitGuard } from 'src/common/guards/rate-limit.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 
 @Controller('events-pricings')
 export class EventsPricingsController {
@@ -33,12 +33,12 @@ export class EventsPricingsController {
   }
 
   @Get()
-  findAll(@Query() options?: FindAllQueryDto) {
+  findAll(@Query() options?: FindOptionsDto) {
     return this.eventsPricingsService.findAll(options);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Query() options?: FindAllQueryDto) {
+  findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
     return this.eventsPricingsService.findOne(id, options);
   }
 

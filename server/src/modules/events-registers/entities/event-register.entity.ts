@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { EventPricing } from 'src/modules/events-pricings/entities/event-pricing.entity';
-import { User } from 'src/modules/users/entities/user.entity';
+import { EventPricing } from '../../../modules/events-pricings/entities/event-pricing.entity';
+import { User } from '../../../modules/users/entities/user.entity';
 import {
   Column,
   Entity,

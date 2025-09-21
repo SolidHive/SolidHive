@@ -30,7 +30,10 @@ export class CreateAssociationRoleDto {
   description?: string;
 
   @ApiProperty({
-    example: [Permissions.MANAGE_ASSOCIATION, Permissions.MANAGE_USERS],
+    example: [
+      Permissions.MANAGE_FUNDRAISINGS,
+      Permissions.MANAGE_ANNOUNCEMENTS,
+    ],
     description: 'Liste des permissions associées au rôle',
   })
   @IsNotEmpty({ message: 'Les permissions sont requises' })

@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Categories } from '../../../common/enums/categories';
-import { Timestamps } from 'src/common/embeddeds/timestamps.embedded';
-import { User } from 'src/modules/users/entities/user.entity';
+import { Timestamps } from '../../../common/embeddeds/timestamps.embedded';
+import { User } from '../../../modules/users/entities/user.entity';
 
 @Entity()
 export class Transaction {

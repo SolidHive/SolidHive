@@ -9,12 +9,12 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from './role.entity';
 import { Announcement } from '../../announcements/entities/announcement.entity';
-import { Association } from 'src/modules/associations/entities/association.entity';
-import { UserAssociation } from 'src/modules/users-associations/entities/user-association.entity';
-import { Favorite } from 'src/modules/favorites/entities/favorite.entity';
-import { Timestamps } from 'src/common/embeddeds/timestamps.embedded';
-import { EventRegister } from 'src/modules/events-registers/entities/event-register.entity';
-import { Transaction } from 'src/modules/transactions/entities/transaction.entity';
+import { Association } from '../../../modules/associations/entities/association.entity';
+import { UserAssociation } from '../../../modules/users-associations/entities/user-association.entity';
+import { Favorite } from '../../../modules/favorites/entities/favorite.entity';
+import { Timestamps } from '../../../common/embeddeds/timestamps.embedded';
+import { EventRegister } from '../../../modules/events-registers/entities/event-register.entity';
+import { Transaction } from '../../../modules/transactions/entities/transaction.entity';
 
 @Entity()
 export class User {

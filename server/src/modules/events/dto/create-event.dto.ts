@@ -10,7 +10,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateAddressDto } from 'src/common/dto/create-address.dto';
+import { CreateAddressDto } from '../../../common/dto/create-address.dto';
 
 export class CreateEventDto {
   @ApiProperty({

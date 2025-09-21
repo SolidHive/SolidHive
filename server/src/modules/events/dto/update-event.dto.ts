@@ -3,7 +3,7 @@ import { CreateEventDto } from './create-event.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { UpdateAddressDto } from 'src/common/dto/update-address.dto';
+import { UpdateAddressDto } from '../../../common/dto/update-address.dto';
 
 export class UpdateEventDto extends PartialType(
   OmitType(CreateEventDto, ['userAssociationId', 'address']),

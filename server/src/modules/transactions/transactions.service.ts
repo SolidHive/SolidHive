@@ -4,7 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Transaction } from './entities/transaction.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -45,14 +45,14 @@ export class TransactionsService {
     return this.transactionsRepository.save(transaction);
   }
 
-  findAll(userId: string, options?: FindAllQueryDto) {
+  findAll(userId: string, options?: FindOptionsDto) {
     return this.transactionsRepository.find({
       ...options,
       where: { user: { id: userId } },
     });
   }
 
-  findOne(id: string, userId: string, options?: FindAllQueryDto) {
+  findOne(id: string, userId: string, options?: FindOptionsDto) {
     return this.transactionsRepository.findOne({
       ...options,
       where: { id, user: { id: userId } },

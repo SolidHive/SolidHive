@@ -10,12 +10,12 @@ import {
 } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { RateLimitGuard } from 'src/common/guards/rate-limit.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
-import { User } from 'src/common/decorators/user.decorator';
-import { Categories } from 'src/common/enums/categories';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { User } from '../../common/decorators/user.decorator';
+import { Categories } from '../../common/enums/categories';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 
 @Controller('favorites')
 export class FavoritesController {
@@ -36,7 +36,7 @@ export class FavoritesController {
   @UseGuards(RateLimitGuard, AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  findAll(@User('id') userId: string, @Query() options?: FindAllQueryDto) {
+  findAll(@User('id') userId: string, @Query() options?: FindOptionsDto) {
     return this.favoritesService.findAll(userId, options);
   }
 

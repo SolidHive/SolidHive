@@ -10,11 +10,11 @@ import {
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { User } from 'src/common/decorators/user.decorator';
+import { User } from '../../common/decorators/user.decorator';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
-import { RateLimitGuard } from 'src/common/guards/rate-limit.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('transactions')
@@ -33,7 +33,7 @@ export class TransactionsController {
   @UseGuards(RateLimitGuard, AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  findAll(@User('id') userId: string, @Query() options?: FindAllQueryDto) {
+  findAll(@User('id') userId: string, @Query() options?: FindOptionsDto) {
     return this.transactionsService.findAll(userId, options);
   }
 
@@ -44,7 +44,7 @@ export class TransactionsController {
   findOne(
     @Param('id') id: string,
     @User('id') userId: string,
-    @Query() options?: FindAllQueryDto,
+    @Query() options?: FindOptionsDto,
   ) {
     return this.transactionsService.findOne(id, userId, options);
   }

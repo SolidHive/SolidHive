@@ -12,12 +12,12 @@ import {
 import { UsersAssociationsService } from './users-associations.service';
 import { CreateUsersAssociationDto } from './dto/create-users-association.dto';
 import { UpdateUsersAssociationDto } from './dto/update-users-association.dto';
-import { RateLimitGuard } from 'src/common/guards/rate-limit.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
-import { User } from 'src/common/decorators/user.decorator';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { User } from '../../common/decorators/user.decorator';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 
 @Controller('users-associations')
 export class UsersAssociationsController {
@@ -42,12 +42,12 @@ export class UsersAssociationsController {
   }
 
   @Get()
-  findAll(@Query() options?: FindAllQueryDto) {
+  findAll(@Query() options?: FindOptionsDto) {
     return this.usersAssociationsService.findAll(options);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Query() options?: FindAllQueryDto) {
+  findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
     return this.usersAssociationsService.findOne(id, options);
   }
 

@@ -4,7 +4,7 @@ import { UserAssociation } from '../users-associations/entities/user-association
 import { Repository } from 'typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Event } from './entities/event.entity';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 
 @Injectable()
@@ -39,11 +39,11 @@ export class EventsService {
     return this.eventsRepository.save(event);
   }
 
-  findAll(options?: FindAllQueryDto) {
+  findAll(options?: FindOptionsDto) {
     return this.eventsRepository.find(options);
   }
 
-  findOne(id: string, options?: FindAllQueryDto) {
+  findOne(id: string, options?: FindOptionsDto) {
     return this.eventsRepository.findOne({
       where: { id },
       ...options,

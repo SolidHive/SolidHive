@@ -7,7 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { EventRegister } from 'src/modules/events-registers/entities/event-register.entity';
+import { EventRegister } from '../../../modules/events-registers/entities/event-register.entity';
 
 @Entity()
 export class EventPricing {

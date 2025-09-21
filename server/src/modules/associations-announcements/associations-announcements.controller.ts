@@ -14,9 +14,9 @@ import { CreateAssociationAnnouncementDto } from './dto/create-association-annou
 import { UpdateAssociationAnnouncementDto } from './dto/update-association-announcement.dto';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
-import { RateLimitGuard } from 'src/common/guards/rate-limit.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 
 @Controller('associations-announcements')
 export class AssociationsAnnouncementsController {
@@ -40,12 +40,12 @@ export class AssociationsAnnouncementsController {
   }
 
   @Get()
-  findAll(@Query() options?: FindAllQueryDto) {
+  findAll(@Query() options?: FindOptionsDto) {
     return this.associationsAnnouncementsService.findAll(options);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Query() options?: FindAllQueryDto) {
+  findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
     return this.associationsAnnouncementsService.findOne(id, options);
   }
 

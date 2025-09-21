@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Association } from '../../associations/entities/association.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Timestamps } from '../../../common/embeddeds/timestamps.embedded';
-import { UserAssociation } from 'src/modules/users-associations/entities/user-association.entity';
+import { UserAssociation } from '../../../modules/users-associations/entities/user-association.entity';
 
 @Entity()
 export class AssociationAnnouncement {

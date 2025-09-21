@@ -9,8 +9,8 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { UserAssociation } from 'src/modules/users-associations/entities/user-association.entity';
-import { Timestamps } from 'src/common/embeddeds/timestamps.embedded';
+import { UserAssociation } from '../../../modules/users-associations/entities/user-association.entity';
+import { Timestamps } from '../../../common/embeddeds/timestamps.embedded';
 
 @Entity()
 @Unique(['name', 'association'])
@@ -55,7 +55,7 @@ export class AssociationRole {
   association: Association;
 
   @ApiProperty({
-    example: [Permissions.MANAGE_ASSOCIATION, Permissions.MANAGE_USERS],
+    example: [Permissions.MANAGE_EVENTS, Permissions.MANAGE_REGISTERS],
     description: 'Permissions associées au rôle',
     isArray: true,
   })

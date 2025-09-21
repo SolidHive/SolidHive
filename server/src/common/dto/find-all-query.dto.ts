@@ -2,7 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 
-export class FindAllQueryDto {
+export class FindOptionsDto {
   @ApiPropertyOptional({
     description: 'Colonnes à sélectionner (ex: "id,name,email")',
     type: String,
