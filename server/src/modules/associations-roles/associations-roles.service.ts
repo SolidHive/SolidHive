@@ -39,25 +39,73 @@ export class AssociationsRolesService {
     return this.associationsRolesRepository.save(associationRole);
   }
 
-  async findAll(options?: FindOptionsDto) {
+  async findAll(userAssociationId: string, options?: FindOptionsDto) {
+    const userAssociation = await this.userAssociationsRepository.findOne({
+      where: { id: userAssociationId },
+      relations: ['association'],
+    });
+
+    if (!userAssociation) {
+      throw new HttpException(
+        'User association not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     return this.associationsRolesRepository.find({
       ...options,
+      where: { association: userAssociation.association },
     });
   }
 
-  findOne(id: string, options?: FindOptionsDto) {
+  async findOne(
+    userAssociationId: string,
+    id: string,
+    options?: FindOptionsDto,
+  ) {
+    const userAssociation = await this.userAssociationsRepository.findOne({
+      where: { id: userAssociationId },
+      relations: ['association'],
+    });
+
+    if (!userAssociation) {
+      throw new HttpException(
+        'User association not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     return this.associationsRolesRepository.findOne({
       ...options,
-      where: { id },
+      where: { id, association: userAssociation.association },
     });
   }
 
-  async update(id: string, updateAssociationRoleDto: UpdateAssociationRoleDto) {
+  async update(
+    userAssociationId: string,
+    id: string,
+    updateAssociationRoleDto: UpdateAssociationRoleDto,
+  ) {
     await this.associationsRolesRepository.update(id, updateAssociationRoleDto);
-    return this.findOne(id);
+    return this.findOne(userAssociationId, id);
   }
 
-  async remove(id: string) {
-    return this.associationsRolesRepository.delete(id);
+  async remove(userAssociationId: string, id: string) {
+    const userAssociation = await this.userAssociationsRepository.findOne({
+      where: { id: userAssociationId },
+      relations: ['association'],
+    });
+
+    if (!userAssociation) {
+      throw new HttpException(
+        'User association not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return this.associationsRolesRepository.delete({
+      id,
+      association: userAssociation.association,
+    });
   }
 }

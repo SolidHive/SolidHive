@@ -12,11 +12,15 @@ import {
 import { AssociationsAnnouncementsService } from './associations-announcements.service';
 import { CreateAssociationAnnouncementDto } from './dto/create-association-announcement.dto';
 import { UpdateAssociationAnnouncementDto } from './dto/update-association-announcement.dto';
-import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
+import {
+  AssociationPermissions,
+  AssociationPermissionsGuard,
+} from '../associations/guards/association-permissions.guard';
+import { Permissions } from '../../common/enums/permissions';
 
 @Controller('associations-announcements')
 export class AssociationsAnnouncementsController {
@@ -25,8 +29,8 @@ export class AssociationsAnnouncementsController {
   ) {}
 
   @Post()
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user') // In future update, change Roles to AssociationsRoles
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.ANNOUNCEMENTS_CREATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -50,8 +54,8 @@ export class AssociationsAnnouncementsController {
   }
 
   @Patch(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user', 'admin')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.ANNOUNCEMENTS_UPDATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -67,8 +71,8 @@ export class AssociationsAnnouncementsController {
   }
 
   @Delete(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user', 'admin')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.ANNOUNCEMENTS_DELETE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })

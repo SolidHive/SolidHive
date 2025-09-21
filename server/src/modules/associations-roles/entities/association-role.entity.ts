@@ -55,7 +55,10 @@ export class AssociationRole {
   association: Association;
 
   @ApiProperty({
-    example: [Permissions.MANAGE_EVENTS, Permissions.MANAGE_REGISTERS],
+    example: [
+      Permissions.ANNOUNCEMENTS_CREATE,
+      Permissions.ANNOUNCEMENTS_DELETE,
+    ],
     description: 'Permissions associées au rôle',
     isArray: true,
   })

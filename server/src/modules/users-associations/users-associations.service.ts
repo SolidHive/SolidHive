@@ -54,11 +54,39 @@ export class UsersAssociationsService {
     return this.usersAssociationsRepository.save(userAssociation);
   }
 
-  findAll(options?: FindOptionsDto) {
+  async findAll(userAssociationId: string, options?: FindOptionsDto) {
+    const userAssociation = await this.usersAssociationsRepository.findOne({
+      where: { id: userAssociationId },
+      relations: ['association'],
+    });
+
+    if (!userAssociation) {
+      throw new HttpException(
+        'User association not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     return this.usersAssociationsRepository.find(options);
   }
 
-  findOne(id: string, options?: FindOptionsDto) {
+  async findOne(
+    userAssociationId: string,
+    id: string,
+    options?: FindOptionsDto,
+  ) {
+    const userAssociation = await this.usersAssociationsRepository.findOne({
+      where: { id: userAssociationId },
+      relations: ['association'],
+    });
+
+    if (!userAssociation) {
+      throw new HttpException(
+        'User association not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     return this.usersAssociationsRepository.findOne({
       where: { id },
       ...options,
@@ -66,6 +94,7 @@ export class UsersAssociationsService {
   }
 
   async update(
+    userAssociationId: string,
     id: string,
     updateUsersAssociationDto: UpdateUsersAssociationDto,
   ) {
@@ -79,10 +108,21 @@ export class UsersAssociationsService {
     await this.usersAssociationsRepository.update(id, {
       role,
     });
-    return this.findOne(id);
+    return this.findOne(userAssociationId, id);
   }
 
-  async remove(id: string) {
+  async remove(userAssociationId: string, id: string) {
+    const userAssociation = await this.usersAssociationsRepository.findOne({
+      where: { id: userAssociationId },
+    });
+
+    if (!userAssociation) {
+      throw new HttpException(
+        'User association not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     return this.usersAssociationsRepository.delete(id);
   }
 }
