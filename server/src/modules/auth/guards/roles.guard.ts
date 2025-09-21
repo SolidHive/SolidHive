@@ -8,14 +8,9 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-interface Role {
-  name: string;
-  description?: string;
-}
-
 interface UserWithRoles {
   id: string;
-  roles: Role[];
+  roles: Array<string>;
 }
 
 interface AuthenticatedRequest extends Request {
@@ -61,11 +56,7 @@ export class RolesGuard implements CanActivate {
 
     const hasRole = requiredRoles.some((role) =>
       user.roles.some(
-        (userRole) =>
-          userRole &&
-          typeof userRole === 'object' &&
-          'name' in userRole &&
-          userRole.name === role,
+        (userRole) => userRole && userRole.toUpperCase() === role.toUpperCase(),
       ),
     );
 

@@ -1,24 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { EventPricing } from './entities/event-pricing.entity';
+import { CreateEventPricingDto } from './dto/create-event-pricing.dto';
+import { Event } from '../events/entities/event.entity';
+import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { UpdateEventPricingDto } from './dto/update-event-pricing.dto';
 
 @Injectable()
 export class EventsPricingsService {
-  create() {
-    return 'This action adds a new eventsPricing';
+  constructor(
+    @InjectRepository(Event)
+    private readonly eventsRepository: Repository<Event>,
+    @InjectRepository(EventPricing)
+    private readonly eventsPricingsRepository: Repository<EventPricing>,
+  ) {}
+
+  async create(createEventPricingDto: CreateEventPricingDto) {
+    const event: Event | null = await this.eventsRepository.findOne({
+      where: { id: createEventPricingDto.eventId },
+    });
+
+    if (!event) {
+      throw new HttpException('Event not found', HttpStatus.NOT_FOUND);
+    }
+
+    const eventPricing = this.eventsPricingsRepository.create({
+      ...createEventPricingDto,
+      event,
+    });
+
+    return this.eventsPricingsRepository.save(eventPricing);
   }
 
-  findAll() {
-    return `This action returns all eventsPricings`;
+  findAll(options?: FindAllQueryDto) {
+    return this.eventsPricingsRepository.find(options);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} eventsPricing`;
+  findOne(id: string, options?: FindAllQueryDto) {
+    return this.eventsPricingsRepository.findOne({
+      where: { id },
+      ...options,
+    });
   }
 
-  update(id: number) {
-    return `This action updates a #${id} eventsPricing`;
+  async update(id: string, updateEventPricingDto: UpdateEventPricingDto) {
+    await this.eventsPricingsRepository.update(id, updateEventPricingDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} eventsPricing`;
+  async remove(id: string) {
+    return this.eventsPricingsRepository.delete(id);
   }
 }

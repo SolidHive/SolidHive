@@ -13,6 +13,8 @@ import { Association } from 'src/modules/associations/entities/association.entit
 import { UserAssociation } from 'src/modules/users-associations/entities/user-association.entity';
 import { Favorite } from 'src/modules/favorites/entities/favorite.entity';
 import { Timestamps } from 'src/common/embeddeds/timestamps.embedded';
+import { EventRegister } from 'src/modules/events-registers/entities/event-register.entity';
+import { Transaction } from 'src/modules/transactions/entities/transaction.entity';
 
 @Entity()
 export class User {
@@ -90,10 +92,20 @@ export class User {
   @OneToMany(() => Favorite, (favorite) => favorite.user)
   favorites: Favorite[];
 
+  @OneToMany(() => EventRegister, (eventRegister) => eventRegister.user)
+  eventRegisters: EventRegister[];
+
   @ApiProperty({
     type: [Association],
     description: "Associations créées par l'utilisateur",
   })
   @OneToMany(() => Association, (association) => association.createdBy)
   createdAssociations: Association[];
+
+  @ApiProperty({
+    type: [Transaction],
+    description: "Transactions de l'utilisateur",
+  })
+  @OneToMany(() => Transaction, (transaction) => transaction.user)
+  transactions: Transaction[];
 }

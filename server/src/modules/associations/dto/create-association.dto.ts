@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Image } from '../../../common/embeddeds/image.embedded';
 import { Colors } from '../../../common/enums/colors';
 import {
   IsEmail,
@@ -40,20 +39,6 @@ export class CreateAssociationDto {
   description?: string;
 
   @ApiProperty({
-    description: "Logo de l'association",
-    required: false,
-  })
-  @IsOptional()
-  logo?: Image;
-
-  @ApiProperty({
-    description: "Image de fond de l'association",
-    required: false,
-  })
-  @IsOptional()
-  background?: Image;
-
-  @ApiProperty({
     example: '#000000',
     description: "Couleur primaire de l'association",
     required: false,
@@ -64,6 +49,11 @@ export class CreateAssociationDto {
   @IsOptional()
   primaryColor?: Colors;
 
+  @ApiProperty({
+    example: '#FF0000',
+    description: "Couleur secondaire de l'association",
+    required: false,
+  })
   @IsEnum(Colors, {
     message: 'La couleur secondaire doit être une couleur valide',
   })

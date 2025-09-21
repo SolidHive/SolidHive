@@ -1,6 +1,6 @@
-import { PartialType } from '@nestjs/swagger';
+import { OmitType, PartialType } from '@nestjs/swagger';
 import { CreateUsersAssociationDto } from './create-users-association.dto';
 
 export class UpdateUsersAssociationDto extends PartialType(
-  CreateUsersAssociationDto,
+  OmitType(CreateUsersAssociationDto, ['associationId']),
 ) {}

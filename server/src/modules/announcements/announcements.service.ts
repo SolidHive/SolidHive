@@ -1,24 +1,55 @@
 import { Injectable } from '@nestjs/common';
+import { CreateAnnouncementDto } from './dto/create-announcement.dto';
+import { Announcement } from './entities/announcement.entity';
+import { Repository } from 'typeorm';
+import { User } from '../users/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
+import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
 
 @Injectable()
 export class AnnouncementsService {
-  create() {
-    return 'This action adds a new announcement';
+  constructor(
+    @InjectRepository(Announcement)
+    private readonly announcementsRepository: Repository<Announcement>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
+
+  async create(createAnnouncementDto: CreateAnnouncementDto, userId: string) {
+    const user: User | null = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const announcement = this.announcementsRepository.create({
+      ...createAnnouncementDto,
+      createdBy: user,
+    });
+
+    return this.announcementsRepository.save(announcement);
   }
 
-  findAll() {
-    return `This action returns all announcements`;
+  findAll(options?: FindAllQueryDto) {
+    return this.announcementsRepository.find(options);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} announcement`;
+  findOne(id: string, options?: FindAllQueryDto) {
+    return this.announcementsRepository.findOne({
+      where: { id },
+      ...options,
+    });
   }
 
-  update(id: number) {
-    return `This action updates a #${id} announcement`;
+  async update(id: string, updateAnnouncementDto: UpdateAnnouncementDto) {
+    await this.announcementsRepository.update(id, updateAnnouncementDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} announcement`;
+  async remove(id: string) {
+    return this.announcementsRepository.delete(id);
   }
 }
