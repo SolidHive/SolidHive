@@ -14,10 +14,10 @@ import { CreateAssociationDto } from './dto/create-association.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
-import { RateLimitGuard } from 'src/common/guards/rate-limit.guard';
+import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
-import { User } from 'src/common/decorators/user.decorator';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { User } from '../../common/decorators/user.decorator';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 
 @Controller('associations')
 export class AssociationsController {
@@ -37,12 +37,12 @@ export class AssociationsController {
   }
 
   @Get()
-  findAll(@Query() options?: FindAllQueryDto) {
+  findAll(@Query() options?: FindOptionsDto) {
     return this.associationsService.findAll(options);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Query() options?: FindAllQueryDto) {
+  findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
     return this.associationsService.findOne(id, options);
   }
 

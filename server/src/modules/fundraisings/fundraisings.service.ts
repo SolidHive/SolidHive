@@ -4,7 +4,7 @@ import { UserAssociation } from '../users-associations/entities/user-association
 import { Repository } from 'typeorm';
 import { Fundraising } from './entities/fundraising.entity';
 import { CreateFundraisingDto } from './dto/create-fundraising.dto';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { UpdateFundraisingDto } from './dto/update-fundraising.dto';
 
 @Injectable()
@@ -39,11 +39,11 @@ export class FundraisingsService {
     return this.fundraisingsRepository.save(fundraising);
   }
 
-  findAll(options?: FindAllQueryDto) {
+  findAll(options?: FindOptionsDto) {
     return this.fundraisingsRepository.find(options);
   }
 
-  findOne(id: string, options?: FindAllQueryDto) {
+  findOne(id: string, options?: FindOptionsDto) {
     return this.fundraisingsRepository.findOne({ where: { id }, ...options });
   }
 

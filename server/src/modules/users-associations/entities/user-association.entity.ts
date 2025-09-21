@@ -13,7 +13,7 @@ import {
   PrimaryColumn,
   Unique,
 } from 'typeorm';
-import { Event } from 'src/modules/events/entities/event.entity';
+import { Event } from '../../../modules/events/entities/event.entity';
 
 @Entity()
 @Unique(['userId', 'associationId'])

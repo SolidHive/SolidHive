@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { EventPricing } from './entities/event-pricing.entity';
 import { CreateEventPricingDto } from './dto/create-event-pricing.dto';
 import { Event } from '../events/entities/event.entity';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { UpdateEventPricingDto } from './dto/update-event-pricing.dto';
 
 @Injectable()
@@ -33,11 +33,11 @@ export class EventsPricingsService {
     return this.eventsPricingsRepository.save(eventPricing);
   }
 
-  findAll(options?: FindAllQueryDto) {
+  findAll(options?: FindOptionsDto) {
     return this.eventsPricingsRepository.find(options);
   }
 
-  findOne(id: string, options?: FindAllQueryDto) {
+  findOne(id: string, options?: FindOptionsDto) {
     return this.eventsPricingsRepository.findOne({
       where: { id },
       ...options,

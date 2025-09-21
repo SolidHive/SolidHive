@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserAssociation } from '../users-associations/entities/user-association.entity';
 import { CreateAssociationRoleDto } from './dto/create-association-role.dto';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { UpdateAssociationRoleDto } from './dto/update-association-role.dto';
 
 @Injectable()
@@ -39,13 +39,13 @@ export class AssociationsRolesService {
     return this.associationsRolesRepository.save(associationRole);
   }
 
-  async findAll(options?: FindAllQueryDto) {
+  async findAll(options?: FindOptionsDto) {
     return this.associationsRolesRepository.find({
       ...options,
     });
   }
 
-  findOne(id: string, options?: FindAllQueryDto) {
+  findOne(id: string, options?: FindOptionsDto) {
     return this.associationsRolesRepository.findOne({
       ...options,
       where: { id },

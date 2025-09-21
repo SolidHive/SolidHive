@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { AssociationAnnouncement } from './entities/association-announcement.entity';
 import { CreateAssociationAnnouncementDto } from './dto/create-association-announcement.dto';
 import { UserAssociation } from '../users-associations/entities/user-association.entity';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { UpdateAssociationAnnouncementDto } from './dto/update-association-announcement.dto';
 
 @Injectable()
@@ -41,11 +41,11 @@ export class AssociationsAnnouncementsService {
     return this.associationsAnnouncementsRepository.save(announcement);
   }
 
-  findAll(options?: FindAllQueryDto) {
+  findAll(options?: FindOptionsDto) {
     return this.associationsAnnouncementsRepository.find(options);
   }
 
-  findOne(id: string, options?: FindAllQueryDto) {
+  findOne(id: string, options?: FindOptionsDto) {
     return this.associationsAnnouncementsRepository.findOne({
       ...options,
       where: { id },

@@ -4,8 +4,8 @@ import { User } from '../users/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Favorite } from './entities/favorite.entity';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
-import { Categories } from 'src/common/enums/categories';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
+import { Categories } from '../../common/enums/categories';
 
 @Injectable()
 export class FavoritesService {
@@ -48,7 +48,7 @@ export class FavoritesService {
     return this.favoritesRepository.save(favorite);
   }
 
-  findAll(userId: string, options?: FindAllQueryDto) {
+  findAll(userId: string, options?: FindOptionsDto) {
     return this.favoritesRepository.find({
       ...options,
       where: { userId: userId },

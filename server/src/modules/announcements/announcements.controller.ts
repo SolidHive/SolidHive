@@ -18,7 +18,7 @@ import { User } from '../../common/decorators/user.decorator';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 
 @Controller('announcements')
 export class AnnouncementsController {
@@ -38,14 +38,14 @@ export class AnnouncementsController {
   }
 
   @Get()
-  findAll(@Query() options?: FindAllQueryDto) {
+  findAll(@Query() options?: FindOptionsDto) {
     return this.announcementsService.findAll(options);
   }
 
   @Get(':id')
   findOne(
     @Param('id', new ParseUUIDPipe()) id: string,
-    @Query() options?: FindAllQueryDto,
+    @Query() options?: FindOptionsDto,
   ) {
     return this.announcementsService.findOne(id, options);
   }

@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { EventRegister } from './entities/event-register.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateEventRegisterDto } from './dto/create-event-register.dto';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { EventPricing } from '../events-pricings/entities/event-pricing.entity';
 
 @Injectable()
@@ -42,11 +42,11 @@ export class EventsRegistersService {
     return this.eventsRegisterRepository.save(eventRegister);
   }
 
-  findAll(options?: FindAllQueryDto) {
+  findAll(options?: FindOptionsDto) {
     return this.eventsRegisterRepository.find(options);
   }
 
-  findOne(id: string, options?: FindAllQueryDto) {
+  findOne(id: string, options?: FindOptionsDto) {
     return this.eventsRegisterRepository.findOne({
       where: { id },
       ...options,

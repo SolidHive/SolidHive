@@ -6,7 +6,7 @@ import { User } from '../users/entities/user.entity';
 import { Association } from '../associations/entities/association.entity';
 import { AssociationRole } from '../associations-roles/entities/association-role.entity';
 import { CreateUsersAssociationDto } from './dto/create-users-association.dto';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { UpdateUsersAssociationDto } from './dto/update-users-association.dto';
 
 @Injectable()
@@ -54,11 +54,11 @@ export class UsersAssociationsService {
     return this.usersAssociationsRepository.save(userAssociation);
   }
 
-  findAll(options?: FindAllQueryDto) {
+  findAll(options?: FindOptionsDto) {
     return this.usersAssociationsRepository.find(options);
   }
 
-  findOne(id: string, options?: FindAllQueryDto) {
+  findOne(id: string, options?: FindOptionsDto) {
     return this.usersAssociationsRepository.findOne({
       where: { id },
       ...options,

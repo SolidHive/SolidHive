@@ -4,11 +4,11 @@ import { Association } from './entities/association.entity';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { CreateAssociationDto } from './dto/create-association.dto';
-import { FindAllQueryDto } from 'src/common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
 import { AssociationRole } from '../associations-roles/entities/association-role.entity';
 import { UserAssociation } from '../users-associations/entities/user-association.entity';
-import { Permissions } from 'src/common/enums/permissions';
+import { Permissions } from '../../common/enums/permissions';
 
 @Injectable()
 export class AssociationsService {
@@ -79,11 +79,11 @@ export class AssociationsService {
     );
   }
 
-  findAll(options?: FindAllQueryDto) {
+  findAll(options?: FindOptionsDto) {
     return this.associationsRepository.find(options);
   }
 
-  findOne(id: string, options?: FindAllQueryDto) {
+  findOne(id: string, options?: FindOptionsDto) {
     return this.associationsRepository.findOne({
       where: { id },
       ...options,
