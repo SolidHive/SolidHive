@@ -31,8 +31,8 @@ export class CreateAssociationRoleDto {
 
   @ApiProperty({
     example: [
-      Permissions.MANAGE_FUNDRAISINGS,
-      Permissions.MANAGE_ANNOUNCEMENTS,
+      Permissions.ANNOUNCEMENTS_CREATE,
+      Permissions.ANNOUNCEMENTS_DELETE,
     ],
     description: 'Liste des permissions associées au rôle',
   })

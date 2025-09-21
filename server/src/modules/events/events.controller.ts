@@ -14,17 +14,21 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
-import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
+import {
+  AssociationPermissions,
+  AssociationPermissionsGuard,
+} from '../associations/guards/association-permissions.guard';
+import { Permissions } from '../../common/enums/permissions';
 
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user') // In future update, change Roles to AssociationsRoles
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.EVENTS_CREATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -43,8 +47,8 @@ export class EventsController {
   }
 
   @Patch(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user', 'admin')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.EVENTS_UPDATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -53,8 +57,8 @@ export class EventsController {
   }
 
   @Delete(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user', 'admin')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.EVENTS_DELETE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })

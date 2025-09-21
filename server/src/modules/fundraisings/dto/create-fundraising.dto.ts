@@ -60,16 +60,6 @@ export class CreateFundraisingDto {
 
   @ApiProperty({
     example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-    description: "Identifiant de l'association liée à la collecte",
-  })
-  @IsNotEmpty({ message: "L'identifiant de l'association est requis" })
-  @IsUUID('4', {
-    message: "L'identifiant de l'association doit être un UUID valide",
-  })
-  associationId: string;
-
-  @ApiProperty({
-    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
     description: "Identifiant de l'association de l'utilisateur (UUID)",
   })
   @IsNotEmpty({

@@ -12,11 +12,15 @@ import {
 import { AssociationsRolesService } from './associations-roles.service';
 import { CreateAssociationRoleDto } from './dto/create-association-role.dto';
 import { UpdateAssociationRoleDto } from './dto/update-association-role.dto';
-import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
+import {
+  AssociationPermissions,
+  AssociationPermissionsGuard,
+} from '../associations/guards/association-permissions.guard';
+import { Permissions } from '../../common/enums/permissions';
 
 @Controller('associations-roles')
 export class AssociationsRolesController {
@@ -25,8 +29,8 @@ export class AssociationsRolesController {
   ) {}
 
   @Post()
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user') // In future update, change Roles to AssociationsRoles
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.ROLES_CREATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -37,36 +41,65 @@ export class AssociationsRolesController {
     return this.associationsRolesService.create(createAssociationRoleDto);
   }
 
-  @Get()
-  findAll(@Query() options?: FindOptionsDto) {
-    return this.associationsRolesService.findAll(options);
+  @Get(':userAssociationId')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.ROLES_VIEW)
+  @ApiCookieAuth()
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Accès refusé' })
+  findAll(
+    @Param('userAssociationId') userAssociationId: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.associationsRolesService.findAll(userAssociationId, options);
   }
 
-  @Get('detail/:id')
-  findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
-    return this.associationsRolesService.findOne(id, options);
+  @Get(':userAssociationId/:id')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.ROLES_VIEW)
+  @ApiCookieAuth()
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Accès refusé' })
+  findOne(
+    @Param('userAssociationId') userAssociationId: string,
+    @Param('id') id: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.associationsRolesService.findOne(
+      userAssociationId,
+      id,
+      options,
+    );
   }
 
-  @Patch(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user', 'admin')
+  @Patch(':userAssociationId/:id')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.ROLES_UPDATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   update(
+    @Param('userAssociationId') userAssociationId: string,
     @Param('id') id: string,
     @Body() updateAssociationsRoleDto: UpdateAssociationRoleDto,
   ) {
-    return this.associationsRolesService.update(id, updateAssociationsRoleDto);
+    return this.associationsRolesService.update(
+      userAssociationId,
+      id,
+      updateAssociationsRoleDto,
+    );
   }
 
-  @Delete(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user', 'admin')
+  @Delete(':userAssociationId/:id')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.ROLES_DELETE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(@Param('id') id: string) {
-    return this.associationsRolesService.remove(id);
+  remove(
+    @Param('userAssociationId') userAssociationId: string,
+    @Param('id') id: string,
+  ) {
+    return this.associationsRolesService.remove(userAssociationId, id);
   }
 }

@@ -14,17 +14,21 @@ import { CreateFundraisingDto } from './dto/create-fundraising.dto';
 import { UpdateFundraisingDto } from './dto/update-fundraising.dto';
 import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
-import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
+import {
+  AssociationPermissions,
+  AssociationPermissionsGuard,
+} from '../associations/guards/association-permissions.guard';
+import { Permissions } from '../../common/enums/permissions';
 
 @Controller('fundraisings')
 export class FundraisingsController {
   constructor(private readonly fundraisingsService: FundraisingsService) {}
 
   @Post()
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user') // In future update, change Roles to AssociationsRoles
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.FUNDRAISINGS_CREATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -43,8 +47,8 @@ export class FundraisingsController {
   }
 
   @Patch(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user', 'admin')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.FUNDRAISINGS_UPDATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -56,8 +60,8 @@ export class FundraisingsController {
   }
 
   @Delete(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
-  @Roles('user', 'admin')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.FUNDRAISINGS_DELETE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
