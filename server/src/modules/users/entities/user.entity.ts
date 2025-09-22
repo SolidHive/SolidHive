@@ -10,10 +10,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Role } from './role.entity';
 import { Announcement } from '../../announcements/entities/announcement.entity';
 import { Association } from '../../../modules/associations/entities/association.entity';
-import { UserAssociation } from '../../../modules/users-associations/entities/user-association.entity';
+import { UserAssociation } from '../../../modules/associations/modules/users/entities/user-association.entity';
 import { Favorite } from '../../../modules/favorites/entities/favorite.entity';
 import { Timestamps } from '../../../common/embeddeds/timestamps.embedded';
-import { EventRegister } from '../../../modules/events-registers/entities/event-register.entity';
+import { EventRegister } from '../../../modules/associations/modules/events/modules/registers/entities/event-register.entity';
 import { Transaction } from '../../../modules/transactions/entities/transaction.entity';
 
 @Entity()

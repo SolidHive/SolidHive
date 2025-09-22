@@ -6,17 +6,13 @@ import { User } from '../users/entities/user.entity';
 import { CreateAssociationDto } from './dto/create-association.dto';
 import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
-import { AssociationRole } from '../associations-roles/entities/association-role.entity';
-import { UserAssociation } from '../users-associations/entities/user-association.entity';
 import { Permissions } from '../../common/enums/permissions';
+import { AssociationRole } from './modules/roles/entities/association-role.entity';
+import { UserAssociation } from './modules/users/entities/user-association.entity';
 
 @Injectable()
 export class AssociationsService {
   constructor(
-    @InjectRepository(AssociationRole)
-    private associationsRolesRepository: Repository<AssociationRole>,
-    @InjectRepository(UserAssociation)
-    private readonly usersAssociationsRepository: Repository<UserAssociation>,
     @InjectRepository(Association)
     private readonly associationsRepository: Repository<Association>,
     @InjectRepository(User)

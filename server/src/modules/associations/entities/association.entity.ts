@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AssociationAnnouncement } from '../../associations-announcements/entities/association-announcement.entity';
-import { AssociationRole } from '../../associations-roles/entities/association-role.entity';
+import { AssociationAnnouncement } from '../modules/announcements/entities/association-announcement.entity';
+import { AssociationRole } from '../modules/roles/entities/association-role.entity';
 import { Colors } from '../../../common/enums/colors';
 import {
   Column,
@@ -9,11 +9,11 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserAssociation } from '../../../modules/users-associations/entities/user-association.entity';
-import { Fundraising } from '../../../modules/fundraisings/entities/fundraising.entity';
+import { UserAssociation } from '../modules/users/entities/user-association.entity';
+import { Fundraising } from '../modules/fundraisings/entities/fundraising.entity';
 import { Timestamps } from '../../../common/embeddeds/timestamps.embedded';
 import { User } from '../../../modules/users/entities/user.entity';
-import { Event } from '../../../modules/events/entities/event.entity';
+import { Event } from '../modules/events/entities/event.entity';
 
 @Entity()
 export class Association {

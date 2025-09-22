@@ -19,11 +19,11 @@ import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
 import { User } from '../../common/decorators/user.decorator';
 import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 
-@Controller('associations')
+@Controller()
 export class AssociationsController {
   constructor(private readonly associationsService: AssociationsService) {}
 
-  @Post()
+  @Post('association')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
   @Roles('user')
   @ApiCookieAuth()
@@ -36,17 +36,17 @@ export class AssociationsController {
     return this.associationsService.create(createAssociationDto, userId);
   }
 
-  @Get()
+  @Get('associations')
   findAll(@Query() options?: FindOptionsDto) {
     return this.associationsService.findAll(options);
   }
 
-  @Get(':id')
+  @Get('association/:id')
   findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
     return this.associationsService.findOne(id, options);
   }
 
-  @Patch(':id')
+  @Patch('association/:id')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
   @Roles('user', 'admin')
   @ApiCookieAuth()
@@ -59,7 +59,7 @@ export class AssociationsController {
     return this.associationsService.update(id, updateAssociationDto);
   }
 
-  @Delete(':id')
+  @Delete('association/:id')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
   @Roles('user', 'admin')
   @ApiCookieAuth()

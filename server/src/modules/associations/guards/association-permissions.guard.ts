@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Request } from 'express';
 import { Permissions } from '../../../common/enums/permissions';
-import { UserAssociation } from 'src/modules/users-associations/entities/user-association.entity';
+import { UserAssociation } from '../modules/users/entities/user-association.entity';
 
 export const PERMISSIONS_KEY = 'associationPermissions';
 export const AssociationPermissions = (...permissions: Permissions[]) =>
