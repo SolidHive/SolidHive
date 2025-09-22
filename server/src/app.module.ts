@@ -10,13 +10,6 @@ import { AssociationsModule } from './modules/associations/associations.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { AnnouncementsModule } from './modules/announcements/announcements.module';
-import { FundraisingsModule } from './modules/fundraisings/fundraisings.module';
-import { EventsModule } from './modules/events/events.module';
-import { AssociationsAnnouncementsModule } from './modules/associations-announcements/associations-announcements.module';
-import { AssociationsRolesModule } from './modules/associations-roles/associations-roles.module';
-import { EventsPricingsModule } from './modules/events-pricings/events-pricings.module';
-import { EventsRegistersModule } from './modules/events-registers/events-registers.module';
-import { UsersAssociationsModule } from './modules/users-associations/users-associations.module';
 
 @Module({
   imports: [
@@ -30,13 +23,6 @@ import { UsersAssociationsModule } from './modules/users-associations/users-asso
     FavoritesModule,
     TransactionsModule,
     AnnouncementsModule,
-    FundraisingsModule,
-    EventsModule,
-    AssociationsAnnouncementsModule,
-    AssociationsRolesModule,
-    EventsPricingsModule,
-    EventsRegistersModule,
-    UsersAssociationsModule,
   ],
   controllers: [],
   providers: [],

@@ -4,7 +4,7 @@ import { UserSecurityService } from './user-security.service';
 import { SecurityActionRequestDto } from './dto/security-action.dto';
 import { SecurityActionType } from './enums/security-action-type.enum';
 
-@ApiTags('User Security')
+@ApiTags('Security')
 @Controller('security')
 export class UserSecurityController {
   constructor(private readonly userSecurityService: UserSecurityService) {}
