@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AssociationRole } from './entities/association-role.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,20 +16,10 @@ export class AssociationsRolesService {
     private readonly associationsRolesRepository: Repository<AssociationRole>,
   ) {}
 
-  async create(createAssociationRoleDto: CreateAssociationRoleDto) {
-    const userAssociation: UserAssociation | null =
-      await this.userAssociationsRepository.findOne({
-        where: { id: createAssociationRoleDto.userAssociationId },
-        relations: ['association'],
-      });
-
-    if (!userAssociation) {
-      throw new HttpException(
-        'User association not found',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
+  async create(
+    createAssociationRoleDto: CreateAssociationRoleDto,
+    userAssociation: UserAssociation,
+  ) {
     const associationRole = this.associationsRolesRepository.create({
       ...createAssociationRoleDto,
       association: userAssociation.association,
@@ -39,27 +29,35 @@ export class AssociationsRolesService {
     return this.associationsRolesRepository.save(associationRole);
   }
 
-  async findAll(options?: FindOptionsDto) {
+  async findAll(associationId: string, options?: FindOptionsDto) {
     return this.associationsRolesRepository.find({
       ...options,
+      where: {
+        association: { id: associationId },
+      },
     });
   }
 
-  async findOne(id: string, options?: FindOptionsDto) {
+  async findOne(id: string, associationId: string, options?: FindOptionsDto) {
     return this.associationsRolesRepository.findOne({
       ...options,
-      where: { id },
+      where: { id, association: { id: associationId } },
     });
   }
 
-  async update(id: string, updateAssociationRoleDto: UpdateAssociationRoleDto) {
+  async update(
+    id: string,
+    associationId: string,
+    updateAssociationRoleDto: UpdateAssociationRoleDto,
+  ) {
     await this.associationsRolesRepository.update(id, updateAssociationRoleDto);
-    return this.findOne(id);
+    return this.findOne(id, associationId);
   }
 
-  async remove(id: string) {
+  async remove(id: string, associationId: string) {
     return this.associationsRolesRepository.delete({
       id,
+      association: { id: associationId },
     });
   }
 }

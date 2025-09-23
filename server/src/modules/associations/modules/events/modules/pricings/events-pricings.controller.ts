@@ -14,7 +14,7 @@ import { CreateEventPricingDto } from './dto/create-event-pricing.dto';
 import { UpdateEventPricingDto } from './dto/update-event-pricing.dto';
 import { RateLimitGuard } from '../../../../../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../../../../../auth/guards/authenticated.guard';
-import { ApiCookieAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../../../../../common/dto/find-all-query.dto';
 import { Permissions } from '../../../../../../common/enums/permissions';
 import {
@@ -33,18 +33,31 @@ export class EventsPricingsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  create(@Body() createEventPricingDto: CreateEventPricingDto) {
-    return this.eventsPricingsService.create(createEventPricingDto);
+  @ApiParam({ name: 'associationId', type: 'string' })
+  create(
+    @Body() createEventPricingDto: CreateEventPricingDto,
+    @Param('eventId') eventId: string,
+  ) {
+    return this.eventsPricingsService.create(createEventPricingDto, eventId);
   }
 
   @Get('pricings')
-  findAll(@Query() options?: FindOptionsDto) {
-    return this.eventsPricingsService.findAll(options);
+  @ApiParam({ name: 'associationId', type: 'string' })
+  findAll(
+    @Param('eventId') eventId: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.eventsPricingsService.findAll(eventId, options);
   }
 
   @Get('pricing/:id')
-  findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
-    return this.eventsPricingsService.findOne(id, options);
+  @ApiParam({ name: 'associationId', type: 'string' })
+  findOne(
+    @Param('id') id: string,
+    @Param('eventId') eventId: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.eventsPricingsService.findOne(id, eventId, options);
   }
 
   @Patch('pricing/:id')
@@ -53,11 +66,17 @@ export class EventsPricingsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
+  @ApiParam({ name: 'associationId', type: 'string' })
   update(
     @Param('id') id: string,
+    @Param('eventId') eventId: string,
     @Body() updateEventPricingDto: UpdateEventPricingDto,
   ) {
-    return this.eventsPricingsService.update(id, updateEventPricingDto);
+    return this.eventsPricingsService.update(
+      id,
+      eventId,
+      updateEventPricingDto,
+    );
   }
 
   @Delete('pricing/:id')
@@ -66,7 +85,8 @@ export class EventsPricingsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(@Param('id') id: string) {
-    return this.eventsPricingsService.remove(id);
+  @ApiParam({ name: 'associationId', type: 'string' })
+  remove(@Param('id') id: string, @Param('eventId') eventId: string) {
+    return this.eventsPricingsService.remove(id, eventId);
   }
 }

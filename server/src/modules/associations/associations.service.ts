@@ -30,7 +30,6 @@ export class AssociationsService {
 
     return await this.associationsRepository.manager.transaction(
       async (transactionalEntityManager) => {
-        // 1. créer l'association
         const addAssociation = transactionalEntityManager.create(Association, {
           ...createAssociationDto,
           createdBy: user,
@@ -40,7 +39,6 @@ export class AssociationsService {
           addAssociation,
         );
 
-        // 2. créer le rôle par défaut
         const addDefaultRole = transactionalEntityManager.create(
           AssociationRole,
           {
@@ -56,7 +54,6 @@ export class AssociationsService {
           addDefaultRole,
         );
 
-        // 3. ajouter le lien user ↔ association ↔ rôle
         const addUserAssociation = transactionalEntityManager.create(
           UserAssociation,
           {
@@ -81,8 +78,8 @@ export class AssociationsService {
 
   findOne(id: string, options?: FindOptionsDto) {
     return this.associationsRepository.findOne({
-      where: { id },
       ...options,
+      where: { id },
     });
   }
 

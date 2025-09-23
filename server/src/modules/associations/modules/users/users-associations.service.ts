@@ -25,6 +25,7 @@ export class UsersAssociationsService {
   async create(
     createUsersAssociationDto: CreateUsersAssociationDto,
     userId: string,
+    associationId: string,
   ) {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
@@ -32,7 +33,7 @@ export class UsersAssociationsService {
     }
 
     const association = await this.associationsRepository.findOne({
-      where: { id: createUsersAssociationDto.associationId },
+      where: { id: associationId },
     });
     if (!association) {
       throw new HttpException('Association not found', HttpStatus.NOT_FOUND);
@@ -54,19 +55,23 @@ export class UsersAssociationsService {
     return this.usersAssociationsRepository.save(userAssociation);
   }
 
-  async findAll(options?: FindOptionsDto) {
-    return this.usersAssociationsRepository.find(options);
+  async findAll(associationId: string, options?: FindOptionsDto) {
+    return this.usersAssociationsRepository.find({
+      ...options,
+      where: { associationId },
+    });
   }
 
-  async findOne(id: string, options?: FindOptionsDto) {
+  async findOne(id: string, associationId: string, options?: FindOptionsDto) {
     return this.usersAssociationsRepository.findOne({
-      where: { id },
       ...options,
+      where: { id, associationId },
     });
   }
 
   async update(
     id: string,
+    associationId: string,
     updateUsersAssociationDto: UpdateUsersAssociationDto,
   ) {
     const role = await this.associationsRolesRepository.findOne({
@@ -79,10 +84,10 @@ export class UsersAssociationsService {
     await this.usersAssociationsRepository.update(id, {
       role,
     });
-    return this.findOne(id);
+    return this.findOne(id, associationId);
   }
 
-  async remove(id: string) {
-    return this.usersAssociationsRepository.delete(id);
+  async remove(id: string, associationId: string) {
+    return this.usersAssociationsRepository.delete({ id, associationId });
   }
 }

@@ -4,7 +4,6 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   Length,
 } from 'class-validator';
 
@@ -39,12 +38,4 @@ export class CreateEventPricingDto {
   @IsNotEmpty({ message: 'Le montant du tarif est requis' })
   @IsNumber({}, { message: 'Le montant du tarif doit être un nombre' })
   amount: number;
-
-  @ApiProperty({
-    example: '550e8400-e29b-41d4-a716-446655440000',
-    description: "ID de l'événement",
-  })
-  @IsNotEmpty({ message: "L'ID de l'événement est requis" })
-  @IsUUID('4', { message: "L'ID de l'événement doit être un UUID valide" })
-  eventId: string;
 }

@@ -39,10 +39,12 @@ export class UsersAssociationsController {
   create(
     @Body() createUsersAssociationDto: CreateUsersAssociationDto,
     @User('id') userId: string,
+    @Param('associationId') associationId: string,
   ) {
     return this.usersAssociationsService.create(
       createUsersAssociationDto,
       userId,
+      associationId,
     );
   }
 
@@ -52,8 +54,11 @@ export class UsersAssociationsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  findAll(@Query() options?: FindOptionsDto) {
-    return this.usersAssociationsService.findAll(options);
+  findAll(
+    @Param('associationId') associationId: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.usersAssociationsService.findAll(associationId, options);
   }
 
   @Get('user/:id')
@@ -62,8 +67,12 @@ export class UsersAssociationsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
-    return this.usersAssociationsService.findOne(id, options);
+  findOne(
+    @Param('id') id: string,
+    @Param('associationId') associationId: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.usersAssociationsService.findOne(id, associationId, options);
   }
 
   // You can update the role of an user in an association (ex: from member to admin)
@@ -76,9 +85,14 @@ export class UsersAssociationsController {
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   update(
     @Param('id') id: string,
+    @Param('associationId') associationId: string,
     @Body() updateUsersAssociationDto: UpdateUsersAssociationDto,
   ) {
-    return this.usersAssociationsService.update(id, updateUsersAssociationDto);
+    return this.usersAssociationsService.update(
+      id,
+      associationId,
+      updateUsersAssociationDto,
+    );
   }
 
   // To remove an user from an association, the user himself can do it and an admin from the association too
@@ -88,7 +102,10 @@ export class UsersAssociationsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(@Param('id') id: string) {
-    return this.usersAssociationsService.remove(id);
+  remove(
+    @Param('id') id: string,
+    @Param('associationId') associationId: string,
+  ) {
+    return this.usersAssociationsService.remove(id, associationId);
   }
 }

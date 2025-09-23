@@ -14,13 +14,15 @@ import { CreateFundraisingDto } from './dto/create-fundraising.dto';
 import { UpdateFundraisingDto } from './dto/update-fundraising.dto';
 import { RateLimitGuard } from '../../../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../../../auth/guards/authenticated.guard';
-import { ApiCookieAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
 import {
   AssociationPermissions,
   AssociationPermissionsGuard,
 } from '../../guards/association-permissions.guard';
 import { Permissions } from '../../../../common/enums/permissions';
+import { UserAssociationDecorator } from 'src/common/decorators/user-association.decorator';
+import { UserAssociation } from '../users/entities/user-association.entity';
 
 @ApiTags('Association - Fundraisings')
 @Controller('association/:associationId')
@@ -33,18 +35,32 @@ export class FundraisingsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  create(@Body() createFundraisingDto: CreateFundraisingDto) {
-    return this.fundraisingsService.create(createFundraisingDto);
+  @ApiParam({ name: 'associationId', type: 'string' })
+  create(
+    @Body() createFundraisingDto: CreateFundraisingDto,
+    @UserAssociationDecorator() userAssociation: UserAssociation,
+  ) {
+    return this.fundraisingsService.create(
+      createFundraisingDto,
+      userAssociation,
+    );
   }
 
   @Get('fundraisings')
-  findAll(@Query() options?: FindOptionsDto) {
-    return this.fundraisingsService.findAll(options);
+  findAll(
+    @Param('associationId') associationId: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.fundraisingsService.findAll(associationId, options);
   }
 
   @Get('fundraising/:id')
-  findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
-    return this.fundraisingsService.findOne(id, options);
+  findOne(
+    @Param('id') id: string,
+    @Param('associationId') associationId: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.fundraisingsService.findOne(id, associationId, options);
   }
 
   @Patch('fundraising/:id')
@@ -55,9 +71,14 @@ export class FundraisingsController {
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   update(
     @Param('id') id: string,
+    @Param('associationId') associationId: string,
     @Body() updateFundraisingDto: UpdateFundraisingDto,
   ) {
-    return this.fundraisingsService.update(id, updateFundraisingDto);
+    return this.fundraisingsService.update(
+      id,
+      associationId,
+      updateFundraisingDto,
+    );
   }
 
   @Delete('fundraising/:id')
@@ -66,7 +87,10 @@ export class FundraisingsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(@Param('id') id: string) {
-    return this.fundraisingsService.remove(id);
+  remove(
+    @Param('id') id: string,
+    @Param('associationId') associationId: string,
+  ) {
+    return this.fundraisingsService.remove(id, associationId);
   }
 }
