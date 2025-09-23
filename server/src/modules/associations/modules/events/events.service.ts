@@ -21,7 +21,7 @@ export class EventsService {
     const event = this.eventsRepository.create({
       ...createEventDto,
       createdBy: userAssociation,
-      association: userAssociation.association,
+      association: { id: userAssociation.associationId },
     });
 
     return this.eventsRepository.save(event);

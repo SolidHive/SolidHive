@@ -4,27 +4,6 @@ import { IsOptional } from 'class-validator';
 
 export class FindOptionsDto {
   @ApiPropertyOptional({
-    description: 'Colonnes à sélectionner (ex: "id,name,email")',
-    type: String,
-    isArray: true,
-  })
-  @IsOptional()
-  @Transform(({ value }): { [key: string]: any } =>
-    typeof value === 'string'
-      ? (JSON.parse(value) as Record<string, any>)
-      : (value as Record<string, any>),
-  )
-  select?: Record<string, any>;
-
-  @ApiPropertyOptional({
-    description: 'Relations à inclure (ex: ["profile","posts"])',
-    type: String,
-    isArray: true,
-  })
-  @IsOptional()
-  relations?: Array<string>;
-
-  @ApiPropertyOptional({
     type: 'object',
     properties: {
       where: {
