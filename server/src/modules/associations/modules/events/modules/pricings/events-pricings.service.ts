@@ -16,9 +16,9 @@ export class EventsPricingsService {
     private readonly eventsPricingsRepository: Repository<EventPricing>,
   ) {}
 
-  async create(createEventPricingDto: CreateEventPricingDto) {
+  async create(createEventPricingDto: CreateEventPricingDto, eventId: string) {
     const event: Event | null = await this.eventsRepository.findOne({
-      where: { id: createEventPricingDto.eventId },
+      where: { id: eventId },
     });
 
     if (!event) {
@@ -33,23 +33,30 @@ export class EventsPricingsService {
     return this.eventsPricingsRepository.save(eventPricing);
   }
 
-  findAll(options?: FindOptionsDto) {
-    return this.eventsPricingsRepository.find(options);
-  }
-
-  findOne(id: string, options?: FindOptionsDto) {
-    return this.eventsPricingsRepository.findOne({
-      where: { id },
+  findAll(eventId: string, options?: FindOptionsDto) {
+    return this.eventsPricingsRepository.find({
       ...options,
+      where: { event: { id: eventId } },
     });
   }
 
-  async update(id: string, updateEventPricingDto: UpdateEventPricingDto) {
-    await this.eventsPricingsRepository.update(id, updateEventPricingDto);
-    return this.findOne(id);
+  findOne(id: string, eventId: string, options?: FindOptionsDto) {
+    return this.eventsPricingsRepository.findOne({
+      ...options,
+      where: { id, event: { id: eventId } },
+    });
   }
 
-  async remove(id: string) {
-    return this.eventsPricingsRepository.delete(id);
+  async update(
+    id: string,
+    eventId: string,
+    updateEventPricingDto: UpdateEventPricingDto,
+  ) {
+    await this.eventsPricingsRepository.update(id, updateEventPricingDto);
+    return this.findOne(id, eventId);
+  }
+
+  async remove(id: string, eventId: string) {
+    return this.eventsPricingsRepository.delete({ id, event: { id: eventId } });
   }
 }

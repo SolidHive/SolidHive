@@ -14,13 +14,15 @@ import { CreateAssociationAnnouncementDto } from './dto/create-association-annou
 import { UpdateAssociationAnnouncementDto } from './dto/update-association-announcement.dto';
 import { AuthenticatedGuard } from '../../../../modules/auth/guards/authenticated.guard';
 import { RateLimitGuard } from '../../../../common/guards/rate-limit.guard';
-import { ApiCookieAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
 import {
   AssociationPermissions,
   AssociationPermissionsGuard,
 } from '../../../associations/guards/association-permissions.guard';
 import { Permissions } from '../../../../common/enums/permissions';
+import { UserAssociationDecorator } from '../../../../common/decorators/user-association.decorator';
+import { UserAssociation } from '../users/entities/user-association.entity';
 
 @ApiTags('Association - Announcements')
 @Controller('association/:associationId')
@@ -35,23 +37,39 @@ export class AssociationsAnnouncementsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
+  @ApiParam({ name: 'associationId', type: 'string' })
   create(
-    @Body()
-    createAssociationAnnouncementDto: CreateAssociationAnnouncementDto,
+    @Body() createAssociationAnnouncementDto: CreateAssociationAnnouncementDto,
+    @UserAssociationDecorator() userAssociation: UserAssociation,
   ) {
     return this.associationsAnnouncementsService.create(
       createAssociationAnnouncementDto,
+      userAssociation,
     );
   }
 
   @Get('announcements')
-  findAll(@Query() options?: FindOptionsDto) {
-    return this.associationsAnnouncementsService.findAll(options);
+  findAll(
+    @Param('associationId') associationId: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.associationsAnnouncementsService.findAll(
+      associationId,
+      options,
+    );
   }
 
   @Get('announcement/:id')
-  findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
-    return this.associationsAnnouncementsService.findOne(id, options);
+  findOne(
+    @Param('id') id: string,
+    @Param('associationId') associationId: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.associationsAnnouncementsService.findOne(
+      id,
+      associationId,
+      options,
+    );
   }
 
   @Patch('announcement/:id')
@@ -62,11 +80,13 @@ export class AssociationsAnnouncementsController {
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   update(
     @Param('id') id: string,
+    @Param('associationId') associationId: string,
     @Body()
     updateAssociationAnnouncementDto: UpdateAssociationAnnouncementDto,
   ) {
     return this.associationsAnnouncementsService.update(
       id,
+      associationId,
       updateAssociationAnnouncementDto,
     );
   }
@@ -77,7 +97,10 @@ export class AssociationsAnnouncementsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(@Param('id') id: string) {
-    return this.associationsAnnouncementsService.remove(id);
+  remove(
+    @Param('id') id: string,
+    @Param('associationId') associationId: string,
+  ) {
+    return this.associationsAnnouncementsService.remove(id, associationId);
   }
 }

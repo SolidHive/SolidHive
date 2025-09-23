@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserAssociation } from '../users/entities/user-association.entity';
 import { Repository } from 'typeorm';
@@ -10,26 +10,14 @@ import { UpdateEventDto } from './dto/update-event.dto';
 @Injectable()
 export class EventsService {
   constructor(
-    @InjectRepository(UserAssociation)
-    private readonly usersAssociationsRepository: Repository<UserAssociation>,
     @InjectRepository(Event)
     private readonly eventsRepository: Repository<Event>,
   ) {}
 
-  async create(createEventDto: CreateEventDto) {
-    const userAssociation: UserAssociation | null =
-      await this.usersAssociationsRepository.findOne({
-        where: { id: createEventDto.userAssociationId },
-        relations: ['association'],
-      });
-
-    if (!userAssociation) {
-      throw new HttpException(
-        'User association not found',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
+  async create(
+    createEventDto: CreateEventDto,
+    userAssociation: UserAssociation,
+  ) {
     const event = this.eventsRepository.create({
       ...createEventDto,
       createdBy: userAssociation,
@@ -39,23 +27,33 @@ export class EventsService {
     return this.eventsRepository.save(event);
   }
 
-  findAll(options?: FindOptionsDto) {
-    return this.eventsRepository.find(options);
-  }
-
-  findOne(id: string, options?: FindOptionsDto) {
-    return this.eventsRepository.findOne({
-      where: { id },
+  findAll(associationId: string, options?: FindOptionsDto) {
+    return this.eventsRepository.find({
       ...options,
+      where: { association: { id: associationId } },
     });
   }
 
-  async update(id: string, updateEventDto: UpdateEventDto) {
-    await this.eventsRepository.update(id, updateEventDto);
-    return this.findOne(id);
+  findOne(id: string, associationId: string, options?: FindOptionsDto) {
+    return this.eventsRepository.findOne({
+      ...options,
+      where: { id, association: { id: associationId } },
+    });
   }
 
-  async remove(id: string) {
-    return this.eventsRepository.delete(id);
+  async update(
+    id: string,
+    associationId: string,
+    updateEventDto: UpdateEventDto,
+  ) {
+    await this.eventsRepository.update(id, updateEventDto);
+    return this.findOne(id, associationId);
+  }
+
+  async remove(id: string, associationId: string) {
+    return this.eventsRepository.delete({
+      id,
+      association: { id: associationId },
+    });
   }
 }

@@ -11,8 +11,8 @@ import {
 import { EventsRegistersService } from './events-registers.service';
 import { CreateEventRegisterDto } from './dto/create-event-register.dto';
 import { Roles, RolesGuard } from '../../../../../auth/guards/roles.guard';
-import { ApiCookieAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { RateLimitGuard } from 'src/common/guards/rate-limit.guard';
+import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { RateLimitGuard } from '../../../../../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../../../../../../modules/auth/guards/authenticated.guard';
 import { User } from '../../../../../../common/decorators/user.decorator';
 import { FindOptionsDto } from '../../../../../../common/dto/find-all-query.dto';
@@ -28,6 +28,8 @@ export class EventsRegistersController {
   @UseGuards(RateLimitGuard)
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
+  @ApiParam({ name: 'associationId', type: 'string' })
+  @ApiParam({ name: 'eventId', type: 'string' })
   create(
     @Body() createEventRegisterDto: CreateEventRegisterDto,
     @User('id') userId?: string,
@@ -36,13 +38,22 @@ export class EventsRegistersController {
   }
 
   @Get('registers')
-  findAll(@Query() options?: FindOptionsDto) {
-    return this.eventsRegistersService.findAll(options);
+  @ApiParam({ name: 'associationId', type: 'string' })
+  findAll(
+    @Param('eventId') eventId: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.eventsRegistersService.findAll(eventId, options);
   }
 
   @Get('register/:id')
-  findOne(@Param('id') id: string, @Query() options?: FindOptionsDto) {
-    return this.eventsRegistersService.findOne(id, options);
+  @ApiParam({ name: 'associationId', type: 'string' })
+  findOne(
+    @Param('id') id: string,
+    @Param('eventId') eventId: string,
+    @Query() options?: FindOptionsDto,
+  ) {
+    return this.eventsRegistersService.findOne(id, eventId, options);
   }
 
   @Delete('register/:id')
@@ -51,7 +62,8 @@ export class EventsRegistersController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(@Param('id') id: string) {
-    return this.eventsRegistersService.remove(id);
+  @ApiParam({ name: 'associationId', type: 'string' })
+  remove(@Param('id') id: string, @Param('eventId') eventId: string) {
+    return this.eventsRegistersService.remove(id, eventId);
   }
 }

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserAssociation } from '../users/entities/user-association.entity';
 import { Repository } from 'typeorm';
@@ -10,26 +10,14 @@ import { UpdateFundraisingDto } from './dto/update-fundraising.dto';
 @Injectable()
 export class FundraisingsService {
   constructor(
-    @InjectRepository(UserAssociation)
-    private readonly usersAssociationsRepository: Repository<UserAssociation>,
     @InjectRepository(Fundraising)
     private readonly fundraisingsRepository: Repository<Fundraising>,
   ) {}
 
-  async create(createFundraisingDto: CreateFundraisingDto) {
-    const userAssociation: UserAssociation | null =
-      await this.usersAssociationsRepository.findOne({
-        where: { id: createFundraisingDto.userAssociationId },
-        relations: ['association'],
-      });
-
-    if (!userAssociation) {
-      throw new HttpException(
-        'User association not found',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
+  async create(
+    createFundraisingDto: CreateFundraisingDto,
+    userAssociation: UserAssociation,
+  ) {
     const fundraising = this.fundraisingsRepository.create({
       ...createFundraisingDto,
       createdBy: userAssociation,
@@ -39,20 +27,33 @@ export class FundraisingsService {
     return this.fundraisingsRepository.save(fundraising);
   }
 
-  findAll(options?: FindOptionsDto) {
-    return this.fundraisingsRepository.find(options);
+  findAll(associationId: string, options?: FindOptionsDto) {
+    return this.fundraisingsRepository.find({
+      ...options,
+      where: { association: { id: associationId } },
+    });
   }
 
-  findOne(id: string, options?: FindOptionsDto) {
-    return this.fundraisingsRepository.findOne({ where: { id }, ...options });
+  findOne(id: string, associationId: string, options?: FindOptionsDto) {
+    return this.fundraisingsRepository.findOne({
+      ...options,
+      where: { id, association: { id: associationId } },
+    });
   }
 
-  async update(id: string, updateFundraisingDto: UpdateFundraisingDto) {
+  async update(
+    id: string,
+    associationId: string,
+    updateFundraisingDto: UpdateFundraisingDto,
+  ) {
     await this.fundraisingsRepository.update(id, updateFundraisingDto);
-    return this.findOne(id);
+    return this.findOne(id, associationId);
   }
 
-  async remove(id: string) {
-    return this.fundraisingsRepository.delete(id);
+  async remove(id: string, associationId: string) {
+    return this.fundraisingsRepository.delete({
+      id,
+      association: { id: associationId },
+    });
   }
 }

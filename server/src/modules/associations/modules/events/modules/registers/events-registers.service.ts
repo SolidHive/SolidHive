@@ -42,18 +42,24 @@ export class EventsRegistersService {
     return this.eventsRegisterRepository.save(eventRegister);
   }
 
-  findAll(options?: FindOptionsDto) {
-    return this.eventsRegisterRepository.find(options);
-  }
-
-  findOne(id: string, options?: FindOptionsDto) {
-    return this.eventsRegisterRepository.findOne({
-      where: { id },
+  findAll(eventId: string, options?: FindOptionsDto) {
+    return this.eventsRegisterRepository.find({
       ...options,
+      where: { eventPricing: { event: { id: eventId } } },
     });
   }
 
-  async remove(id: string) {
-    return this.eventsRegisterRepository.delete(id);
+  findOne(id: string, eventId: string, options?: FindOptionsDto) {
+    return this.eventsRegisterRepository.findOne({
+      ...options,
+      where: { id, eventPricing: { event: { id: eventId } } },
+    });
+  }
+
+  async remove(id: string, eventId: string) {
+    return this.eventsRegisterRepository.delete({
+      id,
+      eventPricing: { event: { id: eventId } },
+    });
   }
 }

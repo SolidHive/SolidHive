@@ -5,7 +5,6 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  IsUUID,
   Length,
   ValidateNested,
 } from 'class-validator';
@@ -74,17 +73,4 @@ export class CreateEventDto {
   @ValidateNested()
   @Type(() => CreateAddressDto)
   address: CreateAddressDto;
-
-  @ApiProperty({
-    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-    description: "Identifiant de l'association de l'utilisateur (UUID)",
-  })
-  @IsNotEmpty({
-    message: "L'identifiant de l'association de l'utilisateur est requis",
-  })
-  @IsUUID('4', {
-    message:
-      "L'identifiant de l'association de l'utilisateur doit être un UUID valide",
-  })
-  userAssociationId: string;
 }
