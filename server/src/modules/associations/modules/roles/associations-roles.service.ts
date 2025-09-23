@@ -22,7 +22,7 @@ export class AssociationsRolesService {
   ) {
     const associationRole = this.associationsRolesRepository.create({
       ...createAssociationRoleDto,
-      association: userAssociation.association,
+      association: { id: userAssociation.associationId },
       createdBy: userAssociation,
     });
 

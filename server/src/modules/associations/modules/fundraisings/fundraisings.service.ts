@@ -21,7 +21,7 @@ export class FundraisingsService {
     const fundraising = this.fundraisingsRepository.create({
       ...createFundraisingDto,
       createdBy: userAssociation,
-      association: userAssociation.association,
+      association: { id: userAssociation.associationId },
     });
 
     return this.fundraisingsRepository.save(fundraising);

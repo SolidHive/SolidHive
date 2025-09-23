@@ -15,6 +15,11 @@ export const PERMISSIONS_KEY = 'associationPermissions';
 export const AssociationPermissions = (...permissions: Permissions[]) =>
   SetMetadata(PERMISSIONS_KEY, permissions);
 
+interface UserRequest extends Request {
+  user: { id: string };
+  userAssociation: UserAssociation | undefined;
+}
+
 @Injectable()
 export class AssociationPermissionsGuard {
   constructor(
@@ -33,7 +38,7 @@ export class AssociationPermissionsGuard {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<Request>();
+    const request = context.switchToHttp().getRequest<UserRequest>();
 
     if (
       typeof request.isAuthenticated === 'function' &&
@@ -44,19 +49,15 @@ export class AssociationPermissionsGuard {
       );
     }
 
-    const body = request.body as { userAssociationId?: string };
-    const params = request.params as { userAssociationId?: string };
-    const userAssociationId: string | undefined =
-      body?.userAssociationId ?? params?.userAssociationId;
+    const userId = request.user.id;
+    const associationId: string = request.params.associationId;
 
-    if (!userAssociationId) {
-      throw new UnauthorizedException(
-        "Vous devez être membre de l'association pour accéder à cette ressource",
-      );
+    if (!associationId) {
+      throw new UnauthorizedException('The association ID need to be filled');
     }
 
     const userAssociation = await this.usersAssociationsRepository.findOne({
-      where: { id: userAssociationId },
+      where: { userId: userId, associationId },
       relations: ['role'],
     });
 
@@ -65,6 +66,8 @@ export class AssociationPermissionsGuard {
         "Vous devez être membre de l'association pour accéder à cette ressource",
       );
     }
+
+    request.userAssociation = userAssociation;
 
     const userPermissions = userAssociation.role.permissions;
 

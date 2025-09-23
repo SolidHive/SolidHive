@@ -21,7 +21,7 @@ export class AssociationsAnnouncementsService {
     const announcement = this.associationsAnnouncementsRepository.create({
       ...createAssociationAnnouncementDto,
       createdBy: userAssociation,
-      association: userAssociation.association,
+      association: { id: userAssociation.associationId },
     });
 
     return this.associationsAnnouncementsRepository.save(announcement);

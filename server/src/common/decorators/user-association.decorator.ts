@@ -4,15 +4,15 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { UserAssociation as UserAssociationEntity } from '../../modules/associations/modules/users/entities/user-association.entity';
+import { UserAssociation } from '../../modules/associations/modules/users/entities/user-association.entity';
 
 interface requestWithUserAssociation extends Request {
-  userAssociation: UserAssociationEntity;
+  userAssociation: UserAssociation;
 }
 
 export const UserAssociationDecorator = createParamDecorator((key, ctx) => {
   const request = ctx.switchToHttp().getRequest<requestWithUserAssociation>();
-  const userAssociation: UserAssociationEntity = request.userAssociation;
+  const userAssociation: UserAssociation = request.userAssociation;
 
   if (!userAssociation) {
     throw new HttpException('User association not found', HttpStatus.NOT_FOUND);
