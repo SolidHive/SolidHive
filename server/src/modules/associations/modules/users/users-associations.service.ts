@@ -24,10 +24,11 @@ export class UsersAssociationsService {
 
   async create(
     createUsersAssociationDto: CreateUsersAssociationDto,
-    userId: string,
     associationId: string,
   ) {
-    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    const user = await this.usersRepository.findOne({
+      where: { id: createUsersAssociationDto.userId },
+    });
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
