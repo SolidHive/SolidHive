@@ -17,4 +17,6 @@ export enum Permissions {
   ANNOUNCEMENTS_CREATE = 'announcements_create',
   ANNOUNCEMENTS_DELETE = 'announcements_delete',
   ANNOUNCEMENTS_UPDATE = 'announcements_update',
+  ASSOCIATION_UPDATE = 'association_update',
+  ASSOCIATION_REMOVE = 'association_remove',
 }
