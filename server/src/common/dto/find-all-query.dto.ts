@@ -16,7 +16,7 @@ export class FindOptionsDto {
   @Transform(({ value }): { [key: string]: any } =>
     typeof value === 'string'
       ? (JSON.parse(value) as Record<string, any>)
-      : (value as Record<string, any>),
+      : (value as Record<string, any>)
   )
   where?: Record<string, any>;
 

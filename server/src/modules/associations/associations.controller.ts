@@ -34,10 +34,7 @@ export class AssociationsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  create(
-    @Body() createAssociationDto: CreateAssociationDto,
-    @User('id') userId: string,
-  ) {
+  create(@Body() createAssociationDto: CreateAssociationDto, @User('id') userId: string) {
     return this.associationsService.create(createAssociationDto, userId);
   }
 
@@ -47,10 +44,7 @@ export class AssociationsController {
   }
 
   @Get('association/:associationId')
-  findOne(
-    @Param('associationId') id: string,
-    @Query() options?: FindOptionsDto,
-  ) {
+  findOne(@Param('associationId') id: string, @Query() options?: FindOptionsDto) {
     return this.associationsService.findOne(id, options);
   }
 
@@ -60,10 +54,7 @@ export class AssociationsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  update(
-    @Param('associationId') id: string,
-    @Body() updateAssociationDto: UpdateAssociationDto,
-  ) {
+  update(@Param('associationId') id: string, @Body() updateAssociationDto: UpdateAssociationDto) {
     return this.associationsService.update(id, updateAssociationDto);
   }
 

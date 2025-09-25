@@ -26,10 +26,7 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get<string[]>(
-      ROLES_KEY,
-      context.getHandler(),
-    );
+    const requiredRoles = this.reflector.get<string[]>(ROLES_KEY, context.getHandler());
 
     if (!requiredRoles || requiredRoles.length === 0) {
       return true;
@@ -37,33 +34,22 @@ export class RolesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
-    if (
-      typeof request.isAuthenticated === 'function' &&
-      !request.isAuthenticated()
-    ) {
-      throw new UnauthorizedException(
-        'Vous devez être connecté pour accéder à cette ressource',
-      );
+    if (typeof request.isAuthenticated === 'function' && !request.isAuthenticated()) {
+      throw new UnauthorizedException('Vous devez être connecté pour accéder à cette ressource');
     }
 
     const user = request.user;
 
     if (!user || !Array.isArray(user.roles) || user.roles.length === 0) {
-      throw new ForbiddenException(
-        "Vous n'avez pas les permissions nécessaires",
-      );
+      throw new ForbiddenException("Vous n'avez pas les permissions nécessaires");
     }
 
     const hasRole = requiredRoles.some((role) =>
-      user.roles.some(
-        (userRole) => userRole && userRole.toUpperCase() === role.toUpperCase(),
-      ),
+      user.roles.some((userRole) => userRole && userRole.toUpperCase() === role.toUpperCase())
     );
 
     if (!hasRole) {
-      throw new ForbiddenException(
-        "Vous n'avez pas les permissions nécessaires",
-      );
+      throw new ForbiddenException("Vous n'avez pas les permissions nécessaires");
     }
 
     return true;

@@ -7,8 +7,7 @@ import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 export class Favorite {
   @ApiProperty({
     example: 'Association',
-    description:
-      "Type de l'élément favori (e.g., 'Association', 'Announcement')",
+    description: "Type de l'élément favori (e.g., 'Association', 'Announcement')",
     enum: Categories,
   })
   @PrimaryColumn()

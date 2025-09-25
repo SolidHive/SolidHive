@@ -13,13 +13,11 @@ export interface RateLimitConfig {
 }
 
 // Typage sécurisé pour le décorateur
-export const SetRateLimit = (
-  config: RateLimitConfig,
-): MethodDecorator & ClassDecorator => {
+export const SetRateLimit = (config: RateLimitConfig): MethodDecorator & ClassDecorator => {
   return (
     target: object,
     propertyKey?: string | symbol,
-    descriptor?: TypedPropertyDescriptor<any>,
+    descriptor?: TypedPropertyDescriptor<any>
   ): void => {
     const metadataTarget: object = (descriptor?.value as object) ?? target;
 
@@ -61,10 +59,9 @@ export class RateLimitGuard implements CanActivate {
           message: { message: config.message || this.defaultConfig.message },
           standardHeaders: true,
           legacyHeaders: false,
-          keyGenerator: (req) =>
-            requestIp.getClientIp(req) || req.ip || 'ip-inconnue',
+          keyGenerator: (req) => requestIp.getClientIp(req) || req.ip || 'ip-inconnue',
           skip: () => false,
-        }),
+        })
       );
     }
 

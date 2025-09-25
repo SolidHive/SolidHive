@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
@@ -18,8 +14,7 @@ import { SecurityUtils } from './utils/security.utils';
 
 @Injectable()
 export class UserSecurityService {
-  private templates: Map<SecurityActionType, HandlebarsTemplateDelegate> =
-    new Map();
+  private templates: Map<SecurityActionType, HandlebarsTemplateDelegate> = new Map();
   private readonly JWT_SECRET: string;
   private readonly FRONTEND_URL: string;
   private usedTokens: Set<string> = new Set();
@@ -27,7 +22,7 @@ export class UserSecurityService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
     private emailService: EmailService,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {
     // Récupération sécurisée des variables d'environnement
     this.JWT_SECRET = this.configService.get<string>('JWT_SECRET') || '';
@@ -35,13 +30,13 @@ export class UserSecurityService {
 
     if (!this.JWT_SECRET) {
       console.error(
-        "AVERTISSEMENT: JWT_SECRET n'est pas défini dans les variables d'environnement!",
+        "AVERTISSEMENT: JWT_SECRET n'est pas défini dans les variables d'environnement!"
       );
     }
 
     if (!this.FRONTEND_URL) {
       console.error(
-        "AVERTISSEMENT: FRONTEND_URL n'est pas défini dans les variables d'environnement!",
+        "AVERTISSEMENT: FRONTEND_URL n'est pas défini dans les variables d'environnement!"
       );
     }
 
@@ -50,7 +45,7 @@ export class UserSecurityService {
 
   // Point d'entrée principal pour toutes les actions de sécurité
   async processSecurityAction(
-    request: SecurityActionRequestDto,
+    request: SecurityActionRequestDto
   ): Promise<{ message: string; userId?: string }> {
     // Vérification anticipée de la configuration
     if (!this.JWT_SECRET) {
@@ -60,8 +55,7 @@ export class UserSecurityService {
     try {
       switch (request.actionType) {
         case SecurityActionType.VERIFY_EMAIL:
-          if (!request.token)
-            throw new BadRequestException('Token requis pour cette action');
+          if (!request.token) throw new BadRequestException('Token requis pour cette action');
           return this.verifyEmail(request.token);
 
         case SecurityActionType.RESET_PASSWORD:
@@ -73,7 +67,7 @@ export class UserSecurityService {
             return this.sendPasswordResetEmail(request.email);
           }
           throw new BadRequestException(
-            'Token avec mot de passe ou email requis pour cette action',
+            'Token avec mot de passe ou email requis pour cette action'
           );
 
         default:
@@ -81,32 +75,25 @@ export class UserSecurityService {
       }
     } catch (error: unknown) {
       if (error instanceof BadRequestException) throw error;
-      throw new BadRequestException(
-        `Erreur: ${SecurityUtils.getErrorMessage(error)}`,
-      );
+      throw new BadRequestException(`Erreur: ${SecurityUtils.getErrorMessage(error)}`);
     }
   }
 
   // Charge les templates d'emails
   private loadTemplates(): void {
     const templatePaths = {
-      [SecurityActionType.VERIFY_EMAIL]:
-        'src/utils/email/templates/verification.html',
-      [SecurityActionType.RESET_PASSWORD]:
-        'src/utils/email/templates/reset-password.html',
+      [SecurityActionType.VERIFY_EMAIL]: 'src/utils/email/templates/verification.html',
+      [SecurityActionType.RESET_PASSWORD]: 'src/utils/email/templates/reset-password.html',
     };
 
     Object.entries(templatePaths).forEach(([type, templatePath]) => {
       try {
         const fullPath = path.join(process.cwd(), templatePath);
         const content = fs.readFileSync(fullPath, 'utf8');
-        this.templates.set(
-          type as SecurityActionType,
-          Handlebars.compile(content),
-        );
+        this.templates.set(type as SecurityActionType, Handlebars.compile(content));
       } catch (error: unknown) {
         console.error(
-          `Erreur lors du chargement du template ${type}: ${SecurityUtils.getErrorMessage(error)}`,
+          `Erreur lors du chargement du template ${type}: ${SecurityUtils.getErrorMessage(error)}`
         );
       }
     });
@@ -121,7 +108,7 @@ export class UserSecurityService {
     const token = SecurityUtils.generateToken(
       user.id,
       SecurityActionType.VERIFY_EMAIL,
-      this.JWT_SECRET,
+      this.JWT_SECRET
     );
 
     const template = this.templates.get(SecurityActionType.VERIFY_EMAIL);
@@ -150,8 +137,7 @@ export class UserSecurityService {
     }
 
     const user = await this.usersRepository.findOne({ where: { email } });
-    const message =
-      'Si votre email est enregistré, vous recevrez un lien de réinitialisation.';
+    const message = 'Si votre email est enregistré, vous recevrez un lien de réinitialisation.';
 
     if (!user) return { message };
 
@@ -159,15 +145,13 @@ export class UserSecurityService {
       const token = SecurityUtils.generateToken(
         user.id,
         SecurityActionType.RESET_PASSWORD,
-        this.JWT_SECRET,
+        this.JWT_SECRET
       );
 
       const template = this.templates.get(SecurityActionType.RESET_PASSWORD);
 
       if (!template || !this.FRONTEND_URL) {
-        throw new InternalServerErrorException(
-          'Configuration email incorrecte',
-        );
+        throw new InternalServerErrorException('Configuration email incorrecte');
       }
 
       const resetUrl = `${this.FRONTEND_URL}/reset-password?token=${token}`;
@@ -184,9 +168,7 @@ export class UserSecurityService {
 
       return { message };
     } catch (error: unknown) {
-      console.error(
-        `Erreur d'envoi d'email à ${email}: ${SecurityUtils.getErrorMessage(error)}`,
-      );
+      console.error(`Erreur d'envoi d'email à ${email}: ${SecurityUtils.getErrorMessage(error)}`);
       return { message };
     }
   }
@@ -201,7 +183,7 @@ export class UserSecurityService {
       const { userId } = SecurityUtils.verifyToken(
         token,
         SecurityActionType.VERIFY_EMAIL,
-        this.JWT_SECRET,
+        this.JWT_SECRET
       );
 
       const user = await this.usersRepository.findOne({
@@ -224,10 +206,7 @@ export class UserSecurityService {
   }
 
   // Réinitialise le mot de passe
-  async resetPassword(
-    token: string,
-    newPassword: string,
-  ): Promise<{ message: string }> {
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
     if (!this.JWT_SECRET) {
       throw new InternalServerErrorException('Configuration JWT manquante');
     }
@@ -235,16 +214,14 @@ export class UserSecurityService {
     try {
       // Vérifier si le token a déjà été utilisé
       if (this.usedTokens.has(token)) {
-        throw new BadRequestException(
-          'Ce lien de réinitialisation a déjà été utilisé',
-        );
+        throw new BadRequestException('Ce lien de réinitialisation a déjà été utilisé');
       }
 
       // Valide le token
       const { userId } = SecurityUtils.verifyToken(
         token,
         SecurityActionType.RESET_PASSWORD,
-        this.JWT_SECRET,
+        this.JWT_SECRET
       );
 
       await SecurityUtils.validatePassword(newPassword);
@@ -256,8 +233,7 @@ export class UserSecurityService {
       if (!user) throw new BadRequestException('Utilisateur non trouvé');
 
       // Utilise la classe utilitaire pour générer le hash et le salt
-      const { hashedPassword, salt } =
-        PasswordUtils.hashNewPassword(newPassword);
+      const { hashedPassword, salt } = PasswordUtils.hashNewPassword(newPassword);
 
       // Met à jour l'utilisateur
       user.password = hashedPassword;
@@ -268,14 +244,13 @@ export class UserSecurityService {
       this.usedTokens.add(token);
 
       return {
-        message:
-          'Mot de passe réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
+        message: 'Mot de passe réinitialisé avec succès. Vous pouvez maintenant vous connecter.',
       };
     } catch (error: unknown) {
       if (error instanceof BadRequestException) throw error;
       throw new BadRequestException(
         'Erreur lors de la réinitialisation du mot de passe: ' +
-          SecurityUtils.getErrorMessage(error),
+          SecurityUtils.getErrorMessage(error)
       );
     }
   }

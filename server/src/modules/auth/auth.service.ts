@@ -13,11 +13,7 @@ export class AuthService {
     try {
       const user = await this.usersService.findByEmail(email);
 
-      const isPasswordValid = PasswordUtils.validatePassword(
-        password,
-        user.salt,
-        user.password,
-      );
+      const isPasswordValid = PasswordUtils.validatePassword(password, user.salt, user.password);
 
       if (!isPasswordValid) {
         throw new UnauthorizedException('Identifiants invalides');
@@ -25,7 +21,7 @@ export class AuthService {
 
       if (!user.isVerified) {
         throw new UnauthorizedException(
-          "Votre compte n'est pas vérifié. Veuillez vérifier votre email avant de vous connecter.",
+          "Votre compte n'est pas vérifié. Veuillez vérifier votre email avant de vous connecter."
         );
       }
 

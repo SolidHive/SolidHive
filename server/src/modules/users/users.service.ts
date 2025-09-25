@@ -44,7 +44,7 @@ export class UsersService {
     private usersRepository: Repository<User>,
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
-    private userSecurityService: UserSecurityService,
+    private userSecurityService: UserSecurityService
   ) {}
 
   async findByEmail(email: string): Promise<User> {
@@ -54,9 +54,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException(
-        `Aucun utilisateur trouvé avec l'email ${email}`,
-      );
+      throw new NotFoundException(`Aucun utilisateur trouvé avec l'email ${email}`);
     }
 
     return user;
@@ -80,16 +78,11 @@ export class UsersService {
 
     // Vérifie que c'est un email d'entreprise
     if (!this.isBusinessEmail(createUserDto.email)) {
-      throw new BadRequestException(
-        'Veuillez utiliser une adresse email professionnelle',
-      );
+      throw new BadRequestException('Veuillez utiliser une adresse email professionnelle');
     }
 
     const salt = PasswordUtils.generateSalt();
-    const hashedPassword = PasswordUtils.hashPassword(
-      createUserDto.password,
-      salt,
-    );
+    const hashedPassword = PasswordUtils.hashPassword(createUserDto.password, salt);
 
     // Chercher le rôle USER
     let userRole = await this.roleRepository.findOne({
@@ -123,8 +116,7 @@ export class UsersService {
         await this.userSecurityService.sendVerificationEmail(savedUser);
 
         return {
-          message:
-            'Inscription réussie. Veuillez vérifier votre email pour activer votre compte.',
+          message: 'Inscription réussie. Veuillez vérifier votre email pour activer votre compte.',
         };
       } catch (emailError) {
         console.error("Erreur lors de l'envoi de l'email:", emailError);
@@ -136,9 +128,7 @@ export class UsersService {
       }
     } catch (error) {
       console.error("Erreur lors de la création de l'utilisateur:", error);
-      throw new InternalServerErrorException(
-        "Une erreur est survenue lors de l'inscription",
-      );
+      throw new InternalServerErrorException("Une erreur est survenue lors de l'inscription");
     }
   }
 

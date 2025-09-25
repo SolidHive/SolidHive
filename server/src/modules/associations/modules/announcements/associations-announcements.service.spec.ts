@@ -9,9 +9,7 @@ describe('AssociationsAnnouncementsService', () => {
       providers: [AssociationsAnnouncementsService],
     }).compile();
 
-    service = module.get<AssociationsAnnouncementsService>(
-      AssociationsAnnouncementsService,
-    );
+    service = module.get<AssociationsAnnouncementsService>(AssociationsAnnouncementsService);
   });
 
   it('should be defined', () => {

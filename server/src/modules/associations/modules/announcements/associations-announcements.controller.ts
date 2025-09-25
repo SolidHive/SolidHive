@@ -28,7 +28,7 @@ import { UserAssociation } from '../users/entities/user-association.entity';
 @Controller('association/:associationId')
 export class AssociationsAnnouncementsController {
   constructor(
-    private readonly associationsAnnouncementsService: AssociationsAnnouncementsService,
+    private readonly associationsAnnouncementsService: AssociationsAnnouncementsService
   ) {}
 
   @Post('announcement')
@@ -40,36 +40,26 @@ export class AssociationsAnnouncementsController {
   @ApiParam({ name: 'associationId', type: 'string' })
   create(
     @Body() createAssociationAnnouncementDto: CreateAssociationAnnouncementDto,
-    @UserAssociationDecorator() userAssociation: UserAssociation,
+    @UserAssociationDecorator() userAssociation: UserAssociation
   ) {
     return this.associationsAnnouncementsService.create(
       createAssociationAnnouncementDto,
-      userAssociation,
+      userAssociation
     );
   }
 
   @Get('announcements')
-  findAll(
-    @Param('associationId') associationId: string,
-    @Query() options?: FindOptionsDto,
-  ) {
-    return this.associationsAnnouncementsService.findAll(
-      associationId,
-      options,
-    );
+  findAll(@Param('associationId') associationId: string, @Query() options?: FindOptionsDto) {
+    return this.associationsAnnouncementsService.findAll(associationId, options);
   }
 
   @Get('announcement/:id')
   findOne(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
-    @Query() options?: FindOptionsDto,
+    @Query() options?: FindOptionsDto
   ) {
-    return this.associationsAnnouncementsService.findOne(
-      id,
-      associationId,
-      options,
-    );
+    return this.associationsAnnouncementsService.findOne(id, associationId, options);
   }
 
   @Patch('announcement/:id')
@@ -82,12 +72,12 @@ export class AssociationsAnnouncementsController {
     @Param('id') id: string,
     @Param('associationId') associationId: string,
     @Body()
-    updateAssociationAnnouncementDto: UpdateAssociationAnnouncementDto,
+    updateAssociationAnnouncementDto: UpdateAssociationAnnouncementDto
   ) {
     return this.associationsAnnouncementsService.update(
       id,
       associationId,
-      updateAssociationAnnouncementDto,
+      updateAssociationAnnouncementDto
     );
   }
 
@@ -97,10 +87,7 @@ export class AssociationsAnnouncementsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(
-    @Param('id') id: string,
-    @Param('associationId') associationId: string,
-  ) {
+  remove(@Param('id') id: string, @Param('associationId') associationId: string) {
     return this.associationsAnnouncementsService.remove(id, associationId);
   }
 }

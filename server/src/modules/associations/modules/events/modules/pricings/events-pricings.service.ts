@@ -13,7 +13,7 @@ export class EventsPricingsService {
     @InjectRepository(Event)
     private readonly eventsRepository: Repository<Event>,
     @InjectRepository(EventPricing)
-    private readonly eventsPricingsRepository: Repository<EventPricing>,
+    private readonly eventsPricingsRepository: Repository<EventPricing>
   ) {}
 
   async create(createEventPricingDto: CreateEventPricingDto, eventId: string) {
@@ -47,11 +47,7 @@ export class EventsPricingsService {
     });
   }
 
-  async update(
-    id: string,
-    eventId: string,
-    updateEventPricingDto: UpdateEventPricingDto,
-  ) {
+  async update(id: string, eventId: string, updateEventPricingDto: UpdateEventPricingDto) {
     await this.eventsPricingsRepository.update(id, updateEventPricingDto);
     return this.findOne(id, eventId);
   }

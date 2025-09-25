@@ -35,9 +35,7 @@ export class EmailService {
     attachments?: any[];
   }): Promise<void> {
     const mailOptions = {
-      from:
-        options.from ||
-        `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
+      from: options.from || `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
       to: options.to,
       subject: options.subject,
       html: options.html,
@@ -58,8 +56,7 @@ export class EmailService {
       console.log('✅ Connexion au serveur email vérifiée avec succès');
       return true;
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Erreur inconnue';
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
 
       console.error('❌ Erreur de connexion au serveur email:', errorMessage);
       return false;

@@ -11,13 +11,10 @@ import { UpdateFundraisingDto } from './dto/update-fundraising.dto';
 export class FundraisingsService {
   constructor(
     @InjectRepository(Fundraising)
-    private readonly fundraisingsRepository: Repository<Fundraising>,
+    private readonly fundraisingsRepository: Repository<Fundraising>
   ) {}
 
-  async create(
-    createFundraisingDto: CreateFundraisingDto,
-    userAssociation: UserAssociation,
-  ) {
+  async create(createFundraisingDto: CreateFundraisingDto, userAssociation: UserAssociation) {
     const fundraising = this.fundraisingsRepository.create({
       ...createFundraisingDto,
       createdBy: userAssociation,
@@ -41,11 +38,7 @@ export class FundraisingsService {
     });
   }
 
-  async update(
-    id: string,
-    associationId: string,
-    updateFundraisingDto: UpdateFundraisingDto,
-  ) {
+  async update(id: string, associationId: string, updateFundraisingDto: UpdateFundraisingDto) {
     await this.fundraisingsRepository.update(id, updateFundraisingDto);
     return this.findOne(id, associationId);
   }

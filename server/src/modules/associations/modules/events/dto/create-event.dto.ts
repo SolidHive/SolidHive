@@ -35,8 +35,7 @@ export class CreateEventDto {
   })
   @IsOptional()
   @Length(5, 500, {
-    message:
-      "La description de l'événement doit contenir entre 5 et 500 caractères",
+    message: "La description de l'événement doit contenir entre 5 et 500 caractères",
   })
   description?: string;
 

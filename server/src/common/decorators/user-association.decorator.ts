@@ -1,8 +1,4 @@
-import {
-  createParamDecorator,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { createParamDecorator, HttpException, HttpStatus } from '@nestjs/common';
 import { Request } from 'express';
 import { UserAssociation } from '../../modules/associations/modules/users/entities/user-association.entity';
 

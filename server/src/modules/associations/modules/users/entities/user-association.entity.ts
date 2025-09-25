@@ -1,13 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryColumn,
-  Unique,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, Unique } from 'typeorm';
 import { Event } from '../../../modules/events/entities/event.entity';
 import { User } from '../../../../../modules/users/entities/user.entity';
 import { Association } from 'src/modules/associations/entities/association.entity';
@@ -63,8 +55,7 @@ export class UserAssociation {
 
   @ApiProperty({
     type: [Fundraising],
-    description:
-      "Collectes de fonds créées par l'utilisateur dans cette association",
+    description: "Collectes de fonds créées par l'utilisateur dans cette association",
   })
   @OneToMany(() => Fundraising, (fundraising) => fundraising.createdBy)
   fundraisings: Fundraising[];
@@ -80,10 +71,7 @@ export class UserAssociation {
     type: [AssociationAnnouncement],
     description: "Annonces créées par l'utilisateur dans cette association",
   })
-  @OneToMany(
-    () => AssociationAnnouncement,
-    (announcement) => announcement.createdBy,
-  )
+  @OneToMany(() => AssociationAnnouncement, (announcement) => announcement.createdBy)
   announcements: AssociationAnnouncement[];
 
   @ApiProperty({

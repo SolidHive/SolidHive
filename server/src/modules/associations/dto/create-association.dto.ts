@@ -1,13 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Colors } from '../../../common/enums/colors';
-import {
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateAssociationDto {
   @ApiProperty({
@@ -29,12 +22,10 @@ export class CreateAssociationDto {
   })
   @IsOptional()
   @IsString({
-    message:
-      "La description de l'association doit être une chaîne de caractères",
+    message: "La description de l'association doit être une chaîne de caractères",
   })
   @Length(5, 1000, {
-    message:
-      "La description de l'association doit contenir entre 5 et 1000 caractères",
+    message: "La description de l'association doit contenir entre 5 et 1000 caractères",
   })
   description?: string;
 

@@ -14,7 +14,7 @@ export class FavoritesService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(Favorite)
-    private favoritesRepository: Repository<Favorite>,
+    private favoritesRepository: Repository<Favorite>
   ) {}
 
   async create(createFavoriteDto: CreateFavoriteDto, userId: string) {
@@ -25,19 +25,14 @@ export class FavoritesService {
     }
 
     // Vérifie que la cible existe
-    const targetRepo = this.dataSource.getRepository(
-      createFavoriteDto.relatedTo,
-    );
+    const targetRepo = this.dataSource.getRepository(createFavoriteDto.relatedTo);
 
     const target = await targetRepo.findOne({
       where: { id: createFavoriteDto.relatedBy },
     });
 
     if (!target) {
-      throw new HttpException(
-        `${createFavoriteDto.relatedTo} not found`,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException(`${createFavoriteDto.relatedTo} not found`, HttpStatus.NOT_FOUND);
     }
 
     const favorite = this.favoritesRepository.create({

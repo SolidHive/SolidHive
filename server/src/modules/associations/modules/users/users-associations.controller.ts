@@ -25,9 +25,7 @@ import { Permissions } from '../../../../common/enums/permissions';
 @ApiTags('Association - Users')
 @Controller('association/:associationId')
 export class UsersAssociationsController {
-  constructor(
-    private readonly usersAssociationsService: UsersAssociationsService,
-  ) {}
+  constructor(private readonly usersAssociationsService: UsersAssociationsService) {}
 
   @Post('user')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
@@ -37,12 +35,9 @@ export class UsersAssociationsController {
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   create(
     @Body() createUsersAssociationDto: CreateUsersAssociationDto,
-    @Param('associationId') associationId: string,
+    @Param('associationId') associationId: string
   ) {
-    return this.usersAssociationsService.create(
-      createUsersAssociationDto,
-      associationId,
-    );
+    return this.usersAssociationsService.create(createUsersAssociationDto, associationId);
   }
 
   @Get('users')
@@ -51,10 +46,7 @@ export class UsersAssociationsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  findAll(
-    @Param('associationId') associationId: string,
-    @Query() options?: FindOptionsDto,
-  ) {
+  findAll(@Param('associationId') associationId: string, @Query() options?: FindOptionsDto) {
     return this.usersAssociationsService.findAll(associationId, options);
   }
 
@@ -67,7 +59,7 @@ export class UsersAssociationsController {
   findOne(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
-    @Query() options?: FindOptionsDto,
+    @Query() options?: FindOptionsDto
   ) {
     return this.usersAssociationsService.findOne(id, associationId, options);
   }
@@ -83,13 +75,9 @@ export class UsersAssociationsController {
   update(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
-    @Body() updateUsersAssociationDto: UpdateUsersAssociationDto,
+    @Body() updateUsersAssociationDto: UpdateUsersAssociationDto
   ) {
-    return this.usersAssociationsService.update(
-      id,
-      associationId,
-      updateUsersAssociationDto,
-    );
+    return this.usersAssociationsService.update(id, associationId, updateUsersAssociationDto);
   }
 
   // To remove an user from an association, the user himself can do it and an admin from the association too
@@ -99,10 +87,7 @@ export class UsersAssociationsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(
-    @Param('id') id: string,
-    @Param('associationId') associationId: string,
-  ) {
+  remove(@Param('id') id: string, @Param('associationId') associationId: string) {
     return this.usersAssociationsService.remove(id, associationId);
   }
 }

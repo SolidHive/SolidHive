@@ -12,7 +12,7 @@ describe('AssociationsAnnouncementsController', () => {
     }).compile();
 
     controller = module.get<AssociationsAnnouncementsController>(
-      AssociationsAnnouncementsController,
+      AssociationsAnnouncementsController
     );
   });
 

@@ -30,11 +30,7 @@ export class PasswordUtils {
   /**
    * Valide un mot de passe par rapport à un hash stocké
    */
-  static validatePassword(
-    password: string,
-    salt: string,
-    storedHash: string,
-  ): boolean {
+  static validatePassword(password: string, salt: string, storedHash: string): boolean {
     const hash = this.hashPassword(password, salt);
     return hash === storedHash;
   }

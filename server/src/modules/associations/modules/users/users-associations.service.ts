@@ -19,13 +19,10 @@ export class UsersAssociationsService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(UserAssociation)
-    private usersAssociationsRepository: Repository<UserAssociation>,
+    private usersAssociationsRepository: Repository<UserAssociation>
   ) {}
 
-  async create(
-    createUsersAssociationDto: CreateUsersAssociationDto,
-    associationId: string,
-  ) {
+  async create(createUsersAssociationDto: CreateUsersAssociationDto, associationId: string) {
     const user = await this.usersRepository.findOne({
       where: { id: createUsersAssociationDto.userId },
     });
@@ -73,7 +70,7 @@ export class UsersAssociationsService {
   async update(
     id: string,
     associationId: string,
-    updateUsersAssociationDto: UpdateUsersAssociationDto,
+    updateUsersAssociationDto: UpdateUsersAssociationDto
   ) {
     const role = await this.associationsRolesRepository.findOne({
       where: { id: updateUsersAssociationDto.roleId },

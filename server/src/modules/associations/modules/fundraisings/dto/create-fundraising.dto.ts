@@ -1,13 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateFundraisingDto {
   @ApiProperty({ example: 'Aide pour les enfants', description: 'Titre' })

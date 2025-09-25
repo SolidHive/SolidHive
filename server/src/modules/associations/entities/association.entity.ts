@@ -2,13 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AssociationAnnouncement } from '../modules/announcements/entities/association-announcement.entity';
 import { AssociationRole } from '../modules/roles/entities/association-role.entity';
 import { Colors } from '../../../common/enums/colors';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UserAssociation } from '../modules/users/entities/user-association.entity';
 import { Fundraising } from '../modules/fundraisings/entities/fundraising.entity';
 import { Timestamps } from '../../../common/embeddeds/timestamps.embedded';
@@ -63,10 +57,7 @@ export class Association {
     type: [AssociationAnnouncement],
     description: "Annonces de l'association",
   })
-  @OneToMany(
-    () => AssociationAnnouncement,
-    (announcement) => announcement.association,
-  )
+  @OneToMany(() => AssociationAnnouncement, (announcement) => announcement.association)
   announcements: AssociationAnnouncement[];
 
   @ApiProperty({
@@ -80,10 +71,7 @@ export class Association {
     type: [Association],
     description: "Associations de l'utilisateur",
   })
-  @OneToMany(
-    () => UserAssociation,
-    (userAssociation) => userAssociation.association,
-  )
+  @OneToMany(() => UserAssociation, (userAssociation) => userAssociation.association)
   users: UserAssociation[];
 
   @ApiProperty({

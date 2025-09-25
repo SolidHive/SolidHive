@@ -54,10 +54,7 @@ export class Fundraising {
     type: UserAssociation,
     description: 'Utilisateur ayant créé la collecte',
   })
-  @ManyToOne(
-    () => UserAssociation,
-    (userAssociation) => userAssociation.fundraisings,
-  )
+  @ManyToOne(() => UserAssociation, (userAssociation) => userAssociation.fundraisings)
   createdBy: UserAssociation;
 
   @Column(() => Timestamps)

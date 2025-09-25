@@ -38,19 +38,13 @@ export class FundraisingsController {
   @ApiParam({ name: 'associationId', type: 'string' })
   create(
     @Body() createFundraisingDto: CreateFundraisingDto,
-    @UserAssociationDecorator() userAssociation: UserAssociation,
+    @UserAssociationDecorator() userAssociation: UserAssociation
   ) {
-    return this.fundraisingsService.create(
-      createFundraisingDto,
-      userAssociation,
-    );
+    return this.fundraisingsService.create(createFundraisingDto, userAssociation);
   }
 
   @Get('fundraisings')
-  findAll(
-    @Param('associationId') associationId: string,
-    @Query() options?: FindOptionsDto,
-  ) {
+  findAll(@Param('associationId') associationId: string, @Query() options?: FindOptionsDto) {
     return this.fundraisingsService.findAll(associationId, options);
   }
 
@@ -58,7 +52,7 @@ export class FundraisingsController {
   findOne(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
-    @Query() options?: FindOptionsDto,
+    @Query() options?: FindOptionsDto
   ) {
     return this.fundraisingsService.findOne(id, associationId, options);
   }
@@ -72,13 +66,9 @@ export class FundraisingsController {
   update(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
-    @Body() updateFundraisingDto: UpdateFundraisingDto,
+    @Body() updateFundraisingDto: UpdateFundraisingDto
   ) {
-    return this.fundraisingsService.update(
-      id,
-      associationId,
-      updateFundraisingDto,
-    );
+    return this.fundraisingsService.update(id, associationId, updateFundraisingDto);
   }
 
   @Delete('fundraising/:id')
@@ -87,10 +77,7 @@ export class FundraisingsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(
-    @Param('id') id: string,
-    @Param('associationId') associationId: string,
-  ) {
+  remove(@Param('id') id: string, @Param('associationId') associationId: string) {
     return this.fundraisingsService.remove(id, associationId);
   }
 }

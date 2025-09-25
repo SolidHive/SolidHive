@@ -13,12 +13,12 @@ export class AssociationsRolesService {
     @InjectRepository(UserAssociation)
     private readonly userAssociationsRepository: Repository<UserAssociation>,
     @InjectRepository(AssociationRole)
-    private readonly associationsRolesRepository: Repository<AssociationRole>,
+    private readonly associationsRolesRepository: Repository<AssociationRole>
   ) {}
 
   async create(
     createAssociationRoleDto: CreateAssociationRoleDto,
-    userAssociation: UserAssociation,
+    userAssociation: UserAssociation
   ) {
     const associationRole = this.associationsRolesRepository.create({
       ...createAssociationRoleDto,
@@ -48,7 +48,7 @@ export class AssociationsRolesService {
   async update(
     id: string,
     associationId: string,
-    updateAssociationRoleDto: UpdateAssociationRoleDto,
+    updateAssociationRoleDto: UpdateAssociationRoleDto
   ) {
     await this.associationsRolesRepository.update(id, updateAssociationRoleDto);
     return this.findOne(id, associationId);

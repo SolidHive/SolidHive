@@ -1,14 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Association } from '../../../../../modules/associations/entities/association.entity';
 import { Permissions } from '../../../../../common/enums/permissions';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  Unique,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { UserAssociation } from '../../../modules/users/entities/user-association.entity';
 import { Timestamps } from '../../../../../common/embeddeds/timestamps.embedded';
 
@@ -40,11 +33,7 @@ export class AssociationRole {
     type: UserAssociation,
     description: 'Utilisateur ayant créé le rôle',
   })
-  @ManyToOne(
-    () => UserAssociation,
-    (userAssociation) => userAssociation.roles,
-    { nullable: true },
-  )
+  @ManyToOne(() => UserAssociation, (userAssociation) => userAssociation.roles, { nullable: true })
   createdBy: UserAssociation | null;
 
   @ApiProperty({
@@ -55,10 +44,7 @@ export class AssociationRole {
   association: Association;
 
   @ApiProperty({
-    example: [
-      Permissions.ANNOUNCEMENTS_CREATE,
-      Permissions.ANNOUNCEMENTS_DELETE,
-    ],
+    example: [Permissions.ANNOUNCEMENTS_CREATE, Permissions.ANNOUNCEMENTS_DELETE],
     description: 'Permissions associées au rôle',
     isArray: true,
   })

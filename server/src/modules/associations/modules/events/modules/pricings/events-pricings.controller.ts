@@ -34,19 +34,13 @@ export class EventsPricingsController {
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   @ApiParam({ name: 'associationId', type: 'string' })
-  create(
-    @Body() createEventPricingDto: CreateEventPricingDto,
-    @Param('eventId') eventId: string,
-  ) {
+  create(@Body() createEventPricingDto: CreateEventPricingDto, @Param('eventId') eventId: string) {
     return this.eventsPricingsService.create(createEventPricingDto, eventId);
   }
 
   @Get('pricings')
   @ApiParam({ name: 'associationId', type: 'string' })
-  findAll(
-    @Param('eventId') eventId: string,
-    @Query() options?: FindOptionsDto,
-  ) {
+  findAll(@Param('eventId') eventId: string, @Query() options?: FindOptionsDto) {
     return this.eventsPricingsService.findAll(eventId, options);
   }
 
@@ -55,7 +49,7 @@ export class EventsPricingsController {
   findOne(
     @Param('id') id: string,
     @Param('eventId') eventId: string,
-    @Query() options?: FindOptionsDto,
+    @Query() options?: FindOptionsDto
   ) {
     return this.eventsPricingsService.findOne(id, eventId, options);
   }
@@ -70,13 +64,9 @@ export class EventsPricingsController {
   update(
     @Param('id') id: string,
     @Param('eventId') eventId: string,
-    @Body() updateEventPricingDto: UpdateEventPricingDto,
+    @Body() updateEventPricingDto: UpdateEventPricingDto
   ) {
-    return this.eventsPricingsService.update(
-      id,
-      eventId,
-      updateEventPricingDto,
-    );
+    return this.eventsPricingsService.update(id, eventId, updateEventPricingDto);
   }
 
   @Delete('pricing/:id')

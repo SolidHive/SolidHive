@@ -1,9 +1,4 @@
-import {
-  ExecutionContext,
-  Injectable,
-  SetMetadata,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ExecutionContext, Injectable, SetMetadata, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -25,14 +20,11 @@ export class AssociationPermissionsGuard {
   constructor(
     private reflector: Reflector,
     @InjectRepository(UserAssociation)
-    private usersAssociationsRepository: Repository<UserAssociation>,
+    private usersAssociationsRepository: Repository<UserAssociation>
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredPermissions = this.reflector.get<string[]>(
-      PERMISSIONS_KEY,
-      context.getHandler(),
-    );
+    const requiredPermissions = this.reflector.get<string[]>(PERMISSIONS_KEY, context.getHandler());
 
     if (!requiredPermissions || requiredPermissions.length === 0) {
       return true;
@@ -40,13 +32,8 @@ export class AssociationPermissionsGuard {
 
     const request = context.switchToHttp().getRequest<UserRequest>();
 
-    if (
-      typeof request.isAuthenticated === 'function' &&
-      !request.isAuthenticated()
-    ) {
-      throw new UnauthorizedException(
-        'Vous devez être connecté pour accéder à cette ressource',
-      );
+    if (typeof request.isAuthenticated === 'function' && !request.isAuthenticated()) {
+      throw new UnauthorizedException('Vous devez être connecté pour accéder à cette ressource');
     }
 
     const userId = request.user.id;
@@ -63,7 +50,7 @@ export class AssociationPermissionsGuard {
 
     if (!userAssociation) {
       throw new UnauthorizedException(
-        "Vous devez être membre de l'association pour accéder à cette ressource",
+        "Vous devez être membre de l'association pour accéder à cette ressource"
       );
     }
 
@@ -76,14 +63,13 @@ export class AssociationPermissionsGuard {
       : requiredPermissions.some((permission) =>
           userPermissions.some(
             (userPermission) =>
-              userPermission &&
-              userPermission.toUpperCase() === permission.toUpperCase(),
-          ),
+              userPermission && userPermission.toUpperCase() === permission.toUpperCase()
+          )
         );
 
     if (!hasPermissions) {
       throw new UnauthorizedException(
-        "Vous n'avez pas les permissions nécessaires pour accéder à cette ressource",
+        "Vous n'avez pas les permissions nécessaires pour accéder à cette ressource"
       );
     }
 

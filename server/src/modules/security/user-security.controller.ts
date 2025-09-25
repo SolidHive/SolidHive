@@ -26,18 +26,15 @@ export class UserSecurityController {
         },
         token: {
           type: 'string',
-          description:
-            'Token de sécurité (pour vérification ou réinitialisation)',
+          description: 'Token de sécurité (pour vérification ou réinitialisation)',
         },
         email: {
           type: 'string',
-          description:
-            'Email (pour demander une réinitialisation de mot de passe)',
+          description: 'Email (pour demander une réinitialisation de mot de passe)',
         },
         newPassword: {
           type: 'string',
-          description:
-            'Nouveau mot de passe (pour finaliser la réinitialisation)',
+          description: 'Nouveau mot de passe (pour finaliser la réinitialisation)',
         },
       },
       required: ['actionType'],
@@ -53,8 +50,7 @@ export class UserSecurityController {
       },
       requestPasswordReset: {
         summary: 'Demande de réinitialisation de mot de passe',
-        description:
-          'Exemple de requête pour demander un lien de réinitialisation de mot de passe',
+        description: 'Exemple de requête pour demander un lien de réinitialisation de mot de passe',
         value: {
           actionType: 'RESET_PASSWORD',
           email: 'contact@entreprise.com',
@@ -62,8 +58,7 @@ export class UserSecurityController {
       },
       resetPassword: {
         summary: 'Réinitialisation du mot de passe',
-        description:
-          'Exemple de requête pour réinitialiser le mot de passe avec un token valide',
+        description: 'Exemple de requête pour réinitialiser le mot de passe avec un token valide',
         value: {
           actionType: 'RESET_PASSWORD',
           token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
@@ -87,15 +82,13 @@ export class UserSecurityController {
           verifyEmail: {
             summary: "Réponse de vérification d'email",
             value: {
-              message:
-                'Vérification réussie. Vous pouvez maintenant vous connecter.',
+              message: 'Vérification réussie. Vous pouvez maintenant vous connecter.',
             },
           },
           requestReset: {
             summary: 'Réponse de demande de réinitialisation',
             value: {
-              message:
-                'Si votre email est enregistré, vous recevrez un lien de réinitialisation.',
+              message: 'Si votre email est enregistré, vous recevrez un lien de réinitialisation.',
             },
           },
           passwordReset: {
@@ -153,9 +146,7 @@ export class UserSecurityController {
   })
   async processAction(@Body() actionRequest: SecurityActionRequestDto) {
     try {
-      return await this.userSecurityService.processSecurityAction(
-        actionRequest,
-      );
+      return await this.userSecurityService.processSecurityAction(actionRequest);
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;

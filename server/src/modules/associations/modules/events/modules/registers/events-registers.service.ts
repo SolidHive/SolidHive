@@ -15,16 +15,11 @@ export class EventsRegistersService {
     @InjectRepository(EventPricing)
     private readonly eventsPricingRepository: Repository<EventPricing>,
     @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>
   ) {}
 
-  async create(
-    createEventRegisterDto: CreateEventRegisterDto,
-    userId?: string,
-  ) {
-    const user = userId
-      ? await this.usersRepository.findOne({ where: { id: userId } })
-      : null;
+  async create(createEventRegisterDto: CreateEventRegisterDto, userId?: string) {
+    const user = userId ? await this.usersRepository.findOne({ where: { id: userId } }) : null;
 
     const eventPricing = await this.eventsPricingRepository.findOne({
       where: { id: createEventRegisterDto.eventPricingId },

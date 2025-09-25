@@ -1,12 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Address } from '../../../../../common/embeddeds/address.embedded';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { EventPricing } from '../modules/pricings/entities/event-pricing.entity';
 import { Association } from '../../../../../modules/associations/entities/association.entity';
 import { UserAssociation } from '../../../modules/users/entities/user-association.entity';

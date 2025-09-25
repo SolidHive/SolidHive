@@ -17,7 +17,7 @@ interface SerializedUser {
 export class SessionSerializer extends PassportSerializer {
   serializeUser(
     user: UserEntity,
-    done: (err: Error | null, user: SerializedUser | null) => void,
+    done: (err: Error | null, user: SerializedUser | null) => void
   ): void {
     try {
       if (!user || !user.roles || !Array.isArray(user.roles)) {
@@ -25,13 +25,12 @@ export class SessionSerializer extends PassportSerializer {
         return;
       }
 
-      const isVerified =
-        user.isVerified !== undefined ? user.isVerified : user.isVerified;
+      const isVerified = user.isVerified !== undefined ? user.isVerified : user.isVerified;
 
       done(null, {
         id: user.id,
         roles: user.roles.map((role) =>
-          typeof role === 'object' && role !== null ? role.name : String(role),
+          typeof role === 'object' && role !== null ? role.name : String(role)
         ),
         isVerified: isVerified,
       });
@@ -42,7 +41,7 @@ export class SessionSerializer extends PassportSerializer {
 
   deserializeUser(
     payload: SerializedUser,
-    done: (err: Error | null, user: SerializedUser | null) => void,
+    done: (err: Error | null, user: SerializedUser | null) => void
   ): void {
     try {
       done(null, payload);

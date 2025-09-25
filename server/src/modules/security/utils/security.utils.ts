@@ -35,32 +35,25 @@ export class SecurityUtils {
 
     if (errors.length > 0) {
       const constraints = errors[0].constraints;
-      const message = constraints
-        ? Object.values(constraints)[0]
-        : 'Mot de passe invalide';
+      const message = constraints ? Object.values(constraints)[0] : 'Mot de passe invalide';
       throw new BadRequestException(message);
     }
   }
 
   // Gestion des tokens JWT
-  static generateToken(
-    userId: string,
-    actionType: SecurityActionType,
-    jwtSecret: string,
-  ): string {
+  static generateToken(userId: string, actionType: SecurityActionType, jwtSecret: string): string {
     if (!jwtSecret) {
       throw new BadRequestException('Configuration JWT manquante');
     }
 
-    const expiresIn =
-      actionType === SecurityActionType.RESET_PASSWORD ? '1h' : '24h';
+    const expiresIn = actionType === SecurityActionType.RESET_PASSWORD ? '1h' : '24h';
     return jwt.sign({ userId, actionType }, jwtSecret, { expiresIn });
   }
 
   static verifyToken(
     token: string,
     expectedActionType: SecurityActionType,
-    jwtSecret: string,
+    jwtSecret: string
   ): SecurityTokenPayload {
     if (!jwtSecret) {
       throw new BadRequestException('Configuration JWT manquante');

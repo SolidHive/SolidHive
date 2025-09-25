@@ -41,10 +41,7 @@ export class AssociationAnnouncement {
     type: UserAssociation,
     description: "Utilisateur ayant créé l'annonce",
   })
-  @ManyToOne(
-    () => UserAssociation,
-    (userAssociation) => userAssociation.announcements,
-  )
+  @ManyToOne(() => UserAssociation, (userAssociation) => userAssociation.announcements)
   createdBy: UserAssociation;
 
   @ApiProperty({

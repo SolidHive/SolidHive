@@ -35,8 +35,7 @@ export class CreateUserDto {
 
   @ApiProperty({
     example: 'Password123!',
-    description:
-      'Mot de passe (min 10 caractères, 1 minuscule, 1 majuscule, 1 chiffre, 1 symbole)',
+    description: 'Mot de passe (min 10 caractères, 1 minuscule, 1 majuscule, 1 chiffre, 1 symbole)',
   })
   @IsNotEmpty({ message: 'Le mot de passe est requis' })
   @MinLength(10, {
@@ -61,10 +60,7 @@ export class CreateUserDto {
     description: 'Numéro de téléphone (10 chiffres)',
   })
   @IsOptional()
-  @IsNumberString(
-    {},
-    { message: 'Le numéro de téléphone doit contenir uniquement des chiffres' },
-  )
+  @IsNumberString({}, { message: 'Le numéro de téléphone doit contenir uniquement des chiffres' })
   @Length(10, 10, {
     message: 'Le numéro de téléphone doit contenir exactement 10 chiffres',
   })
@@ -78,10 +74,7 @@ export class CreateUserDto {
     description: 'Numéro SIRET (14 chiffres)',
   })
   @IsNotEmpty({ message: 'Le numéro SIRET est requis' })
-  @IsNumberString(
-    {},
-    { message: 'Le SIRET doit contenir uniquement des chiffres' },
-  )
+  @IsNumberString({}, { message: 'Le SIRET doit contenir uniquement des chiffres' })
   @Length(14, 14, { message: 'Le SIRET doit contenir exactement 14 chiffres' })
   siret: string;
 }

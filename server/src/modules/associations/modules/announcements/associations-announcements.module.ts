@@ -6,9 +6,7 @@ import { AssociationAnnouncement } from './entities/association-announcement.ent
 import { UserAssociation } from '../users/entities/user-association.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([AssociationAnnouncement, UserAssociation]),
-  ],
+  imports: [TypeOrmModule.forFeature([AssociationAnnouncement, UserAssociation])],
   controllers: [AssociationsAnnouncementsController],
   providers: [AssociationsAnnouncementsService],
 })
