@@ -11,6 +11,7 @@
     "lint:frontend": "docker compose exec -T frontend npm run lint -- --max-warnings=0 --fix",
     "format:backend": "prettier --write \"server/src/**/*.ts\"",
     "format:frontend": "prettier --write \"client/src/**/*.{ts,vue}\"",
+    "format:check": "prettier --check \"server/src/**/*.ts\" && prettier --check \"client/src/**/*.{ts,vue}\"",
     "lint": "npm run lint:backend && npm run lint:frontend",
     "format": "npm run format:backend && npm run format:frontend"
   },
