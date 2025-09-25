@@ -8,14 +8,7 @@ import { Association } from '../../entities/association.entity';
 import { AssociationRole } from '../roles/entities/association-role.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      UserAssociation,
-      User,
-      Association,
-      AssociationRole,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([UserAssociation, User, Association, AssociationRole])],
   controllers: [UsersAssociationsController],
   providers: [UsersAssociationsService],
 })

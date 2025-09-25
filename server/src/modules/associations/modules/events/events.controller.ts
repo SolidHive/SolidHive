@@ -38,16 +38,13 @@ export class EventsController {
   @ApiParam({ name: 'associationId', type: 'string' })
   create(
     @Body() createEventDto: CreateEventDto,
-    @UserAssociationDecorator() userAssociation: UserAssociation,
+    @UserAssociationDecorator() userAssociation: UserAssociation
   ) {
     return this.eventsService.create(createEventDto, userAssociation);
   }
 
   @Get('events')
-  findAll(
-    @Param('associationId') associationId: string,
-    @Query() options?: FindOptionsDto,
-  ) {
+  findAll(@Param('associationId') associationId: string, @Query() options?: FindOptionsDto) {
     return this.eventsService.findAll(associationId, options);
   }
 
@@ -55,7 +52,7 @@ export class EventsController {
   findOne(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
-    @Query() options?: FindOptionsDto,
+    @Query() options?: FindOptionsDto
   ) {
     return this.eventsService.findOne(id, associationId, options);
   }
@@ -69,7 +66,7 @@ export class EventsController {
   update(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
-    @Body() updateEventDto: UpdateEventDto,
+    @Body() updateEventDto: UpdateEventDto
   ) {
     return this.eventsService.update(id, associationId, updateEventDto);
   }
@@ -80,10 +77,7 @@ export class EventsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(
-    @Param('id') id: string,
-    @Param('associationId') associationId: string,
-  ) {
+  remove(@Param('id') id: string, @Param('associationId') associationId: string) {
     return this.eventsService.remove(id, associationId);
   }
 }

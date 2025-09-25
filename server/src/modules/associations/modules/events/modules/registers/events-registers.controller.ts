@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  UseGuards,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { EventsRegistersService } from './events-registers.service';
 import { CreateEventRegisterDto } from './dto/create-event-register.dto';
 import { Roles, RolesGuard } from '../../../../../auth/guards/roles.guard';
@@ -20,9 +11,7 @@ import { FindOptionsDto } from '../../../../../../common/dto/find-all-query.dto'
 @ApiTags('Association - Event - Registers')
 @Controller('association/:associationId/event/:eventId')
 export class EventsRegistersController {
-  constructor(
-    private readonly eventsRegistersService: EventsRegistersService,
-  ) {}
+  constructor(private readonly eventsRegistersService: EventsRegistersService) {}
 
   @Post('register')
   @UseGuards(RateLimitGuard)
@@ -30,19 +19,13 @@ export class EventsRegistersController {
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   @ApiParam({ name: 'associationId', type: 'string' })
   @ApiParam({ name: 'eventId', type: 'string' })
-  create(
-    @Body() createEventRegisterDto: CreateEventRegisterDto,
-    @User('id') userId?: string,
-  ) {
+  create(@Body() createEventRegisterDto: CreateEventRegisterDto, @User('id') userId?: string) {
     return this.eventsRegistersService.create(createEventRegisterDto, userId);
   }
 
   @Get('registers')
   @ApiParam({ name: 'associationId', type: 'string' })
-  findAll(
-    @Param('eventId') eventId: string,
-    @Query() options?: FindOptionsDto,
-  ) {
+  findAll(@Param('eventId') eventId: string, @Query() options?: FindOptionsDto) {
     return this.eventsRegistersService.findAll(eventId, options);
   }
 
@@ -51,7 +34,7 @@ export class EventsRegistersController {
   findOne(
     @Param('id') id: string,
     @Param('eventId') eventId: string,
-    @Query() options?: FindOptionsDto,
+    @Query() options?: FindOptionsDto
   ) {
     return this.eventsRegistersService.findOne(id, eventId, options);
   }

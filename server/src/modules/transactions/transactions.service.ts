@@ -13,7 +13,7 @@ export class TransactionsService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(Transaction)
-    private transactionsRepository: Repository<Transaction>,
+    private transactionsRepository: Repository<Transaction>
   ) {}
 
   async create(createTransactionDto: CreateTransactionDto, userId?: string) {
@@ -22,19 +22,14 @@ export class TransactionsService {
       : await this.usersRepository.findOne({ where: { id: userId } });
 
     // Vérifie que la cible existe
-    const targetRepo = this.dataSource.getRepository(
-      createTransactionDto.relatedTo,
-    );
+    const targetRepo = this.dataSource.getRepository(createTransactionDto.relatedTo);
 
     const target = await targetRepo.findOne({
       where: { id: createTransactionDto.relatedBy },
     });
 
     if (!target) {
-      throw new HttpException(
-        `${createTransactionDto.relatedTo} not found`,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException(`${createTransactionDto.relatedTo} not found`, HttpStatus.NOT_FOUND);
     }
 
     const transaction = this.transactionsRepository.create({

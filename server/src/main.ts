@@ -22,7 +22,7 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: false,
       },
-    }),
+    })
   );
 
   // 3. Génération sécurisée du nom de cookie
@@ -47,7 +47,7 @@ async function bootstrap() {
         httpOnly: true,
         sameSite: 'lax',
       },
-    }),
+    })
   );
 
   // 5. Configuration de Passport

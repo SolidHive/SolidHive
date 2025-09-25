@@ -27,9 +27,7 @@ import { UserAssociation } from '../users/entities/user-association.entity';
 @ApiTags('Association - Roles')
 @Controller('association/:associationId')
 export class AssociationsRolesController {
-  constructor(
-    private readonly associationsRolesService: AssociationsRolesService,
-  ) {}
+  constructor(private readonly associationsRolesService: AssociationsRolesService) {}
 
   @Post('role')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
@@ -41,12 +39,9 @@ export class AssociationsRolesController {
   create(
     @Body()
     createAssociationRoleDto: CreateAssociationRoleDto,
-    @UserAssociationDecorator() userAssociation: UserAssociation,
+    @UserAssociationDecorator() userAssociation: UserAssociation
   ) {
-    return this.associationsRolesService.create(
-      createAssociationRoleDto,
-      userAssociation,
-    );
+    return this.associationsRolesService.create(createAssociationRoleDto, userAssociation);
   }
 
   @Get('roles')
@@ -55,10 +50,7 @@ export class AssociationsRolesController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  findAll(
-    @Param('associationId') associationId: string,
-    @Query() options?: FindOptionsDto,
-  ) {
+  findAll(@Param('associationId') associationId: string, @Query() options?: FindOptionsDto) {
     return this.associationsRolesService.findAll(associationId, options);
   }
 
@@ -71,7 +63,7 @@ export class AssociationsRolesController {
   findOne(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
-    @Query() options?: FindOptionsDto,
+    @Query() options?: FindOptionsDto
   ) {
     return this.associationsRolesService.findOne(id, associationId, options);
   }
@@ -85,13 +77,9 @@ export class AssociationsRolesController {
   update(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
-    @Body() updateAssociationsRoleDto: UpdateAssociationRoleDto,
+    @Body() updateAssociationsRoleDto: UpdateAssociationRoleDto
   ) {
-    return this.associationsRolesService.update(
-      id,
-      associationId,
-      updateAssociationsRoleDto,
-    );
+    return this.associationsRolesService.update(id, associationId, updateAssociationsRoleDto);
   }
 
   @Delete('role/:id')
@@ -100,10 +88,7 @@ export class AssociationsRolesController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(
-    @Param('id') id: string,
-    @Param('associationId') associationId: string,
-  ) {
+  remove(@Param('id') id: string, @Param('associationId') associationId: string) {
     return this.associationsRolesService.remove(id, associationId);
   }
 }

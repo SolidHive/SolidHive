@@ -1,14 +1,16 @@
 <template>
-    <div class="flex flex-col min-h-screen font-sans text-gray-800 antialiased">
-        <Navbar />
-        <main class="flex-grow">
-            <router-view />
-        </main>
-        <Footer />
+  <div class="flex min-h-screen flex-col">
+    <Navbar />
+    <div class="flex-grow px-4 py-8 sm:px-6 lg:px-8 xl:px-20">
+      <main>
+        <router-view />
+      </main>
     </div>
+    <Footer />
+  </div>
 </template>
 
 <script setup lang="ts">
-import Navbar from './components/Navbar.vue';
-import Footer from './components/Footer.vue';
+  import Navbar from './components/Navbar.vue';
+  import Footer from './components/Footer.vue';
 </script>

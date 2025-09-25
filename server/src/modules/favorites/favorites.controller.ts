@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  UseGuards,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
@@ -25,10 +16,7 @@ export class FavoritesController {
   @UseGuards(RateLimitGuard, AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  create(
-    @Body() createFavoriteDto: CreateFavoriteDto,
-    @User('id') userId: string,
-  ) {
+  create(@Body() createFavoriteDto: CreateFavoriteDto, @User('id') userId: string) {
     return this.favoritesService.create(createFavoriteDto, userId);
   }
 
@@ -47,7 +35,7 @@ export class FavoritesController {
   findOne(
     @Param('relatedTo') relatedTo: Categories,
     @Param('relatedBy') id: string,
-    @User('id') userId: string,
+    @User('id') userId: string
   ) {
     return this.favoritesService.findOne(relatedTo, id, userId);
   }
@@ -59,7 +47,7 @@ export class FavoritesController {
   remove(
     @Param('relatedTo') relatedTo: Categories,
     @Param('relatedBy') relatedBy: string,
-    @User('id') userId: string,
+    @User('id') userId: string
   ) {
     return this.favoritesService.remove(relatedTo, relatedBy, userId);
   }

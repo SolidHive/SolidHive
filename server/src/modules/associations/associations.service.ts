@@ -16,7 +16,7 @@ export class AssociationsService {
     @InjectRepository(Association)
     private readonly associationsRepository: Repository<Association>,
     @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>
   ) {}
 
   async create(createAssociationDto: CreateAssociationDto, userId: string) {
@@ -34,41 +34,26 @@ export class AssociationsService {
           ...createAssociationDto,
           createdBy: user,
         });
-        const savedAssociation = await transactionalEntityManager.save(
-          Association,
-          addAssociation,
-        );
+        const savedAssociation = await transactionalEntityManager.save(Association, addAssociation);
 
-        const addDefaultRole = transactionalEntityManager.create(
-          AssociationRole,
-          {
-            name: 'owner',
-            association: savedAssociation,
-            description: "Rôle propriétaire de l'association",
-            createdBy: null,
-            permissions: [Permissions.ALL],
-          },
-        );
-        const savedRole = await transactionalEntityManager.save(
-          AssociationRole,
-          addDefaultRole,
-        );
+        const addDefaultRole = transactionalEntityManager.create(AssociationRole, {
+          name: 'owner',
+          association: savedAssociation,
+          description: "Rôle propriétaire de l'association",
+          createdBy: null,
+          permissions: [Permissions.ALL],
+        });
+        const savedRole = await transactionalEntityManager.save(AssociationRole, addDefaultRole);
 
-        const addUserAssociation = transactionalEntityManager.create(
-          UserAssociation,
-          {
-            user,
-            association: savedAssociation,
-            role: savedRole,
-          },
-        );
-        await transactionalEntityManager.save(
-          UserAssociation,
-          addUserAssociation,
-        );
+        const addUserAssociation = transactionalEntityManager.create(UserAssociation, {
+          user,
+          association: savedAssociation,
+          role: savedRole,
+        });
+        await transactionalEntityManager.save(UserAssociation, addUserAssociation);
 
         return savedAssociation;
-      },
+      }
     );
   }
 

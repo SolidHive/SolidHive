@@ -30,10 +30,7 @@ export class AnnouncementsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  create(
-    @Body() createAnnouncementDto: CreateAnnouncementDto,
-    @User('id') userId: string,
-  ) {
+  create(@Body() createAnnouncementDto: CreateAnnouncementDto, @User('id') userId: string) {
     return this.announcementsService.create(createAnnouncementDto, userId);
   }
 
@@ -43,10 +40,7 @@ export class AnnouncementsController {
   }
 
   @Get(':id')
-  findOne(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Query() options?: FindOptionsDto,
-  ) {
+  findOne(@Param('id', new ParseUUIDPipe()) id: string, @Query() options?: FindOptionsDto) {
     return this.announcementsService.findOne(id, options);
   }
 
@@ -56,10 +50,7 @@ export class AnnouncementsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  update(
-    @Param('id') id: string,
-    @Body() updateAnnouncementDto: UpdateAnnouncementDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateAnnouncementDto: UpdateAnnouncementDto) {
     return this.announcementsService.update(id, updateAnnouncementDto);
   }
 

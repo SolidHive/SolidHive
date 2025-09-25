@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  UseGuards,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { User } from '../../common/decorators/user.decorator';
@@ -22,10 +13,7 @@ export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post()
-  create(
-    @Body() createTransactionDto: CreateTransactionDto,
-    @User('id') userId?: string,
-  ) {
+  create(@Body() createTransactionDto: CreateTransactionDto, @User('id') userId?: string) {
     return this.transactionsService.create(createTransactionDto, userId);
   }
 
@@ -41,11 +29,7 @@ export class TransactionsController {
   @UseGuards(RateLimitGuard, AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
-  findOne(
-    @Param('id') id: string,
-    @User('id') userId: string,
-    @Query() options?: FindOptionsDto,
-  ) {
+  findOne(@Param('id') id: string, @User('id') userId: string, @Query() options?: FindOptionsDto) {
     return this.transactionsService.findOne(id, userId, options);
   }
 

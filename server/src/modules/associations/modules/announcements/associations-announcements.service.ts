@@ -11,12 +11,12 @@ import { UpdateAssociationAnnouncementDto } from './dto/update-association-annou
 export class AssociationsAnnouncementsService {
   constructor(
     @InjectRepository(AssociationAnnouncement)
-    private readonly associationsAnnouncementsRepository: Repository<AssociationAnnouncement>,
+    private readonly associationsAnnouncementsRepository: Repository<AssociationAnnouncement>
   ) {}
 
   async create(
     createAssociationAnnouncementDto: CreateAssociationAnnouncementDto,
-    userAssociation: UserAssociation,
+    userAssociation: UserAssociation
   ) {
     const announcement = this.associationsAnnouncementsRepository.create({
       ...createAssociationAnnouncementDto,
@@ -44,12 +44,9 @@ export class AssociationsAnnouncementsService {
   async update(
     id: string,
     associationId: string,
-    updateAssociationAnnouncementDto: UpdateAssociationAnnouncementDto,
+    updateAssociationAnnouncementDto: UpdateAssociationAnnouncementDto
   ) {
-    await this.associationsAnnouncementsRepository.update(
-      id,
-      updateAssociationAnnouncementDto,
-    );
+    await this.associationsAnnouncementsRepository.update(id, updateAssociationAnnouncementDto);
     return this.findOne(id, associationId);
   }
 

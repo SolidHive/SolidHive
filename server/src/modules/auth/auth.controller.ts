@@ -1,29 +1,12 @@
-import {
-  Controller,
-  Post,
-  UseGuards,
-  Request,
-  Get,
-  Body,
-  Res,
-} from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Get, Body, Res } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthenticatedGuard } from './guards/authenticated.guard';
 import { AuthService } from './auth.service';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiCookieAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiCookieAuth } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { Request as ExpressRequest, Response } from 'express';
 import { Session, SessionData } from 'express-session';
-import {
-  RateLimitGuard,
-  SetRateLimit,
-} from '../../common/guards/rate-limit.guard';
+import { RateLimitGuard, SetRateLimit } from '../../common/guards/rate-limit.guard';
 
 interface RequestWithUser extends ExpressRequest {
   user: {
@@ -104,10 +87,7 @@ export class AuthController {
       },
     },
   })
-  logout(
-    @Request() req: RequestWithUser,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  logout(@Request() req: RequestWithUser, @Res({ passthrough: true }) res: Response) {
     return this.authService.logout(req.session, res);
   }
 }

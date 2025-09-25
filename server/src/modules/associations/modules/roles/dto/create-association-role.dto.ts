@@ -1,12 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Permissions } from '../../../../../common/enums/permissions';
-import {
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateAssociationRoleDto {
   @ApiProperty({ example: 'Gestionnaire', description: 'Nom du rôle' })
@@ -29,10 +23,7 @@ export class CreateAssociationRoleDto {
   description?: string;
 
   @ApiProperty({
-    example: [
-      Permissions.ANNOUNCEMENTS_CREATE,
-      Permissions.ANNOUNCEMENTS_DELETE,
-    ],
+    example: [Permissions.ANNOUNCEMENTS_CREATE, Permissions.ANNOUNCEMENTS_DELETE],
     description: 'Liste des permissions associées au rôle',
   })
   @IsNotEmpty({ message: 'Les permissions sont requises' })

@@ -13,7 +13,7 @@ export class AnnouncementsService {
     @InjectRepository(Announcement)
     private readonly announcementsRepository: Repository<Announcement>,
     @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>
   ) {}
 
   async create(createAnnouncementDto: CreateAnnouncementDto, userId: string) {

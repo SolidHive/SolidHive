@@ -1,12 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Event } from '../../../entities/event.entity';
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { EventRegister } from '../../registers/entities/event-register.entity';
 
 @Entity()

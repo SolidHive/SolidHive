@@ -7,8 +7,8 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
-    "lint:backend": "docker compose exec -T backend npm run lint -- --max-warnings=0",
-    "lint:frontend": "docker compose exec -T frontend npm run lint -- --max-warnings=0",
+    "lint:backend": "docker compose exec -T backend npm run lint -- --max-warnings=0 --fix",
+    "lint:frontend": "docker compose exec -T frontend npm run lint -- --max-warnings=0 --fix",
     "format:backend": "prettier --write \"server/src/**/*.ts\"",
     "format:frontend": "prettier --write \"client/src/**/*.{ts,vue}\"",
     "lint": "npm run lint:backend && npm run lint:frontend",
@@ -19,6 +19,7 @@
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.2.3",
     "husky": "^9.0.11",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.14"
   }
 }

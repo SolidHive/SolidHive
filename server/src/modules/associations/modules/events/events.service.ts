@@ -11,13 +11,10 @@ import { UpdateEventDto } from './dto/update-event.dto';
 export class EventsService {
   constructor(
     @InjectRepository(Event)
-    private readonly eventsRepository: Repository<Event>,
+    private readonly eventsRepository: Repository<Event>
   ) {}
 
-  async create(
-    createEventDto: CreateEventDto,
-    userAssociation: UserAssociation,
-  ) {
+  async create(createEventDto: CreateEventDto, userAssociation: UserAssociation) {
     const event = this.eventsRepository.create({
       ...createEventDto,
       createdBy: userAssociation,
@@ -41,11 +38,7 @@ export class EventsService {
     });
   }
 
-  async update(
-    id: string,
-    associationId: string,
-    updateEventDto: UpdateEventDto,
-  ) {
+  async update(id: string, associationId: string, updateEventDto: UpdateEventDto) {
     await this.eventsRepository.update(id, updateEventDto);
     return this.findOne(id, associationId);
   }

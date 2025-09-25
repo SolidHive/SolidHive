@@ -11,9 +11,7 @@ describe('EventsRegistersController', () => {
       providers: [EventsRegistersService],
     }).compile();
 
-    controller = module.get<EventsRegistersController>(
-      EventsRegistersController,
-    );
+    controller = module.get<EventsRegistersController>(EventsRegistersController);
   });
 
   it('should be defined', () => {
