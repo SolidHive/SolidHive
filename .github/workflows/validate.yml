@@ -41,6 +41,9 @@ jobs:
       - name: Check formatting
         run: npm run format:check
 
+      - name: Create .env for backend
+        run: cp server/.env.example server/.env
+
       # Vérification du linting
       - name: Run linting
         run: npm run lint
