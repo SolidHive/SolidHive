@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <!-- En-tête du profil -->
       <div class="mb-6 overflow-hidden rounded-lg bg-white shadow">
-        <div class="h-32 bg-gradient-to-r from-green-500 to-emerald-500 md:h-48"></div>
+        <div class="h-32 bg-gradient-to-r from-green-500 to-emerald-500 md:h-48" />
         <div class="relative px-6 pb-6">
           <div class="flex flex-col md:flex-row md:items-end">
             <!-- Avatar -->

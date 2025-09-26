@@ -25,11 +25,11 @@
           class="absolute left-1/2 top-full z-10 mt-1 hidden w-64 -translate-x-1/2 transform rounded-md border border-gray-100 bg-white px-3 py-2 shadow-lg group-hover:block"
         >
           <div class="text-sm text-gray-600">
-            <slot name="hint"></slot>
+            <slot name="hint" />
           </div>
           <div
             class="absolute -top-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 transform border-l border-t border-gray-100 bg-white"
-          ></div>
+          />
         </div>
       </div>
     </div>

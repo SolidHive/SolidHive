@@ -22,9 +22,9 @@
                     x2="65.682%"
                     y2="23.865%"
                   >
-                    <stop stop-color="#22c55e" stop-opacity="0" offset="0%"></stop>
-                    <stop stop-color="#22c55e" stop-opacity=".631" offset="63.146%"></stop>
-                    <stop stop-color="#22c55e" offset="100%"></stop>
+                    <stop stop-color="#22c55e" stop-opacity="0" offset="0%" />
+                    <stop stop-color="#22c55e" stop-opacity=".631" offset="63.146%" />
+                    <stop stop-color="#22c55e" offset="100%" />
                   </linearGradient>
                 </defs>
                 <g fill="none" fill-rule="evenodd">
@@ -41,7 +41,7 @@
                         to="360 18 18"
                         dur="1s"
                         repeatCount="indefinite"
-                      ></animateTransform>
+                      />
                     </path>
                     <circle fill="#fff" cx="36" cy="18" r="1">
                       <animateTransform
@@ -51,7 +51,7 @@
                         to="360 18 18"
                         dur="1s"
                         repeatCount="indefinite"
-                      ></animateTransform>
+                      />
                     </circle>
                   </g>
                 </g>
@@ -79,7 +79,7 @@
                     stroke-linejoin="round"
                     stroke-width="2.5"
                     d="M5 13l4 4L19 7"
-                  ></path>
+                  />
                 </svg>
               </div>
             </div>
@@ -101,7 +101,7 @@
                     stroke-linejoin="round"
                     stroke-width="2"
                     d="M6 18L18 6M6 6l12 12"
-                  ></path>
+                  />
                 </svg>
               </div>
             </div>
