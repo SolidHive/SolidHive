@@ -6,7 +6,6 @@ import * as session from 'express-session';
 import * as passport from 'passport';
 import * as crypto from 'crypto';
 import helmet from 'helmet';
-import { FileCleanupFilter } from './common/filters/file-cleanup.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,7 +24,6 @@ async function bootstrap() {
       },
     })
   );
-  app.useGlobalFilters(new FileCleanupFilter());
 
   // 3. Génération sécurisée du nom de cookie
   const cookieName = `ca_sid_${crypto.createHash('sha256').update('solidhive-salt').digest('hex').substring(0, 8)}`;

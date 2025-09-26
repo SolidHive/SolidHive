@@ -11,6 +11,7 @@ import {
   UseGuards,
   UploadedFile,
   StreamableFile,
+  UseFilters,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { CreateFileDto } from './dto/create-file.dto';
@@ -20,7 +21,7 @@ import { ApiBody, ApiConsumes, ApiCookieAuth } from '@nestjs/swagger';
 import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { User } from '../../common/decorators/user.decorator';
-import * as fs from 'fs';
+import { FileCleanupFilter } from './filters/file-cleanup.filter';
 
 @Controller('files')
 export class FilesController {
@@ -29,31 +30,16 @@ export class FilesController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @UseFilters(FileCleanupFilter)
   @ApiConsumes('multipart/form-data')
   @ApiCookieAuth()
   @ApiBody({ type: CreateFileDto })
   create(
     @Body() createFileDto: CreateFileDto,
     @User('id') userId: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File
   ) {
-    try {
-      return this.filesService.create(createFileDto, file, userId);
-    } catch (error) {
-      if (file) {
-        fs.unlink(file.path, (err) => {
-          if (err) {
-            console.error('Error deleting file after failed upload:', err);
-          }
-        });
-        throw error;
-      }
-    }
-  }
-
-  @Get()
-  findAll() {
-    return this.filesService.findAll();
+    return this.filesService.create(createFileDto, file, userId);
   }
 
   @Get(':relatedTo/:relatedBy/metadata')
@@ -61,8 +47,9 @@ export class FilesController {
     @Param('relatedTo') relatedTo: string,
     @Param('relatedBy') relatedBy: string,
     @Query('index') index: number,
+    @User('id') userId?: string
   ) {
-    return this.filesService.findOne(relatedTo, relatedBy, index);
+    return this.filesService.findOne(relatedTo, relatedBy, index, userId);
   }
 
   @Patch(':relatedTo/:relatedBy')
@@ -70,7 +57,7 @@ export class FilesController {
     @Body() updateFileDto: UpdateFileDto,
     @Param('relatedTo') relatedTo: string,
     @Param('relatedBy') relatedBy: string,
-    @Query('index') index?: number,
+    @Query('index') index?: number
   ) {
     return this.filesService.update(relatedTo, relatedBy, index, updateFileDto);
   }
@@ -79,7 +66,7 @@ export class FilesController {
   remove(
     @Param('relatedTo') relatedTo: string,
     @Param('relatedBy') relatedBy: string,
-    @Query('index') index?: number,
+    @Query('index') index?: number
   ) {
     return this.filesService.remove(relatedTo, relatedBy, index);
   }
@@ -88,7 +75,7 @@ export class FilesController {
   getFileStream(
     @Param('relatedTo') relatedTo: string,
     @Param('relatedBy') relatedBy: string,
-    @Query('index') index: number,
+    @Query('index') index: number
   ): Promise<StreamableFile | null> {
     return this.filesService.getFileStream(relatedTo, relatedBy, index);
   }
