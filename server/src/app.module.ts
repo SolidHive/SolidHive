@@ -10,6 +10,7 @@ import { AssociationsModule } from './modules/associations/associations.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { AnnouncementsModule } from './modules/announcements/announcements.module';
+import { FilesModule } from './modules/files/files.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AnnouncementsModule } from './modules/announcements/announcements.modul
     FavoritesModule,
     TransactionsModule,
     AnnouncementsModule,
+    FilesModule,
   ],
   controllers: [],
   providers: [],
