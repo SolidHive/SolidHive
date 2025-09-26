@@ -1,6 +1,6 @@
 <template>
   <footer class="border-border border-t bg-[#0297AF40] pb-6 pt-8">
-    <div class="container mx-auto px-4">
+    <div class="w-full px-4 xl:px-0">
       <!-- Logo centré -->
       <div class="mb-8 flex justify-center">
         <router-link to="/">
@@ -9,7 +9,7 @@
       </div>
 
       <!-- Liens avec marges latérales -->
-      <div class="mb-8 grid grid-cols-1 gap-8 px-6 md:grid-cols-4 xl:px-16">
+      <div class="mb-8 grid grid-cols-1 gap-8 px-6 md:grid-cols-4 xl:px-20">
         <!-- Plateforme -->
         <div>
           <h3 class="font-title text-secondary mb-4 text-center text-lg md:text-left">
