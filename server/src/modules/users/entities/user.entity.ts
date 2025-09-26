@@ -8,6 +8,7 @@ import { Favorite } from '../../../modules/favorites/entities/favorite.entity';
 import { Timestamps } from '../../../common/embeddeds/timestamps.embedded';
 import { EventRegister } from '../../../modules/associations/modules/events/modules/registers/entities/event-register.entity';
 import { Transaction } from '../../../modules/transactions/entities/transaction.entity';
+import { File } from 'src/modules/files/entities/file.entity';
 
 @Entity()
 export class User {
@@ -101,4 +102,11 @@ export class User {
   })
   @OneToMany(() => Transaction, (transaction) => transaction.user)
   transactions: Transaction[];
+
+  @ApiProperty({
+    type: [File],
+    description: "Fichiers téléchargés par l'utilisateur",
+  })
+  @OneToMany(() => File, (file) => file.user)
+  files: File[];
 }
