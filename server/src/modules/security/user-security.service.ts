@@ -82,8 +82,8 @@ export class UserSecurityService {
   // Charge les templates d'emails
   private loadTemplates(): void {
     const templatePaths = {
-      [SecurityActionType.VERIFY_EMAIL]: 'src/utils/email/templates/verification.html',
-      [SecurityActionType.RESET_PASSWORD]: 'src/utils/email/templates/reset-password.html',
+      [SecurityActionType.VERIFY_EMAIL]: 'src/common/utils/email/templates/verification.html',
+      [SecurityActionType.RESET_PASSWORD]: 'src/common/utils/email/templates/reset-password.html',
     };
 
     Object.entries(templatePaths).forEach(([type, templatePath]) => {

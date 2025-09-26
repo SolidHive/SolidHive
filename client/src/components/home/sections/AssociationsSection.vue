@@ -14,12 +14,12 @@
       <div
         v-for="(association, index) in associations"
         :key="index"
-        class="flex aspect-[4/3] items-center justify-center rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg"
+        class="flex aspect-[4/3] items-center justify-center rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg 2xl:aspect-[4/2]"
       >
         <img
           :src="association.logo"
           :alt="association.name"
-          class="h-16 w-16 object-contain transition-transform duration-200 hover:scale-105 lg:h-24 lg:w-24"
+          class="h-16 w-16 object-contain transition-transform duration-200 hover:scale-105 lg:h-24 lg:w-24 2xl:h-28 2xl:w-28"
         />
       </div>
     </div>

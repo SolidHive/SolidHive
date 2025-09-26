@@ -1,8 +1,6 @@
 <template>
   <header class="sticky top-0 z-30 border-b border-gray-200 bg-white">
-    <nav
-      class="container mx-auto flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8 xl:px-20"
-    >
+    <nav class="flex w-full items-center justify-between px-6 py-3 xl:px-20">
       <!-- Logo -->
       <div class="flex-shrink-0">
         <router-link to="/" class="flex items-center">
@@ -152,15 +150,17 @@
         <div class="flex-1"></div>
         <div>
           <template v-if="authStore.isAuthenticated()">
-            <router-link
-              to="/mon-compte"
-              class="text-secondary font-paragraph mb-2 block py-2 text-base"
-              @click="closeMenu"
-            >
-              Mon compte
-            </router-link>
-            <div class="bg-accent flex h-8 w-8 items-center justify-center rounded-full">
-              <User class="h-4 w-4 text-white" />
+            <div class="flex items-center gap-2">
+              <div class="bg-accent flex h-8 w-8 items-center justify-center rounded-full">
+                <User class="h-4 w-4 text-white" />
+              </div>
+              <router-link
+                to="/mon-compte"
+                class="text-secondary font-paragraph py-2 text-base"
+                @click="closeMenu"
+              >
+                Mon compte
+              </router-link>
             </div>
           </template>
           <template v-else>
@@ -203,14 +203,17 @@
   .fade-leave-active {
     transition: opacity 0.2s;
   }
+
   .fade-enter-from,
   .fade-leave-to {
     opacity: 0;
   }
+
   .slide-enter-active,
   .slide-leave-active {
     transition: transform 0.2s;
   }
+
   .slide-enter-from,
   .slide-leave-to {
     transform: translateX(100%);
