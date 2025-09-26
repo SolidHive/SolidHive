@@ -8,8 +8,8 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
-    "lint:backend": "cd server && npm run lint -- --max-warnings=0",
-    "lint:frontend": "cd client && npm run lint -- --max-warnings=0",
+    "lint:backend": "cd server && npm run lint -- --fix --max-warnings=0",
+    "lint:frontend": "cd client && npm run lint -- --fix --max-warnings=0",
     "format:backend": "prettier --write \"server/src/**/*.ts\"",
     "format:frontend": "prettier --write \"client/src/**/*.{ts,vue}\"",
     "format:check:backend": "prettier --check \"server/src/**/*.ts\"",
@@ -22,6 +22,7 @@
     "@eslint/js": "^9.23.0",
     "eslint": "^9.23.0",
     "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-vue": "^10.0.0",
     "globals": "^16.0.0",
     "husky": "^9.0.11",

@@ -90,11 +90,7 @@
 
     <!-- Mobile Menu Overlay -->
     <transition name="fade">
-      <div
-        v-if="menuOpen"
-        class="fixed inset-0 z-40 bg-black/40 md:hidden"
-        @click="closeMenu"
-      ></div>
+      <div v-if="menuOpen" class="fixed inset-0 z-40 bg-black/40 md:hidden" @click="closeMenu" />
     </transition>
 
     <!-- Mobile Menu Drawer -->
@@ -147,7 +143,7 @@
             Association
           </router-link>
         </nav>
-        <div class="flex-1"></div>
+        <div class="flex-1" />
         <div>
           <template v-if="authStore.isAuthenticated()">
             <div class="flex items-center gap-2">

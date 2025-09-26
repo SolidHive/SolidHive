@@ -84,7 +84,7 @@
 
       <!-- Barre de séparation alignée -->
       <div class="mx-auto px-6 xl:px-16">
-        <div class="border-secondary my-4 border-t-2"></div>
+        <div class="border-secondary my-4 border-t-2" />
       </div>
 
       <!-- Droits réservés -->
