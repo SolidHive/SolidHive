@@ -23,10 +23,10 @@
           Événements
         </router-link>
         <router-link
-          to="/association"
+          to="/associations"
           class="text-secondary font-paragraph text-sm transition-opacity hover:opacity-80"
         >
-          Association
+          Associations
         </router-link>
       </div>
 
@@ -136,11 +136,11 @@
             Événements
           </router-link>
           <router-link
-            to="/association"
+            to="/associations"
             class="text-secondary font-paragraph py-2 text-base"
             @click="closeMenu"
           >
-            Association
+            Associations
           </router-link>
         </nav>
         <div class="flex-1" />

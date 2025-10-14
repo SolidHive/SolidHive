@@ -61,6 +61,22 @@ const routes: RouteRecordRaw[] = [
       requiresAuth: true,
     },
   },
+  {
+    path: '/associations',
+    name: 'Associations',
+    component: () => import('../views/Associations.vue'),
+    meta: {
+      title: 'Associations',
+    },
+  },
+  {
+    path: '/association/:id',
+    name: 'AssociationDetail',
+    component: () => import('../views/AssociationDetail.vue'),
+    meta: {
+      title: "Détails de l'association",
+    },
+  },
 ];
 
 export default routes;
