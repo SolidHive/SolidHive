@@ -2,23 +2,17 @@ import { ExceptionFilter, Catch, ArgumentsHost, BadRequestException } from '@nes
 import { Response, Request } from 'express';
 import * as fs from 'fs';
 
-interface MulterRequest extends Request {
-  file?: {
-    path: string;
-    [key: string]: any;
-  };
-}
-
 @Catch(BadRequestException)
 export class FileCleanupFilter implements ExceptionFilter {
   catch(exception: BadRequestException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const req = ctx.getRequest<MulterRequest>();
+    const req = ctx.getRequest<Request>();
     const res = ctx.getResponse<Response>();
 
     // si multer a stocké un fichier → on le supprime
-    if (req.file && req.file.path) {
-      fs.unlink(req.file.path, (err) => {
+    const file = (req as any).file;
+    if (file && file.path && typeof file.path === 'string') {
+      fs.unlink(file.path as fs.PathLike, (err) => {
         if (err) console.error('Error deleting file:', err);
       });
     }

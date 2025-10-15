@@ -10,8 +10,9 @@ export class FileCleanupFilter implements ExceptionFilter {
     const res = ctx.getResponse<Response>();
 
     // Nettoyage du fichier uploadé en cas d'erreur
-    if (req.file && req.file.path) {
-      fs.unlink(req.file.path, (err) => {
+    const file = (req as any).file;
+    if (file && file.path && typeof file.path === 'string') {
+      fs.unlink(file.path as fs.PathLike, (err) => {
         if (err) console.error('Error deleting file:', err);
       });
     }
