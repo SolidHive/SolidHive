@@ -22,7 +22,8 @@ import {
   AssociationPermissions,
   AssociationPermissionsGuard,
 } from './guards/association-permissions.guard';
-import { Permissions } from 'src/common/enums/permissions';
+import { Permissions } from '../../common/enums/permissions';
+import { StatusAssociationDto } from './dto/status-association.dto';
 
 @Controller()
 export class AssociationsController {
@@ -48,6 +49,22 @@ export class AssociationsController {
     return this.associationsService.findOne(id, options);
   }
 
+  // Get associations by status
+  @Get('associations/status/:status')
+  findAllByStatus(@Param('status') status: string, @Query() options?: FindOptionsDto) {
+    return this.associationsService.findAllByStatus(status, options);
+  }
+
+  // Get association by id and status
+  @Get('association/:associationId/status/:status')
+  findOneByStatus(
+    @Param('associationId') id: string,
+    @Param('status') status: string,
+    @Query() options?: FindOptionsDto
+  ) {
+    return this.associationsService.findOneByStatus(id, status, options);
+  }
+
   @Patch('association/:associationId')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ASSOCIATION_UPDATE)
@@ -56,6 +73,20 @@ export class AssociationsController {
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   update(@Param('associationId') id: string, @Body() updateAssociationDto: UpdateAssociationDto) {
     return this.associationsService.update(id, updateAssociationDto);
+  }
+
+  // Update association status if admin
+  @Patch('association/:associationId/status')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
+  @Roles('admin')
+  @ApiCookieAuth()
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Accès refusé' })
+  updateStatus(
+    @Param('associationId') id: string,
+    @Body() statusAssociationDto: StatusAssociationDto
+  ) {
+    return this.associationsService.updateStatus(id, statusAssociationDto);
   }
 
   @Delete('association/:associationId')

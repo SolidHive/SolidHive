@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Request } from 'express';
 import { Permissions } from '../../../common/enums/permissions';
 import { UserAssociation } from '../modules/users/entities/user-association.entity';
+import { Status } from '../../../common/enums/status';
 
 export const PERMISSIONS_KEY = 'associationPermissions';
 export const AssociationPermissions = (...permissions: Permissions[]) =>
@@ -44,7 +45,7 @@ export class AssociationPermissionsGuard {
     }
 
     const userAssociation = await this.usersAssociationsRepository.findOne({
-      where: { userId: userId, associationId },
+      where: { userId: userId, associationId, status: Status.ACCEPTED },
       relations: ['role'],
     });
 

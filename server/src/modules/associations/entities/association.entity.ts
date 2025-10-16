@@ -8,6 +8,7 @@ import { Fundraising } from '../modules/fundraisings/entities/fundraising.entity
 import { Timestamps } from '../../../common/embeddeds/timestamps.embedded';
 import { User } from '../../../modules/users/entities/user.entity';
 import { Event } from '../modules/events/entities/event.entity';
+import { Status } from '../../../common/enums/status';
 
 @Entity()
 export class Association {
@@ -97,4 +98,20 @@ export class Association {
   })
   @OneToMany(() => Event, (event) => event.association)
   events: Event[];
+
+  @ApiProperty({
+    enum: Status,
+    example: 'accepted',
+    description: "Statut de l'association, géré par un administrateur ou un gestionnaire.",
+  })
+  @Column({ type: 'enum', enum: Status, default: Status.PENDING })
+  status: Status;
+
+  @ApiProperty({
+    example:
+      "Besoin de plus d'informations sur les activités de l'association, venant de l'administrateur ou d'un gestionnaire.",
+    description: "Demande d'informations supplémentaires si le statut est en 'additional_request'",
+  })
+  @Column({ type: 'text', nullable: true })
+  additionalRequest?: string;
 }

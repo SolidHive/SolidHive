@@ -6,6 +6,7 @@ import { Association } from 'src/modules/associations/entities/association.entit
 import { AssociationRole } from '../../roles/entities/association-role.entity';
 import { Fundraising } from '../../fundraisings/entities/fundraising.entity';
 import { AssociationAnnouncement } from '../../announcements/entities/association-announcement.entity';
+import { Status } from '../../../../../common/enums/status';
 
 @Entity()
 @Unique(['userId', 'associationId'])
@@ -80,4 +81,13 @@ export class UserAssociation {
   })
   @OneToMany(() => AssociationRole, (role) => role.createdBy)
   roles: AssociationRole[];
+
+  @ApiProperty({
+    enum: Status,
+    example: 'accepted',
+    description:
+      "Statut de l'utilisateur dans cette association, qu'il pourra accepter ou refuser.",
+  })
+  @Column({ type: 'enum', enum: Status, default: Status.PENDING })
+  status: Status;
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Association } from './entities/association.entity';
 import { Repository } from 'typeorm';
@@ -9,6 +9,8 @@ import { UpdateAssociationDto } from './dto/update-association.dto';
 import { Permissions } from '../../common/enums/permissions';
 import { AssociationRole } from './modules/roles/entities/association-role.entity';
 import { UserAssociation } from './modules/users/entities/user-association.entity';
+import { Status } from '../../common/enums/status';
+import { StatusAssociationDto } from './dto/status-association.dto';
 
 @Injectable()
 export class AssociationsService {
@@ -58,18 +60,45 @@ export class AssociationsService {
   }
 
   findAll(options?: FindOptionsDto) {
-    return this.associationsRepository.find(options);
+    return this.associationsRepository.find({ ...options, where: { status: Status.ACCEPTED } });
   }
 
   findOne(id: string, options?: FindOptionsDto) {
     return this.associationsRepository.findOne({
       ...options,
-      where: { id },
+      where: { id, status: Status.ACCEPTED },
+    });
+  }
+
+  findAllByStatus(status: string, options?: FindOptionsDto) {
+    if (!Object.values(Status).includes(status as Status)) {
+      throw new HttpException('Invalid status', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.associationsRepository.find({
+      ...options,
+      where: { status: status as Status },
+    });
+  }
+
+  findOneByStatus(id: string, status: string, options?: FindOptionsDto) {
+    if (!Object.values(Status).includes(status as Status)) {
+      throw new HttpException('Invalid status', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.associationsRepository.findOne({
+      ...options,
+      where: { id, status: status as Status },
     });
   }
 
   async update(id: string, updateAssociationDto: UpdateAssociationDto) {
     await this.associationsRepository.update(id, updateAssociationDto);
+    return this.findOne(id);
+  }
+
+  async updateStatus(id: string, statusAssociationDto: StatusAssociationDto) {
+    await this.associationsRepository.update(id, statusAssociationDto);
     return this.findOne(id);
   }
 
