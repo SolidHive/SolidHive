@@ -6,10 +6,11 @@ import { Event } from './entities/event.entity';
 import { UserAssociation } from '../users/entities/user-association.entity';
 import { EventsPricingsModule } from './modules/pricings/events-pricings.module';
 import { EventsRegistersModule } from './modules/registers/events-registers.module';
+import { File } from '../../../files/entities/file.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Event, UserAssociation]),
+    TypeOrmModule.forFeature([Event, UserAssociation, File]),
     EventsPricingsModule,
     EventsRegistersModule,
   ],

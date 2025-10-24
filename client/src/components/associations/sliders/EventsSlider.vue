@@ -2,7 +2,7 @@
   <Carousel
     :items="items"
     title="Nos événements"
-    itemClass="relative snap-start flex-shrink-0 w-[90%] sm:w-[60%] md:w-[45%] lg:w-[38%] xl:w-[32%] 2xl:w-[28%] rounded-xl overflow-hidden shadow-md"
+    item-class="relative snap-start flex-shrink-0 w-[90%] sm:w-[60%] md:w-[45%] lg:w-[38%] xl:w-[32%] 2xl:w-[28%] rounded-xl overflow-hidden shadow-md"
   >
     <template #item="{ item }">
       <div
@@ -35,7 +35,7 @@
   import Carousel from '@/components/ui/Carousel.vue';
 
   const props = defineProps<{
-    items?: Array<{ title: string; description: string; image: string }>;
+    items?: Array<{ title: string; description: string; image: string | null }>;
     color?: string;
   }>();
   const items = toRef(props, 'items') || [];
