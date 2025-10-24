@@ -1,10 +1,10 @@
 // ESLint config for NestJS backend
-import eslint from '@eslint/js';
-import eslintConfigPrettier from 'eslint-config-prettier';
-import globals from 'globals';
-import typescriptEslint from 'typescript-eslint';
+const eslint = require('@eslint/js');
+const eslintConfigPrettier = require('eslint-config-prettier');
+const globals = require('globals');
+const typescriptEslint = require('typescript-eslint');
 
-export default typescriptEslint.config(
+module.exports = typescriptEslint.config(
   {
     ignores: [
       '*.d.ts',
@@ -28,7 +28,7 @@ export default typescriptEslint.config(
       globals: globals.node,
       parserOptions: {
         project: './tsconfig.json',
-        tsconfigRootDir: import.meta.dirname,
+        tsconfigRootDir: __dirname,
       },
     },
     rules: {
