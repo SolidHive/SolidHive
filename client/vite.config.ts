@@ -11,4 +11,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/files': {
+        target: 'http://backend:3000',
+        changeOrigin: true,
+      },
+    },
+  },
 });

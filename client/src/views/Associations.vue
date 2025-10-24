@@ -34,17 +34,18 @@
               </div>
               <div>
                 <h3 class="text-xl font-semibold text-gray-900">{{ association.name }}</h3>
-                <p class="text-sm text-gray-500">{{ association.category }}</p>
+                <p v-if="association.contact" class="text-sm text-gray-500">
+                  {{ association.contact }}
+                </p>
               </div>
             </div>
 
-            <p class="mb-4 line-clamp-3 text-gray-600">{{ association.description }}</p>
+            <p class="mb-4 line-clamp-3 text-gray-600">
+              {{ association.description || 'Aucune description disponible.' }}
+            </p>
 
             <div class="flex items-center justify-between">
-              <div class="text-sm text-gray-500">
-                <MapPin class="mr-1 inline h-4 w-4" />
-                {{ association.location }}
-              </div>
+              <div class="text-sm text-gray-500">Statut: {{ association.status }}</div>
               <Button size="sm" @click="viewAssociation(association.id)">Voir plus</Button>
             </div>
           </div>
@@ -66,14 +67,17 @@
   import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   import { Button } from '@/components/ui/button';
-  import { Building, MapPin } from 'lucide-vue-next';
+  import { Building } from 'lucide-vue-next';
+  import Database from '@/utils/database.utils';
 
   interface Association {
     id: string;
     name: string;
-    description: string;
-    category: string;
-    location: string;
+    description?: string;
+    contact?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+    status: string;
   }
 
   const router = useRouter();
@@ -86,35 +90,8 @@
       loading.value = true;
       error.value = null;
 
-      // TODO: Replace with actual API call
-      // const response = await api.get('/associations');
-      // associations.value = response.data;
-
-      // Mock data for now
-      associations.value = [
-        {
-          id: '1',
-          name: 'Association des Étudiants',
-          description:
-            "Association dédiée aux étudiants pour promouvoir l'entraide et les activités culturelles.",
-          category: 'Éducation',
-          location: 'Paris',
-        },
-        {
-          id: '2',
-          name: 'Solidarité Locale',
-          description: 'Aide aux personnes en difficulté dans la communauté locale.',
-          category: 'Social',
-          location: 'Lyon',
-        },
-        {
-          id: '3',
-          name: 'Environnement & Nature',
-          description: "Protection de l'environnement et sensibilisation aux enjeux écologiques.",
-          category: 'Environnement',
-          location: 'Marseille',
-        },
-      ];
+      const response = await Database.getAll('associations');
+      associations.value = response;
     } catch (err) {
       error.value = 'Impossible de charger les associations. Veuillez réessayer.';
       console.error('Error loading associations:', err);

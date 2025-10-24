@@ -163,11 +163,13 @@ export class FilesService {
       return null;
     }
 
-    const fileStream = createReadStream(join(process.cwd(), 'uploads', file.userId, file.filename));
+    const fileStream = createReadStream(
+      join(process.cwd(), 'uploads', file.userId, file.fullFilename())
+    );
 
     return new StreamableFile(fileStream, {
       type: file.mimetype,
-      disposition: `attachment; filename="${file.oldFilename}"`,
+      disposition: `inline; filename="${file.oldFilename}"`,
     });
   }
 

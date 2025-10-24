@@ -6,12 +6,15 @@ import { CreateAssociationAnnouncementDto } from './dto/create-association-annou
 import { UserAssociation } from '../users/entities/user-association.entity';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
 import { UpdateAssociationAnnouncementDto } from './dto/update-association-announcement.dto';
+import { File } from '../../../files/entities/file.entity';
 
 @Injectable()
 export class AssociationsAnnouncementsService {
   constructor(
     @InjectRepository(AssociationAnnouncement)
-    private readonly associationsAnnouncementsRepository: Repository<AssociationAnnouncement>
+    private readonly associationsAnnouncementsRepository: Repository<AssociationAnnouncement>,
+    @InjectRepository(File)
+    private readonly fileRepository: Repository<File>
   ) {}
 
   async create(
@@ -27,11 +30,38 @@ export class AssociationsAnnouncementsService {
     return this.associationsAnnouncementsRepository.save(announcement);
   }
 
-  findAll(associationId: string, options?: FindOptionsDto) {
-    return this.associationsAnnouncementsRepository.find({
+  async findAll(associationId: string, options?: FindOptionsDto) {
+    const announcements = await this.associationsAnnouncementsRepository.find({
       ...options,
       where: { association: { id: associationId } },
+      relations: ['createdBy', 'association'],
     });
+
+    // Enrichir avec les images
+    const enrichedAnnouncements = await Promise.all(
+      announcements.map(async (announcement) => {
+        const imageFile = await this.fileRepository.findOne({
+          where: {
+            relatedTo: 'Announcement',
+            relatedBy: announcement.id,
+            purpose: 'image',
+            index: 0,
+          },
+        });
+
+        const imageUrl = imageFile
+          ? `/files/Announcement/${announcement.id}?index=${imageFile.index}`
+          : null; // Pas d'image par défaut, sera géré côté frontend
+
+        return {
+          ...announcement,
+          image: imageUrl,
+          description: announcement.content, // Pour la compatibilité avec le frontend
+        };
+      })
+    );
+
+    return enrichedAnnouncements;
   }
 
   findOne(id: string, associationId: string, options?: FindOptionsDto) {

@@ -34,6 +34,13 @@ export class Association {
   description?: string;
 
   @ApiProperty({
+    example: 'Texte détaillé sur l\'association pour la page "À propos".',
+    description: "Texte détaillé sur l'association",
+  })
+  @Column({ type: 'text', nullable: true })
+  aboutText?: string;
+
+  @ApiProperty({
     example: '#000000',
     description: "Couleur primaire de l'association",
   })

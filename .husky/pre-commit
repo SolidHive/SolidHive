@@ -1,36 +1,10 @@
-#!/bin/sh
+# Lint et format uniquement les fichiers stagés
+echo "🔧 Vérification et formatage des fichiers modifiés..."
+npx lint-staged
 
-# Assurez-vous que les conteneurs Docker sont en cours d'exécution
-if ! docker compose ps --services --status running | grep -q "frontend\|backend"; then
-  echo "⚠️ Les conteneurs Docker ne sont pas en cours d'exécution. Démarrez-les avec 'docker compose up -d'."
-  exit 1
-fi
-
-# Lint backend
-echo "🔧 Vérification du backend..."
-npm run lint:backend
 if [ $? -ne 0 ]; then
-  echo "❌ Le linting du backend a échoué. Corrigez les erreurs avant de commiter."
+  echo "❌ Le linting ou le formatage a échoué. Corrigez les erreurs avant de commiter."
   exit 1
 fi
-
-# Lint frontend
-echo "🔧 Vérification du frontend..."
-npm run lint:frontend
-if [ $? -ne 0 ]; then
-  echo "❌ Le linting du frontend a échoué. Corrigez les erreurs avant de commiter."
-  exit 1
-fi
-
-# Format (localement)
-echo "💅 Formatage du code..."
-npm run format
-if [ $? -ne 0 ]; then
-  echo "❌ Le formatage a échoué."
-  exit 1
-fi
-
-# Ajouter les fichiers formatés au commit
-git add .
 
 echo "✅ Les vérifications de code sont passées !"
