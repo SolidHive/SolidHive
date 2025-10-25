@@ -1,8 +1,8 @@
 import { DataSource } from 'typeorm';
 import { faker } from '@faker-js/faker';
-import * as bcrypt from 'bcrypt';
 import { User } from '../modules/users/entities/user.entity';
 import { Role } from '../modules/users/entities/role.entity';
+import { PasswordUtils } from '../common/utils/password.utils';
 
 /**
  * Seed users with fake data
@@ -26,8 +26,8 @@ export async function seedUsers(dataSource: DataSource): Promise<User[]> {
   const users: User[] = [];
 
   for (let i = 0; i < 5; i++) {
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash('password123', salt);
+    const salt = PasswordUtils.generateSalt();
+    const hashedPassword = PasswordUtils.hashPassword('password123', salt);
 
     const user = userRepository.create({
       name: faker.person.lastName(),

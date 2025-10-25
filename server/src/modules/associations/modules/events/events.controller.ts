@@ -16,6 +16,7 @@ import { RateLimitGuard } from '../../../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../../../auth/guards/authenticated.guard';
 import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
+import { FilterEventsDto } from './dto/filter-events.dto';
 import {
   AssociationPermissions,
   AssociationPermissionsGuard,
@@ -25,11 +26,16 @@ import { UserAssociation } from '../users/entities/user-association.entity';
 import { UserAssociationDecorator } from '../../../../common/decorators/user-association.decorator';
 
 @ApiTags('Association - Events')
-@Controller('association/:associationId')
+@Controller()
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
-  @Post('event')
+  @Get('events')
+  findAllGlobal(@Query() filters: FilterEventsDto) {
+    return this.eventsService.findAll(undefined, filters, filters);
+  }
+
+  @Post('association/:associationId/event')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.EVENTS_CREATE)
   @ApiCookieAuth()
@@ -43,12 +49,12 @@ export class EventsController {
     return this.eventsService.create(createEventDto, userAssociation);
   }
 
-  @Get('events')
-  findAll(@Param('associationId') associationId: string, @Query() options?: FindOptionsDto) {
-    return this.eventsService.findAll(associationId, options);
+  @Get('association/:associationId/events')
+  findAll(@Param('associationId') associationId: string, @Query() filters: FilterEventsDto) {
+    return this.eventsService.findAll(associationId, filters, filters);
   }
 
-  @Get('event/:id')
+  @Get('association/:associationId/event/:id')
   findOne(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
@@ -57,7 +63,7 @@ export class EventsController {
     return this.eventsService.findOne(id, associationId, options);
   }
 
-  @Patch('event/:id')
+  @Patch('association/:associationId/event/:id')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.EVENTS_UPDATE)
   @ApiCookieAuth()
@@ -71,7 +77,7 @@ export class EventsController {
     return this.eventsService.update(id, associationId, updateEventDto);
   }
 
-  @Delete('event/:id')
+  @Delete('association/:associationId/event/:id')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.EVENTS_DELETE)
   @ApiCookieAuth()
