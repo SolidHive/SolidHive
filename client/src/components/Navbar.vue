@@ -17,7 +17,7 @@
           Cagnottes
         </router-link>
         <router-link
-          to="/evenements"
+          to="/events"
           class="text-secondary font-paragraph text-sm transition-opacity hover:opacity-80"
         >
           Événements

@@ -77,6 +77,14 @@ const routes: RouteRecordRaw[] = [
       title: "Détails de l'association",
     },
   },
+  {
+    path: '/events',
+    name: 'Events',
+    component: () => import('../views/Events.vue'),
+    meta: {
+      title: 'Événements',
+    },
+  },
 ];
 
 export default routes;
