@@ -1,37 +1,50 @@
 <template>
   <section>
     <h2 class="font-title text-secondary mb-8 text-center text-2xl">Galerie</h2>
-    <Carousel
-      class="mx-auto w-full bg-transparent"
-      :opts="{ slidesToScroll: 1, align: 'start' }"
-      @init-api="onInit"
+
+    <!-- Message si pas d'images -->
+    <div
+      v-if="!images || images.length === 0"
+      class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
     >
-      <CarouselContent>
-        <CarouselItem
-          v-for="(image, i) in images"
-          :key="i"
-          class="sm:basis-1/2 lg:basis-1/4 2xl:basis-1/5"
-        >
-          <div
-            class="flex h-48 items-center justify-center overflow-hidden rounded-2xl bg-gray-200 2xl:h-64"
+      <p class="font-paragraph text-muted-foreground text-lg">
+        Aucune image n'a été ajoutée à la galerie pour le moment.
+      </p>
+    </div>
+
+    <div v-else>
+      <Carousel
+        class="mx-auto w-full bg-transparent"
+        :opts="{ slidesToScroll: 1, align: 'start' }"
+        @init-api="onInit"
+      >
+        <CarouselContent>
+          <CarouselItem
+            v-for="(image, i) in images"
+            :key="i"
+            class="sm:basis-1/2 lg:basis-1/4 2xl:basis-1/5"
           >
-            <img :src="image" :alt="`Image ${i + 1}`" class="h-full w-full object-cover" />
-          </div>
-        </CarouselItem>
-      </CarouselContent>
-    </Carousel>
-    <!-- Pagination dots -->
-    <div v-if="totalSlides > 1" class="mt-6 flex justify-center gap-2">
-      <button
-        v-for="n in totalSlides"
-        :key="n"
-        :class="[
-          'h-3 w-3 rounded-full transition-colors',
-          currentSlide === n - 1 ? 'bg-secondary' : 'hover:bg-secondary/60 bg-gray-300',
-        ]"
-        aria-label="Aller à la page {{ n }}"
-        @click="goToSlide(n - 1)"
-      />
+            <div
+              class="flex h-48 items-center justify-center overflow-hidden rounded-2xl bg-gray-200 2xl:h-64"
+            >
+              <img :src="image" :alt="`Image ${i + 1}`" class="h-full w-full object-cover" />
+            </div>
+          </CarouselItem>
+        </CarouselContent>
+      </Carousel>
+      <!-- Pagination dots -->
+      <div v-if="totalSlides > 1" class="mt-6 flex justify-center gap-2">
+        <button
+          v-for="n in totalSlides"
+          :key="n"
+          :class="[
+            'h-3 w-3 rounded-full transition-colors',
+            currentSlide === n - 1 ? 'bg-secondary' : 'hover:bg-secondary/60 bg-gray-300',
+          ]"
+          aria-label="Aller à la page {{ n }}"
+          @click="goToSlide(n - 1)"
+        />
+      </div>
     </div>
   </section>
 </template>

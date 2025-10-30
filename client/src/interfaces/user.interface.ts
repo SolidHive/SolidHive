@@ -3,7 +3,24 @@ export interface User {
   firstname: string;
   email: string;
   phone?: string;
-  siret: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface UserAssociation {
+  id: string;
+  association: {
+    id: string;
+    name: string;
+    description?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+    status: string;
+  };
+  role: {
+    id: string;
+    name: string;
+    description?: string;
+  } | null;
+  status: string;
 }

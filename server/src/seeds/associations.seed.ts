@@ -26,6 +26,9 @@ export async function seedAssociations(
   for (let i = 0; i < 10; i++) {
     const randomUser = faker.helpers.arrayElement(users);
 
+    // Generate a valid 14-digit SIRET number
+    const siret = faker.string.numeric(14);
+
     const association = associationRepository.create({
       name: faker.company.name(),
       description: faker.lorem.paragraph(),
@@ -33,6 +36,7 @@ export async function seedAssociations(
       primaryColor: faker.helpers.arrayElement(Object.values(Colors)),
       secondaryColor: faker.helpers.arrayElement(Object.values(Colors)),
       contact: faker.internet.email(),
+      siret: siret,
       status: Status.ACCEPTED,
       createdBy: randomUser,
     });

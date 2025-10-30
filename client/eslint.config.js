@@ -18,7 +18,6 @@ export default typescriptEslint.config(
       '**/*.js.map',
       '**/*.ts.map',
       '**/*.snap',
-      'src/components/ui/**', // Ignore shadcn components
     ],
   },
   {

@@ -41,10 +41,6 @@ export class User {
   @Column()
   salt: string;
 
-  @ApiProperty({ example: '12345678901234', description: 'Numéro SIRET' })
-  @Column({ length: 14 })
-  siret: string;
-
   @ApiProperty({
     example: false,
     description: 'Statut de vérification du compte',

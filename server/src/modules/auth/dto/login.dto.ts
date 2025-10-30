@@ -4,7 +4,7 @@ import { IsEmail, IsNotEmpty, Matches, MinLength } from 'class-validator';
 export class LoginDto {
   @ApiProperty({
     example: 'contact@entreprise.com',
-    description: "Adresse email professionnelle de l'utilisateur",
+    description: "Adresse email de l'utilisateur",
   })
   @IsEmail({}, { message: 'Veuillez fournir une adresse email valide' })
   @IsNotEmpty({ message: "L'email est requis" })

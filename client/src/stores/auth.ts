@@ -60,6 +60,37 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function createAssociation(associationData: {
+    name: string;
+    description: string;
+    contact: string;
+    siret?: string;
+  }) {
+    try {
+      const result = await Database.create('association', associationData);
+      return result.data;
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message: string }>;
+      error.value =
+        axiosError.response?.data?.message || "Erreur lors de la création de l'association";
+      throw err;
+    }
+  }
+
+  async function uploadAssociationFile(
+    associationId: string,
+    file: File,
+    type: 'logo' | 'background'
+  ) {
+    try {
+      await Database.uploadFile(`/association/${associationId}/files`, file, { type });
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message: string }>;
+      error.value = axiosError.response?.data?.message || "Erreur lors de l'upload du fichier";
+      throw err;
+    }
+  }
+
   return {
     user,
     error,
@@ -68,5 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     loadUser,
     isAuthenticated,
+    createAssociation,
+    uploadAssociationFile,
   };
 });

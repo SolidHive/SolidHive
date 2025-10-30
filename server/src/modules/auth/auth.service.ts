@@ -50,7 +50,6 @@ export class AuthService {
       firstname: user.firstname,
       email: user.email,
       phone: user.phone,
-      siret: user.siret,
       createdAt: user.timestamps.createdAt,
       updatedAt: user.timestamps.updatedAt,
     };

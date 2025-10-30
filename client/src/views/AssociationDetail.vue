@@ -33,6 +33,14 @@
         <div v-if="loadingAnnonces">
           <LoadingOverlay message="Chargement des annonces..." />
         </div>
+        <div
+          v-else-if="annonces.length === 0"
+          class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
+        >
+          <p class="font-paragraph text-muted-foreground text-lg">
+            Aucune annonce n'a été publiée pour le moment.
+          </p>
+        </div>
         <div v-else>
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <AnnouncementCard
@@ -54,6 +62,14 @@
         <div v-if="loadingCampaigns">
           <LoadingOverlay message="Chargement des campagnes..." />
         </div>
+        <div
+          v-else-if="campaigns.length === 0"
+          class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
+        >
+          <p class="font-paragraph text-muted-foreground text-lg">
+            Aucune campagne de financement n'est active pour le moment.
+          </p>
+        </div>
         <div v-else>
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <CampaignCard
@@ -74,6 +90,14 @@
       <div v-if="currentTab === 'evenements'" class="mt-8">
         <div v-if="loadingEvents">
           <LoadingOverlay message="Chargement des événements..." />
+        </div>
+        <div
+          v-else-if="eventsList.length === 0"
+          class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
+        >
+          <p class="font-paragraph text-muted-foreground text-lg">
+            Aucun événement n'est prévu pour le moment.
+          </p>
         </div>
         <div v-else>
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -260,7 +284,7 @@
     try {
       loadingEvents.value = true;
       const response = await api.get(`/association/${associationId}/events`);
-      eventsList.value = response.data || [];
+      eventsList.value = response.data?.data || [];
     } catch (err) {
       console.error('Error loading events:', err);
       eventsList.value = [];

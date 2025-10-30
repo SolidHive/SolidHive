@@ -27,6 +27,7 @@
         </div>
       </div>
     </template>
+    <template #empty-message>Aucun événement n'est prévu pour le moment.</template>
   </Carousel>
 </template>
 

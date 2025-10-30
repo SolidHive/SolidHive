@@ -62,6 +62,14 @@ export class Association {
   contact: string;
 
   @ApiProperty({
+    example: '12345678901234',
+    description: "Numéro SIRET de l'association (14 chiffres)",
+    required: true,
+  })
+  @Column({ length: 14, unique: true })
+  siret: string;
+
+  @ApiProperty({
     type: [AssociationAnnouncement],
     description: "Annonces de l'association",
   })

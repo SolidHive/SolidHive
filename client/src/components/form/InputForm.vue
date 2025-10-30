@@ -1,14 +1,14 @@
 <template>
   <div class="mb-4">
     <div class="mb-1 flex items-center">
-      <label :for="inputName" class="block text-gray-700">
-        {{ labelValue }}
+      <label :for="inputName" class="font-paragraph text-foreground block">
+        <slot name="label">{{ labelValue }}</slot>
       </label>
       <div v-if="$slots.hint" class="group relative ml-1.5">
         <div class="cursor-help">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 text-gray-400 hover:text-gray-600"
+            class="text-muted-foreground hover:text-foreground h-4 w-4"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -22,13 +22,13 @@
           </svg>
         </div>
         <div
-          class="absolute left-1/2 top-full z-10 mt-1 hidden w-64 -translate-x-1/2 transform rounded-md border border-gray-100 bg-white px-3 py-2 shadow-lg group-hover:block"
+          class="bg-popover text-popover-foreground border-border absolute left-1/2 top-full z-10 mt-1 hidden w-64 -translate-x-1/2 transform rounded-md border px-3 py-2 shadow-lg group-hover:block"
         >
-          <div class="text-sm text-gray-600">
+          <div class="font-paragraph text-sm">
             <slot name="hint" />
           </div>
           <div
-            class="absolute -top-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 transform border-l border-t border-gray-100 bg-white"
+            class="bg-popover border-border absolute -top-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 transform border-l border-t"
           />
         </div>
       </div>
@@ -38,12 +38,12 @@
       :type="type"
       :placeholder="placeholder"
       :value="modelValue"
-      class="w-full rounded-lg border px-4 py-2"
-      :class="errorState ? 'border-red-500' : 'border-gray-300'"
+      class="font-paragraph w-full rounded-lg border px-4 py-2"
+      :class="errorState ? 'border-destructive' : 'border-border'"
       @input="handleInput"
       @blur="$emit('blur')"
     />
-    <p v-if="errorState" class="mt-1 text-sm text-red-600">
+    <p v-if="errorState" class="text-destructive mt-1 text-sm">
       {{ errorMessage }}
     </p>
   </div>
@@ -53,7 +53,8 @@
   defineProps({
     labelValue: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
     },
     inputName: {
       type: String,

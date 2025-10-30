@@ -27,6 +27,7 @@
         </div>
       </div>
     </template>
+    <template #empty-message>Aucune annonce n'a été publiée pour le moment.</template>
   </Carousel>
 </template>
 

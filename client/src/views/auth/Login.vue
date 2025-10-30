@@ -1,66 +1,77 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-6">
-    <div class="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
-      <h1
-        class="mb-2 inline-block w-full bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-center text-3xl font-bold text-transparent"
-      >
-        Connexion
-      </h1>
-      <p class="mb-6 text-center text-gray-600">Accédez à votre espace personnel</p>
-
-      <form class="space-y-5" @submit.prevent="handleLogin">
-        <InputForm
-          v-model="form.email.$value"
-          label-value="Email"
-          input-name="email"
-          type="email"
-          placeholder="votre@email.com"
-          :error-message="showError('email') ? form.email.$error?.message : ''"
-          :error-state="showError('email')"
-          @blur="touchedFields.email = true"
-        />
-
-        <InputForm
-          v-model="form.password.$value"
-          label-value="Mot de passe"
-          input-name="password"
-          type="password"
-          placeholder="Votre mot de passe"
-          :error-message="showError('password') ? form.password.$error?.message : ''"
-          :error-state="showError('password')"
-          @blur="touchedFields.password = true"
-        >
-          <template #hint>
-            <div>
-              Le mot de passe doit contenir au moins 10 caractères, une majuscule, une minuscule, un
-              chiffre et un symbole.
-            </div>
-          </template>
-        </InputForm>
-
-        <div class="-mt-1 flex justify-end">
-          <router-link to="/forgot-password" class="text-sm text-green-600 hover:underline">
-            Mot de passe oublié?
-          </router-link>
+  <div class="bg-background flex min-h-screen items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md">
+      <div class="bg-card rounded-[20px] border p-8 shadow-xl sm:p-10">
+        <!-- Header -->
+        <div class="mb-10 text-center">
+          <h1 class="font-title text-primary mb-3 text-4xl sm:text-5xl">Connexion</h1>
+          <p class="font-paragraph text-muted-foreground text-lg">
+            Accédez à votre espace personnel
+          </p>
         </div>
 
-        <div class="mt-8 flex flex-col-reverse items-center justify-between gap-y-4 sm:flex-row">
-          <div class="w-full text-center text-sm text-gray-600 sm:w-auto sm:text-left">
-            Pas encore de compte?
-            <router-link to="/register" class="font-medium text-green-600 hover:underline">
-              S'inscrire
+        <form class="space-y-6" @submit.prevent="handleLogin">
+          <InputForm
+            v-model="form.email.$value"
+            label-value="Email"
+            input-name="email"
+            type="email"
+            placeholder="votre@email.com"
+            :error-message="showError('email') ? form.email.$error?.message : ''"
+            :error-state="showError('email')"
+            @blur="touchedFields.email = true"
+          />
+
+          <InputForm
+            v-model="form.password.$value"
+            label-value="Mot de passe"
+            input-name="password"
+            type="password"
+            placeholder="Votre mot de passe"
+            :error-message="showError('password') ? form.password.$error?.message : ''"
+            :error-state="showError('password')"
+            @blur="touchedFields.password = true"
+          >
+            <template #hint>
+              <div>
+                Le mot de passe doit contenir au moins 10 caractères, une majuscule, une minuscule,
+                un chiffre et un symbole.
+              </div>
+            </template>
+          </InputForm>
+
+          <div class="-mt-2 flex justify-end">
+            <router-link
+              to="/forgot-password"
+              class="font-paragraph text-secondary hover:text-secondary/80 text-sm transition-colors"
+            >
+              Mot de passe oublié?
             </router-link>
           </div>
 
-          <button
-            type="submit"
-            class="w-full rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition-colors hover:bg-green-700 sm:w-auto"
-            :disabled="isLoading"
-          >
-            <div class="flex items-center justify-center">
+          <div class="mt-8 flex flex-col-reverse items-center justify-between gap-4 sm:flex-row">
+            <div
+              class="font-paragraph text-muted-foreground w-full text-center text-sm sm:w-auto sm:text-left"
+            >
+              Pas encore de compte?
+              <router-link
+                to="/register"
+                class="text-secondary hover:text-secondary/80 font-medium transition-colors"
+              >
+                S'inscrire
+              </router-link>
+            </div>
+
+            <Button
+              type="submit"
+              variant="default"
+              size="lg"
+              class="w-full sm:w-auto"
+              :disabled="isLoading"
+            >
               <svg
                 v-if="isLoading"
-                class="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
+                class="-ml-1 mr-2 h-4 w-4 animate-spin"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -80,10 +91,10 @@
                 />
               </svg>
               {{ isLoading ? 'Connexion en cours...' : 'Se connecter' }}
-            </div>
-          </button>
-        </div>
-      </form>
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
   <LoadingOverlay :show="isLoading" message="Connexion en cours..." />
@@ -96,9 +107,17 @@
   import { useAuthStore } from '../../stores/auth';
   import LoadingOverlay from '../../components/LoadingOverlay.vue';
   import InputForm from '../../components/form/InputForm.vue';
+  import { Button } from '../../components/ui/button';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
   import * as yup from 'yup';
   import { userErrorMessages } from '../../utils/errors/auth/users';
+  import { associationErrorMessages } from '../../utils/errors/auth/associations';
+  import {
+    hasPendingAssociation,
+    getPendingAssociation,
+    getPendingFile,
+    clearPendingAssociation,
+  } from '../../utils/localStorage.utils';
 
   const authStore = useAuthStore();
   const router = useRouter();
@@ -172,6 +191,10 @@
 
       if (result) {
         toast.success('Connexion réussie !');
+
+        // Vérifier s'il y a une association en attente de création
+        await checkAndCreatePendingAssociation();
+
         router.push('/');
       } else {
         const errorText = authStore.error as string | null;
@@ -190,6 +213,48 @@
       toast.error(formError.value);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  async function checkAndCreatePendingAssociation() {
+    // Vérifier s'il y a une association en attente
+    if (!hasPendingAssociation()) return;
+
+    let associationCreated = false;
+
+    try {
+      // Récupérer les données de l'association
+      const associationData = getPendingAssociation();
+      if (!associationData) return;
+
+      // Créer l'association
+      const response = await authStore.createAssociation(associationData);
+      const associationId = response.id;
+      associationCreated = true;
+
+      // Uploader le logo si présent
+      const logoFile = await getPendingFile('logo');
+      if (logoFile && associationId) {
+        await authStore.uploadAssociationFile(associationId, logoFile, 'logo');
+      }
+
+      // Uploader la bannière si présente
+      const backgroundFile = await getPendingFile('background');
+      if (backgroundFile && associationId) {
+        await authStore.uploadAssociationFile(associationId, backgroundFile, 'background');
+      }
+
+      toast.success(associationErrorMessages.creation.success);
+    } catch (error) {
+      console.error("Erreur lors de la création de l'association:", error);
+
+      // Ne pas afficher d'erreur si l'association a été créée (erreur uniquement sur les uploads)
+      if (!associationCreated) {
+        toast.warning(associationErrorMessages.apiErrors.unknown);
+      }
+    } finally {
+      // Nettoyer le localStorage pour éviter de recréer l'association à chaque connexion
+      clearPendingAssociation();
     }
   }
 </script>

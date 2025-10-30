@@ -2,7 +2,17 @@
   <section class="w-full">
     <h2 v-if="title" class="font-title text-secondary mb-6 text-2xl">{{ title }}</h2>
 
-    <div class="relative">
+    <!-- Message si pas de contenu -->
+    <div
+      v-if="!items || items.length === 0"
+      class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
+    >
+      <p class="font-paragraph text-muted-foreground text-lg">
+        <slot name="empty-message">Aucun contenu disponible pour le moment.</slot>
+      </p>
+    </div>
+
+    <div v-else class="relative">
       <div ref="track" class="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-4">
         <article v-for="(item, i) in items" :key="i" :class="itemClass">
           <!-- delegate rendering of the inner content to the parent via slot -->
@@ -10,7 +20,7 @@
         </article>
       </div>
 
-      <!-- Arrows centered below -->
+      <!-- Arrows centered below (only if there are items) -->
       <div class="mt-4 flex justify-center gap-4">
         <button
           class="bg-accent hover:bg-accent/90 flex items-center justify-center rounded-full p-2 shadow hover:scale-105"

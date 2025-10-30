@@ -1,8 +1,8 @@
 <template>
-  <div
-    class="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-6"
-  >
-    <div class="relative w-full max-w-md rounded-lg bg-white p-8 text-center shadow-xl">
+  <div class="bg-background flex min-h-screen items-center justify-center px-4 py-6">
+    <div
+      class="bg-card border-border relative w-full max-w-md rounded-[20px] border p-8 text-center shadow-xl"
+    >
       <div class="relative z-10">
         <!-- Icônes d'état avec transition fluide -->
         <div class="relative mb-8 mt-2 h-24">
@@ -13,49 +13,7 @@
               key="loading"
               class="absolute inset-0 flex items-center justify-center"
             >
-              <svg class="h-20 w-20" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient
-                    id="spinner-gradient"
-                    x1="8.042%"
-                    y1="0%"
-                    x2="65.682%"
-                    y2="23.865%"
-                  >
-                    <stop stop-color="#22c55e" stop-opacity="0" offset="0%" />
-                    <stop stop-color="#22c55e" stop-opacity=".631" offset="63.146%" />
-                    <stop stop-color="#22c55e" offset="100%" />
-                  </linearGradient>
-                </defs>
-                <g fill="none" fill-rule="evenodd">
-                  <g transform="translate(1 1)">
-                    <path
-                      d="M36 18c0-9.94-8.06-18-18-18"
-                      stroke="url(#spinner-gradient)"
-                      stroke-width="3"
-                    >
-                      <animateTransform
-                        attributeName="transform"
-                        type="rotate"
-                        from="0 18 18"
-                        to="360 18 18"
-                        dur="1s"
-                        repeatCount="indefinite"
-                      />
-                    </path>
-                    <circle fill="#fff" cx="36" cy="18" r="1">
-                      <animateTransform
-                        attributeName="transform"
-                        type="rotate"
-                        from="0 18 18"
-                        to="360 18 18"
-                        dur="1s"
-                        repeatCount="indefinite"
-                      />
-                    </circle>
-                  </g>
-                </g>
-              </svg>
+              <Loader2 class="text-accent h-20 w-20 animate-spin" />
             </div>
 
             <!-- Succès avec animation à l'entrée -->
@@ -65,44 +23,18 @@
               class="absolute inset-0 flex items-center justify-center"
             >
               <div
-                class="animate-pop-in transform rounded-full bg-green-50 p-6 shadow-sm transition-all duration-500"
+                class="bg-accent/10 animate-pop-in transform rounded-full p-6 shadow-sm transition-all duration-500"
               >
-                <svg
-                  class="h-12 w-12 text-green-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.5"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
+                <Check class="text-accent h-12 w-12" :stroke-width="2.5" />
               </div>
             </div>
 
             <!-- Erreur avec animation à l'entrée -->
             <div v-else key="error" class="absolute inset-0 flex items-center justify-center">
               <div
-                class="animate-pop-in transform rounded-full bg-red-50 p-6 shadow-sm transition-all duration-500"
+                class="bg-destructive/10 animate-pop-in transform rounded-full p-6 shadow-sm transition-all duration-500"
               >
-                <svg
-                  class="h-12 w-12 text-red-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <X class="text-destructive h-12 w-12" :stroke-width="2" />
               </div>
             </div>
           </transition>
@@ -111,16 +43,16 @@
         <!-- Contenu textuel avec animation -->
         <div class="space-y-4">
           <transition name="fade-slide-down" mode="out-in">
-            <h1
-              :key="currentTitle"
-              class="mb-2 bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-center text-3xl font-bold text-transparent"
-            >
+            <h1 :key="currentTitle" class="font-title text-foreground mb-2 text-center text-3xl">
               {{ currentTitle }}
             </h1>
           </transition>
 
           <transition name="fade-slide-up" mode="out-in">
-            <p :key="currentMessage" class="mb-8 leading-relaxed text-gray-600">
+            <p
+              :key="currentMessage"
+              class="font-paragraph text-muted-foreground mb-8 leading-relaxed"
+            >
               {{ currentMessage }}
             </p>
           </transition>
@@ -128,28 +60,17 @@
           <!-- Contact support pour liens expirés -->
           <transition name="fade">
             <div v-if="isExpired" class="mb-6">
-              <div class="flex items-center rounded-xl border border-gray-100 bg-gray-50 p-4">
-                <div class="mr-3 rounded-full bg-amber-100 p-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5 text-amber-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+              <div class="bg-accent/5 border-border flex items-center rounded-[12px] border p-4">
+                <div class="bg-accent/10 mr-3 rounded-full p-2">
+                  <Info class="text-accent h-5 w-5" />
                 </div>
                 <div class="text-left">
-                  <div class="text-sm font-semibold text-gray-700">Besoin d'aide?</div>
+                  <div class="font-subtitle text-foreground text-sm font-semibold">
+                    Besoin d'aide?
+                  </div>
                   <a
                     href="mailto:support@solidhive.com"
-                    class="text-sm text-green-600 hover:underline"
+                    class="text-secondary hover:text-secondary/80 font-paragraph text-sm transition-colors"
                   >
                     Contactez notre support
                   </a>
@@ -160,13 +81,9 @@
         </div>
 
         <!-- Bouton d'action -->
-        <button
-          v-if="!loading"
-          class="w-full rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition-colors hover:bg-green-700"
-          @click="redirectToLogin"
-        >
+        <Button v-if="!loading" variant="default" size="lg" class="w-full" @click="redirectToLogin">
           {{ buttonText }}
-        </button>
+        </Button>
       </div>
     </div>
   </div>
@@ -180,6 +97,8 @@
   import Database from '../../utils/database.utils';
   import { verifyEmailMessages } from '../../utils/errors/auth/verifyEmail';
   import LoadingOverlay from '../../components/LoadingOverlay.vue';
+  import { Button } from '../../components/ui/button';
+  import { Loader2, Check, X, Info } from 'lucide-vue-next';
 
   // États
   const loading = ref(true);

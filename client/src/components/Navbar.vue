@@ -34,7 +34,7 @@
       <div class="hidden items-center space-x-4 md:flex">
         <template v-if="authStore.isAuthenticated()">
           <router-link
-            to="/mon-compte"
+            to="/profile"
             class="text-secondary font-paragraph text-sm transition-opacity hover:opacity-80"
           >
             Mon compte
@@ -55,36 +55,8 @@
         class="focus:ring-secondary flex items-center justify-center rounded p-2 focus:outline-none focus:ring-2 md:hidden"
         @click="toggleMenu"
       >
-        <svg
-          v-if="!menuOpen"
-          xmlns="http://www.w3.org/2000/svg"
-          class="text-secondary h-7 w-7"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16"
-          />
-        </svg>
-        <svg
-          v-else
-          xmlns="http://www.w3.org/2000/svg"
-          class="text-secondary h-7 w-7"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
+        <Menu v-if="!menuOpen" class="text-secondary h-7 w-7" />
+        <X v-else class="text-secondary h-7 w-7" />
       </button>
     </nav>
 
@@ -104,20 +76,7 @@
             <img :src="logoUrl" alt="SolidHive Logo" class="h-10 w-auto" />
           </router-link>
           <button class="p-2" @click="closeMenu">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="text-secondary h-7 w-7"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X class="text-secondary h-7 w-7" />
           </button>
         </div>
         <nav class="mt-2 flex flex-col gap-4">
@@ -151,7 +110,7 @@
                 <User class="h-4 w-4 text-white" />
               </div>
               <router-link
-                to="/mon-compte"
+                to="/profile"
                 class="text-secondary font-paragraph py-2 text-base"
                 @click="closeMenu"
               >
@@ -175,7 +134,7 @@
   import { useRouter } from 'vue-router';
   import { useAuthStore } from '../stores/auth';
   import { Button } from '@/components/ui/button';
-  import { User } from 'lucide-vue-next';
+  import { User, Menu, X } from 'lucide-vue-next';
   import logoUrl from '@/assets/images/logo-solidhive.png';
 
   const authStore = useAuthStore();

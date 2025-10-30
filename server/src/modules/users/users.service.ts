@@ -2,7 +2,6 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
-  BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,38 +11,17 @@ import { Role } from './entities/role.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserSecurityService } from '../security/user-security.service';
 import { PasswordUtils } from '../../common/utils/password.utils';
+import { UserAssociation } from '../associations/modules/users/entities/user-association.entity';
 
 @Injectable()
 export class UsersService {
-  // Liste de domaines d'emails personnels courants à rejeter
-  private readonly PERSONAL_EMAIL_DOMAINS = [
-    'gmail.com',
-    'yahoo.com',
-    'yahoo.fr',
-    'hotmail.com',
-    'hotmail.fr',
-    'outlook.com',
-    'outlook.fr',
-    'live.com',
-    'live.fr',
-    'aol.com',
-    'orange.fr',
-    'wanadoo.fr',
-    'free.fr',
-    'sfr.fr',
-    'laposte.net',
-    'protonmail.com',
-    'mail.com',
-    'gmx.com',
-    'icloud.com',
-    'me.com',
-  ];
-
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
+    @InjectRepository(UserAssociation)
+    private userAssociationRepository: Repository<UserAssociation>,
     private userSecurityService: UserSecurityService
   ) {}
 
@@ -60,12 +38,6 @@ export class UsersService {
     return user;
   }
 
-  private isBusinessEmail(email: string): boolean {
-    const domain = email.split('@')[1].toLowerCase();
-    // Si le domaine est dans la liste des domaines personnels, c'est un email personnel
-    return !this.PERSONAL_EMAIL_DOMAINS.includes(domain);
-  }
-
   async register(createUserDto: CreateUserDto): Promise<{ message: string }> {
     // Vérifie si l'email est déjà utilisé
     const existingUser = await this.usersRepository.findOne({
@@ -74,11 +46,6 @@ export class UsersService {
 
     if (existingUser) {
       throw new ConflictException('Un utilisateur avec cet email existe déjà');
-    }
-
-    // Vérifie que c'est un email d'entreprise
-    if (!this.isBusinessEmail(createUserDto.email)) {
-      throw new BadRequestException('Veuillez utiliser une adresse email professionnelle');
     }
 
     const salt = PasswordUtils.generateSalt();
@@ -142,5 +109,32 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async getUserAssociations(userId: string) {
+    const userAssociations = await this.userAssociationRepository.find({
+      where: { userId },
+      relations: ['association', 'role'],
+    });
+
+    return userAssociations.map((ua) => ({
+      id: ua.id,
+      association: {
+        id: ua.association.id,
+        name: ua.association.name,
+        description: ua.association.description,
+        primaryColor: ua.association.primaryColor,
+        secondaryColor: ua.association.secondaryColor,
+        status: ua.association.status,
+      },
+      role: ua.role
+        ? {
+            id: ua.role.id,
+            name: ua.role.name,
+            description: ua.role.description,
+          }
+        : null,
+      status: ua.status,
+    }));
   }
 }
