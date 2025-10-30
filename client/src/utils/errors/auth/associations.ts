@@ -1,0 +1,43 @@
+export const associationErrorMessages = {
+  required: {
+    name: "Le nom de l'association est requis",
+    description: 'La description est requise',
+    contact: "L'email de contact est requis",
+    siret: 'Le numéro SIRET est requis',
+    logo: 'Le logo est requis',
+    background: 'La bannière est requise',
+  },
+  format: {
+    contact: "L'email de contact doit être valide",
+    siret: 'Le SIRET doit contenir exactement 14 chiffres',
+    logo: 'Le fichier doit être une image (JPEG, PNG, GIF, WebP)',
+    background: 'Le fichier doit être une image (JPEG, PNG, GIF, WebP)',
+  },
+  length: {
+    name: "Le nom de l'association doit contenir entre 3 et 100 caractères",
+    description: 'La description doit contenir entre 5 et 1000 caractères',
+    contact: "L'email de contact doit contenir entre 5 et 100 caractères",
+    siret: 'Le SIRET doit contenir exactement 14 chiffres',
+  },
+  size: {
+    logo: 'Le logo ne doit pas dépasser 5 Mo',
+    background: 'La bannière ne doit pas dépasser 10 Mo',
+  },
+  patterns: {
+    siret: /^\d{14}$/,
+  },
+  apiErrors: {
+    400: 'Données invalides, veuillez vérifier le formulaire.',
+    401: 'Vous devez être connecté pour créer une association.',
+    409: 'Une association avec ce SIRET existe déjà.',
+    429: 'Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.',
+    500: 'Erreur serveur, veuillez réessayer plus tard.',
+    unknown: "Une erreur est survenue lors de la création de l'association.",
+  },
+  creation: {
+    success: 'Votre association a été créée et est en attente de validation !',
+    userCreated:
+      'Compte créé ! Vérifiez votre email pour confirmer votre inscription. Votre association sera créée après connexion.',
+    uploadFailed: "L'association a été créée mais l'upload des fichiers a échoué.",
+  },
+};

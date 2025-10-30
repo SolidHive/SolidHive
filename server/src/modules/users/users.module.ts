@@ -6,9 +6,10 @@ import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
 import { EmailModule } from '../../common/utils/email/email.module';
 import { SecurityModule } from '../security/security.module';
+import { UserAssociation } from '../associations/modules/users/entities/user-association.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Role]), EmailModule, SecurityModule],
+  imports: [TypeOrmModule.forFeature([User, Role, UserAssociation]), EmailModule, SecurityModule],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],

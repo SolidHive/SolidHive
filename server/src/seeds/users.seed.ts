@@ -36,7 +36,6 @@ export async function seedUsers(dataSource: DataSource): Promise<User[]> {
       phone: faker.string.numeric(10), // Generate exactly 10 digits
       password: hashedPassword,
       salt: salt,
-      siret: faker.string.numeric(14),
       isVerified: true,
       roles: [userRole],
     });

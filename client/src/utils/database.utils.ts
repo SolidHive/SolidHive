@@ -68,4 +68,30 @@ export default class Database {
       throw err;
     }
   }
+
+  /**
+   * Upload un fichier avec FormData
+   */
+  static async uploadFile(endpoint: string, file: File, additionalData?: Record<string, string>) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      if (additionalData) {
+        Object.entries(additionalData).forEach(([key, value]) => {
+          formData.append(key, value);
+        });
+      }
+
+      const response = await api.post(endpoint, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (err: unknown) {
+      console.error('API Error in Database.uploadFile:', err);
+      throw err;
+    }
+  }
 }

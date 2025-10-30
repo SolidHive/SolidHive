@@ -68,13 +68,4 @@ export class CreateUserDto {
     message: 'Format de numéro de téléphone français invalide',
   })
   phone?: string;
-
-  @ApiProperty({
-    example: '12345678901234',
-    description: 'Numéro SIRET (14 chiffres)',
-  })
-  @IsNotEmpty({ message: 'Le numéro SIRET est requis' })
-  @IsNumberString({}, { message: 'Le SIRET doit contenir uniquement des chiffres' })
-  @Length(14, 14, { message: 'Le SIRET doit contenir exactement 14 chiffres' })
-  siret: string;
 }

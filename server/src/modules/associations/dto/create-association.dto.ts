@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Colors } from '../../../common/enums/colors';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+  IsNumberString,
+} from 'class-validator';
 
 export class CreateAssociationDto {
   @ApiProperty({
@@ -60,4 +68,14 @@ export class CreateAssociationDto {
     message: "L'email de contact doit contenir entre 5 et 100 caractères",
   })
   contact: string;
+
+  @ApiProperty({
+    example: '12345678901234',
+    description: "Numéro SIRET de l'association (14 chiffres)",
+    required: true,
+  })
+  @IsNotEmpty({ message: 'Le numéro SIRET est requis' })
+  @IsNumberString({}, { message: 'Le SIRET doit contenir uniquement des chiffres' })
+  @Length(14, 14, { message: 'Le SIRET doit contenir exactement 14 chiffres' })
+  siret: string;
 }

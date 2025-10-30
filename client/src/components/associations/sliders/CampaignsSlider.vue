@@ -27,6 +27,7 @@
         </div>
       </div>
     </template>
+    <template #empty-message>Aucune campagne de financement n'est active pour le moment.</template>
   </Carousel>
 </template>
 
