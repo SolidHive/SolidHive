@@ -2,7 +2,7 @@
   <section>
     <div class="flex flex-col items-center gap-8 lg:grid lg:grid-cols-2 lg:gap-12">
       <!-- Image à gauche -->
-      <div class="mb-8 hidden w-full justify-center lg:mb-0 lg:mr-8 lg:block lg:w-auto">
+      <div class="mb-8 hidden w-full justify-center lg:mr-8 lg:mb-0 lg:block lg:w-auto">
         <div class="aspect-square w-full lg:h-[450px] lg:w-[450px] 2xl:h-[600px] 2xl:w-[600px]">
           <img
             :src="phoneSolidHive"

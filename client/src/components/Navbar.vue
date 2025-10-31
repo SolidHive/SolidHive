@@ -52,7 +52,7 @@
 
       <!-- Mobile Burger -->
       <button
-        class="focus:ring-secondary flex items-center justify-center rounded p-2 focus:outline-none focus:ring-2 md:hidden"
+        class="focus:ring-secondary flex items-center justify-center rounded p-2 focus:ring-2 focus:outline-none md:hidden"
         @click="toggleMenu"
       >
         <Menu v-if="!menuOpen" class="text-secondary h-7 w-7" />
@@ -69,7 +69,7 @@
     <transition name="slide">
       <aside
         v-if="menuOpen"
-        class="animate-in slide-in-from-right fixed right-0 top-0 z-50 flex h-full w-4/5 max-w-xs flex-col gap-6 bg-white p-6 shadow-lg duration-200 md:hidden"
+        class="animate-in slide-in-from-right fixed top-0 right-0 z-50 flex h-full w-4/5 max-w-xs flex-col gap-6 bg-white p-6 shadow-lg duration-200 md:hidden"
       >
         <div class="mb-2 flex items-center justify-between">
           <router-link to="/" class="flex items-center" @click="closeMenu">

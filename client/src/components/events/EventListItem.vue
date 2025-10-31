@@ -18,7 +18,7 @@
           <Calendar :size="64" class="text-muted-foreground" />
         </div>
         <!-- Price badge on image -->
-        <div class="absolute right-3 top-3">
+        <div class="absolute top-3 right-3">
           <span
             :class="[
               'font-paragraph rounded-full px-3 py-1.5 text-sm shadow-lg backdrop-blur-sm',

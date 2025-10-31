@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-muted/30 min-h-screen pb-12 pt-6">
+  <div class="bg-muted/30 min-h-screen pt-6 pb-12">
     <div class="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
       <!-- Header minimaliste -->
       <div class="bg-card border-border mb-6 rounded-3xl border p-6 shadow-sm">
@@ -49,7 +49,7 @@
               <!-- Nom -->
               <div class="group">
                 <label
-                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium uppercase tracking-wide"
+                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium tracking-wide uppercase"
                 >
                   Nom
                 </label>
@@ -63,7 +63,7 @@
               <!-- Prénom -->
               <div class="group">
                 <label
-                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium uppercase tracking-wide"
+                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium tracking-wide uppercase"
                 >
                   Prénom
                 </label>
@@ -77,7 +77,7 @@
               <!-- Email -->
               <div class="group sm:col-span-2">
                 <label
-                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium uppercase tracking-wide"
+                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium tracking-wide uppercase"
                 >
                   Email
                 </label>
@@ -92,7 +92,7 @@
               <!-- Téléphone -->
               <div class="group">
                 <label
-                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium uppercase tracking-wide"
+                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium tracking-wide uppercase"
                 >
                   Téléphone
                 </label>
@@ -197,7 +197,7 @@
             <div v-if="profile" class="space-y-4">
               <div>
                 <label
-                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium uppercase tracking-wide"
+                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium tracking-wide uppercase"
                 >
                   Date d'inscription
                 </label>
@@ -210,7 +210,7 @@
 
               <div>
                 <label
-                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium uppercase tracking-wide"
+                  class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium tracking-wide uppercase"
                 >
                   Dernière connexion
                 </label>

@@ -30,7 +30,7 @@
       cn(
         'absolute size-8 rounded-full',
         orientation === 'horizontal'
-          ? '-right-2 top-1/2 z-10 -translate-y-1/2 opacity-100'
+          ? 'top-1/2 -right-2 z-10 -translate-y-1/2 opacity-100'
           : '-bottom-12 left-1/2 z-10 -translate-x-1/2 rotate-90 opacity-100',
         props.class
       )

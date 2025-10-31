@@ -1,7 +1,7 @@
 <template>
   <section v-if="association" class="relative w-full pt-0">
     <div
-      class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] flex min-h-[80vh] w-screen items-center overflow-hidden"
+      class="relative right-1/2 left-1/2 -mr-[50vw] -ml-[50vw] flex min-h-[80vh] w-screen items-center overflow-hidden"
     >
       <img
         :src="association.image"
@@ -21,16 +21,16 @@
         <BackHomeButton @click="goHome" />
         <div
           v-if="association.logo"
-          class="h-18 w-18 mb-6 flex items-center justify-center rounded-full bg-white md:h-24 md:w-24 2xl:h-28 2xl:w-28"
+          class="mb-6 flex h-18 w-18 items-center justify-center rounded-full bg-white md:h-24 md:w-24 2xl:h-28 2xl:w-28"
         >
           <img
             :src="association.logo"
             :alt="association.name + ' logo'"
-            class="2xl:h-18 2xl:w-18 h-12 w-12 object-contain md:h-16 md:w-16"
+            class="h-12 w-12 object-contain md:h-16 md:w-16 2xl:h-18 2xl:w-18"
           />
         </div>
         <!-- Titre -->
-        <h1 class="font-title mb-6 text-3xl uppercase text-white lg:text-4xl 2xl:text-6xl">
+        <h1 class="font-title mb-6 text-3xl text-white uppercase lg:text-4xl 2xl:text-6xl">
           {{ association.name }}
         </h1>
         <!-- Description -->

@@ -50,7 +50,7 @@
                   class="w-full sm:w-auto"
                   :disabled="isLoading"
                 >
-                  <Loader2 v-if="isLoading" class="-ml-1 mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 v-if="isLoading" class="mr-2 -ml-1 h-4 w-4 animate-spin" />
                   {{ isLoading ? 'Réinitialisation...' : 'Réinitialiser' }}
                 </Button>
               </div>

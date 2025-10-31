@@ -21,7 +21,7 @@
           class="absolute inset-0 h-full w-full"
           style="background-color: rgba(0, 0, 0, 0.14); z-index: 11"
         ></div>
-        <div class="absolute bottom-0 left-0 right-0 z-20 p-4">
+        <div class="absolute right-0 bottom-0 left-0 z-20 p-4">
           <h3 class="font-title text-lg leading-tight text-white">{{ item.title }}</h3>
           <p class="font-paragraph mt-1 line-clamp-2 text-sm text-white">{{ item.description }}</p>
         </div>

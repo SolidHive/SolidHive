@@ -33,7 +33,7 @@
               <div
                 class="bg-accent/5 border-accent/20 text-foreground font-paragraph flex items-start rounded-[12px] border p-4"
               >
-                <div class="text-accent mr-3 mt-0.5 flex-shrink-0">
+                <div class="text-accent mt-0.5 mr-3 flex-shrink-0">
                   <Info class="h-5 w-5" />
                 </div>
                 <div class="text-sm">
@@ -66,7 +66,7 @@
                   class="w-full sm:w-auto"
                   :disabled="isLoading"
                 >
-                  <Loader2 v-if="isLoading" class="-ml-1 mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 v-if="isLoading" class="mr-2 -ml-1 h-4 w-4 animate-spin" />
                   {{ isLoading ? 'Envoi en cours...' : 'Envoyer le lien' }}
                 </Button>
               </div>

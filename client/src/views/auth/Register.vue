@@ -199,7 +199,7 @@
               v-model="associationForm.description.$value"
               placeholder="Décrivez votre association, ses missions, ses objectifs..."
               rows="4"
-              class="font-paragraph border-input bg-background focus:border-secondary focus:ring-secondary/20 w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
+              class="font-paragraph border-input bg-background focus:border-secondary focus:ring-secondary/20 w-full rounded-xl border px-4 py-3 text-sm focus:ring-2 focus:outline-none"
               :class="showAssociationError('description') ? 'border-destructive' : ''"
               @blur="() => (touchedAssociationFields.description = true)"
             />

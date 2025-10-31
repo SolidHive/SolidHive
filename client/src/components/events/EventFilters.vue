@@ -19,9 +19,9 @@
             v-model="localFilters.search"
             type="text"
             placeholder="Nom de l'événement..."
-            class="border-input bg-background font-paragraph text-foreground focus:border-ring focus:ring-ring/20 w-full rounded-xl border py-3 pl-11 pr-4 transition-all focus:outline-none focus:ring-2"
+            class="border-input bg-background font-paragraph text-foreground focus:border-ring focus:ring-ring/20 w-full rounded-xl border py-3 pr-4 pl-11 transition-all focus:ring-2 focus:outline-none"
           />
-          <Search :size="20" class="text-muted-foreground absolute left-3.5 top-3.5" />
+          <Search :size="20" class="text-muted-foreground absolute top-3.5 left-3.5" />
         </div>
       </div>
 
@@ -75,7 +75,7 @@
             id="startDate"
             v-model="localFilters.startDate"
             type="date"
-            class="border-input bg-background font-paragraph text-foreground focus:border-ring focus:ring-ring/20 w-full rounded-xl border px-4 py-3 transition-all focus:outline-none focus:ring-2"
+            class="border-input bg-background font-paragraph text-foreground focus:border-ring focus:ring-ring/20 w-full rounded-xl border px-4 py-3 transition-all focus:ring-2 focus:outline-none"
           />
         </div>
         <div>
@@ -86,7 +86,7 @@
             id="endDate"
             v-model="localFilters.endDate"
             type="date"
-            class="border-input bg-background font-paragraph text-foreground focus:border-ring focus:ring-ring/20 w-full rounded-xl border px-4 py-3 transition-all focus:outline-none focus:ring-2"
+            class="border-input bg-background font-paragraph text-foreground focus:border-ring focus:ring-ring/20 w-full rounded-xl border px-4 py-3 transition-all focus:ring-2 focus:outline-none"
           />
         </div>
       </div>

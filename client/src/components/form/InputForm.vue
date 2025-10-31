@@ -22,13 +22,13 @@
           </svg>
         </div>
         <div
-          class="bg-popover text-popover-foreground border-border absolute left-1/2 top-full z-10 mt-1 hidden w-64 -translate-x-1/2 transform rounded-md border px-3 py-2 shadow-lg group-hover:block"
+          class="bg-popover text-popover-foreground border-border absolute top-full left-1/2 z-10 mt-1 hidden w-64 -translate-x-1/2 transform rounded-md border px-3 py-2 shadow-lg group-hover:block"
         >
           <div class="font-paragraph text-sm">
             <slot name="hint" />
           </div>
           <div
-            class="bg-popover border-border absolute -top-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 transform border-l border-t"
+            class="bg-popover border-border absolute -top-2 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 transform border-t border-l"
           />
         </div>
       </div>

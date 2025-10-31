@@ -5,7 +5,7 @@
     >
       <div class="relative z-10">
         <!-- Icônes d'état avec transition fluide -->
-        <div class="relative mb-8 mt-2 h-24">
+        <div class="relative mt-2 mb-8 h-24">
           <!-- Spinner avec animation avancée pour chargement -->
           <transition name="fade" mode="out-in">
             <div

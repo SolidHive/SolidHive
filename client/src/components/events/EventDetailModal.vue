@@ -11,7 +11,7 @@
         >
           <!-- Close Button -->
           <button
-            class="bg-card/90 text-muted-foreground hover:bg-card hover:text-foreground absolute right-4 top-4 z-10 rounded-full p-2 transition-colors"
+            class="bg-card/90 text-muted-foreground hover:bg-card hover:text-foreground absolute top-4 right-4 z-10 rounded-full p-2 transition-colors"
             @click="close"
           >
             <X :size="24" />
@@ -90,7 +90,7 @@
                 À propos de l'événement
               </h3>
               <p
-                class="font-paragraph text-muted-foreground whitespace-pre-line text-sm sm:text-base"
+                class="font-paragraph text-muted-foreground text-sm whitespace-pre-line sm:text-base"
               >
                 {{ event.description }}
               </p>
