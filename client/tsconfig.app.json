@@ -1,18 +1,45 @@
 {
-    "extends": "@vue/tsconfig/tsconfig.dom.json",
     "compilerOptions": {
         "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-
-        /* Linting */
+        
+        /* Base Configuration */
+        "target": "ESNext",
+        "module": "ESNext",
+        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "moduleResolution": "bundler",
+        "resolveJsonModule": true,
+        "allowImportingTsExtensions": true,
+        "moduleDetection": "force",
+        "noEmit": true,
+        
+        /* Vue */
+        "jsx": "preserve",
+        "jsxImportSource": "vue",
+        
+        /* Type Checking */
         "strict": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
         "noUncheckedSideEffectImports": true,
+        "noImplicitThis": true,
+        "noUncheckedIndexedAccess": true,
+        
+        /* Module Resolution */
         "baseUrl": ".",
         "paths": {
             "@/*": ["./src/*"]
-        }
+        },
+        "types": [],
+        
+        /* Emit */
+        "verbatimModuleSyntax": true,
+        "useDefineForClassFields": true,
+        
+        /* Interop */
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true
     },
     "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

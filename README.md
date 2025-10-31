@@ -8,6 +8,7 @@ SolidHive est une plateforme numérique dédiée au recensement des acteurs asso
 - [Sauvegarde et Restauration de la base de données](docs/sauvegarde-restauration.md)
 - [Gestion des Dépendances](docs/gestion-dependances.md)
 - [Hooks Git avec Husky](docs/hooks-git.md)
+- [Workflows CI/CD](docs/workflows.md)
 
 ## Accès aux Services
 

@@ -11,13 +11,11 @@
         <div class="loader" />
       </div>
 
-      <!-- Error State -->
-      <div v-else-if="error" class="py-12 text-center">
-        <div class="mx-auto max-w-md rounded-lg border border-red-200 bg-red-50 p-6">
-          <h3 class="mb-2 font-semibold text-red-800">Erreur de chargement</h3>
-          <p class="text-red-600">{{ error }}</p>
-          <Button class="mt-4" variant="secondary" @click="loadAssociations">Réessayer</Button>
-        </div>
+      <!-- Empty State -->
+      <div v-else-if="associations.length === 0" class="py-12 text-center">
+        <Building class="mx-auto mb-4 h-16 w-16 text-gray-400" />
+        <h3 class="mb-2 text-xl font-semibold text-gray-900">Aucune association trouvée</h3>
+        <p class="text-gray-600">Les associations seront bientôt disponibles.</p>
       </div>
 
       <!-- Associations Grid -->
@@ -50,13 +48,6 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Empty State -->
-      <div v-if="!loading && !error && associations.length === 0" class="py-12 text-center">
-        <Building class="mx-auto mb-4 h-16 w-16 text-gray-400" />
-        <h3 class="mb-2 text-xl font-semibold text-gray-900">Aucune association trouvée</h3>
-        <p class="text-gray-600">Les associations seront bientôt disponibles.</p>
       </div>
     </div>
   </PageContainer>

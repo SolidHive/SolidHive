@@ -1,0 +1,59 @@
+# Configuration Gitleaks pour SolidHive
+# Détection de secrets et credentials exposés
+
+title = "Gitleaks Configuration for SolidHive"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlisted files and patterns"
+paths = [
+    '''node_modules/''',
+    '''dist/''',
+    '''build/''',
+    '''\.git/''',
+    '''package-lock\.json''',
+]
+
+# Allowlist pour les faux positifs connus
+regexes = [
+    '''EXAMPLE_SECRET''',
+    '''YOUR_SECRET_HERE''',
+]
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(api[_-]?key|apikey|api[_-]?secret)['\"]?\s*[:=]\s*['\"]?[a-zA-Z0-9]{20,}'''
+tags = ["api", "key", "secret"]
+
+[[rules]]
+id = "jwt-token"
+description = "JWT Token"
+regex = '''eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'''
+tags = ["jwt", "token"]
+
+[[rules]]
+id = "database-connection-string"
+description = "Database Connection String"
+regex = '''(?i)(postgresql|postgres|mysql|mongodb):\/\/[^\s'"]{10,}'''
+tags = ["database", "connection-string"]
+
+[[rules]]
+id = "stripe-key"
+description = "Stripe API Key"
+regex = '''(?i)(sk|pk)_(test|live)_[0-9a-zA-Z]{24,}'''
+tags = ["stripe", "payment", "api-key"]
+
+[[rules]]
+id = "google-oauth"
+description = "Google OAuth Credentials"
+regex = '''(?i)[0-9]+-[0-9a-zA-Z_]{32}\.apps\.googleusercontent\.com'''
+tags = ["google", "oauth"]
+
+[[rules]]
+id = "session-secret"
+description = "Session Secret"
+regex = '''(?i)(session[_-]?secret|cookie[_-]?secret)['\"]?\s*[:=]\s*['\"]?[a-zA-Z0-9@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{20,}'''
+tags = ["session", "secret"]

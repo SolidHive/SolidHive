@@ -17,7 +17,7 @@
           </option>
         </select>
         <svg
-          class="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+          class="pointer-events-none absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-gray-400"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -40,7 +40,7 @@
           :key="tab.key"
           :ref="(el) => setItemRef(el, index)"
           :class="[
-            'font-title text-secondary whitespace-nowrap text-lg transition-colors duration-200 md:text-xl',
+            'font-title text-secondary text-lg whitespace-nowrap transition-colors duration-200 md:text-xl',
             activeIndex === index ? 'text-secondary' : 'hover:text-secondary text-gray-400',
           ]"
           @click="setActiveTab(index)"
@@ -113,7 +113,10 @@
 
   function setActiveTab(index: number) {
     activeIndex.value = index;
-    emit('change-tab', tabs[index].key);
+    const tab = tabs[index];
+    if (tab) {
+      emit('change-tab', tab.key);
+    }
     nextTick(updateIndicator);
   }
 
