@@ -78,11 +78,6 @@ updates:
       day: "monday"
       time: "09:00"
     open-pull-requests-limit: 5
-    reviewers:
-      - "SolidHive/maintainers"
-    labels:
-      - "dependencies"
-      - "tools"
     commit-message:
       prefix: "chore(deps)"
       include: "scope"
