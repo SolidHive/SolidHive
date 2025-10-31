@@ -53,51 +53,55 @@ jobs:
         run: npm run lint
         continue-on-error: true
 
-  secrets-scan:
-    name: Secrets Detection
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Fetch all history for secret scanning
+  # secrets-scan:
+  #   name: Secrets Detection
+  #   runs-on: ubuntu-latest
+  #   
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0  # Fetch all history for secret scanning
 
-      - name: Gitleaks - Scan for secrets
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Gitleaks - Scan for secrets
+  #       uses: gitleaks/gitleaks-action@v2
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #   # NOTE: Gitleaks nécessite une licence pour les organisations GitHub
+  #   # Pour l'activer: acheter une licence sur gitleaks.io et ajouter GITLEAKS_LICENSE dans les secrets GitHub
 
-  sast-analysis:
-    name: SAST - CodeQL Analysis
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ['javascript-typescript']
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  # sast-analysis:
+  #   name: SAST - CodeQL Analysis
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     security-events: write
+  #     actions: read
+  #     contents: read
+  #   
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       language: ['javascript-typescript']
+  #   
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-          queries: security-extended
+  #     - name: Initialize CodeQL
+  #       uses: github/codeql-action/init@v3
+  #       with:
+  #         languages: ${{ matrix.language }}
+  #         queries: security-extended
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+  #     - name: Autobuild
+  #       uses: github/codeql-action/autobuild@v3
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:${{ matrix.language }}"
+  #     - name: Perform CodeQL Analysis
+  #       uses: github/codeql-action/analyze@v3
+  #       with:
+  #         category: "/language:${{ matrix.language }}"
+  #   # NOTE: CodeQL nécessite GitHub Advanced Security (payant pour les organisations privées)
+  #   # Pour l'activer: activer Advanced Security dans les paramètres du dépôt
 
   dependency-security:
     name: Dependency Vulnerability Scan
