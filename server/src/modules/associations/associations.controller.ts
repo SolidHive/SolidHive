@@ -24,6 +24,7 @@ import {
 } from './guards/association-permissions.guard';
 import { Permissions } from '../../common/enums/permissions';
 import { StatusAssociationDto } from './dto/status-association.dto';
+import { UpdateStripeAccountDto } from './dto/update-stripe-account.dto';
 
 @Controller()
 export class AssociationsController {
@@ -97,5 +98,19 @@ export class AssociationsController {
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   remove(@Param('associationId') id: string) {
     return this.associationsService.remove(id);
+  }
+
+  // Configure Stripe account for donations
+  @Patch('association/:associationId/stripe-account')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @AssociationPermissions(Permissions.ASSOCIATION_UPDATE)
+  @ApiCookieAuth()
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Accès refusé' })
+  updateStripeAccount(
+    @Param('associationId') id: string,
+    @Body() updateStripeAccountDto: UpdateStripeAccountDto
+  ) {
+    return this.associationsService.updateStripeAccount(id, updateStripeAccountDto);
   }
 }

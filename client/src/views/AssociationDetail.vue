@@ -120,6 +120,9 @@
     <div class="mt-8">
       <ContactSection @change-tab="onTabChange" />
     </div>
+
+    <!-- Modal de don -->
+    <DonationModal v-model:open="isDonationModalOpen" :association="association" />
   </div>
 </template>
 
@@ -140,6 +143,7 @@
   import ContactSection from '@/components/associations/ContactSection.vue';
   import PageContainer from '@/components/PageContainer.vue';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
+  import DonationModal from '@/components/associations/DonationModal.vue';
   import Database from '@/utils/database.utils';
   import api from '@/utils/api.utils';
   import type { Association } from '@/interfaces/association.interface';
@@ -169,6 +173,9 @@
   const annonces = ref<Announcement[]>([]);
   const campaigns = ref<Fundraising[]>([]);
   const eventsList = ref<Event[]>([]);
+
+  // Modal de don
+  const isDonationModalOpen = ref(false);
 
   // Pagination computed
   const paginatedAnnonces = computed(() => {
@@ -294,7 +301,7 @@
   };
 
   const faireUnDon = () => {
-    alert('Redirection vers la page de don à implémenter');
+    isDonationModalOpen.value = true;
   };
 
   const onTabChange = (tab: string) => {

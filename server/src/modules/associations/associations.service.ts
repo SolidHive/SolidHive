@@ -11,6 +11,7 @@ import { AssociationRole } from './modules/roles/entities/association-role.entit
 import { UserAssociation } from './modules/users/entities/user-association.entity';
 import { Status } from '../../common/enums/status';
 import { StatusAssociationDto } from './dto/status-association.dto';
+import { UpdateStripeAccountDto } from './dto/update-stripe-account.dto';
 
 @Injectable()
 export class AssociationsService {
@@ -104,5 +105,10 @@ export class AssociationsService {
 
   async remove(id: string) {
     return this.associationsRepository.delete(id);
+  }
+
+  async updateStripeAccount(id: string, updateStripeAccountDto: UpdateStripeAccountDto) {
+    await this.associationsRepository.update(id, updateStripeAccountDto);
+    return this.findOne(id);
   }
 }

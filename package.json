@@ -8,20 +8,19 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
-    "lint:backend": "cd server && npm run lint -- --fix --max-warnings=0",
-    "lint:frontend": "cd client && npm run lint -- --fix --max-warnings=0",
+    "format": "npm run format:backend && npm run format:frontend",
+    "lint": "lint-staged",
     "lint:staged:server": "cd server && eslint --fix --max-warnings=0",
     "lint:staged:client": "cd client && cross-env NODE_OPTIONS=--max-old-space-size=8192 eslint --fix --max-warnings=0",
     "format:backend": "prettier --write \"server/src/**/*.ts\"",
     "format:frontend": "prettier --write \"client/src/**/*.{ts,vue}\"",
+    "format:check": "npm run format:check:backend && npm run format:check:frontend",
     "format:check:backend": "prettier --check \"server/src/**/*.ts\"",
-    "format:check:frontend": "prettier --check \"client/src/**/*.{ts,vue}\"",
-    "lint": "npm run lint:backend && npm run lint:frontend",
-    "format": "npm run format:backend && npm run format:frontend",
-    "format:check": "npm run format:check:backend && npm run format:check:frontend"
+    "format:check:frontend": "prettier --check \"client/src/**/*.{ts,vue}\""
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
+    "cross-env": "^7.0.3",
     "eslint": "^9.23.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-prettier": "^5.5.4",

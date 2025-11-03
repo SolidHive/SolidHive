@@ -11,7 +11,7 @@
       <div class="absolute inset-0 z-10">
         <div
           class="absolute inset-0 h-full w-full"
-          :style="association.color ? `background:${association.color}66` : ''"
+          :style="association.primaryColor ? `background:${association.primaryColor}66` : ''"
         ></div>
         <div class="absolute inset-0 h-full w-full bg-black/50"></div>
       </div>
@@ -41,6 +41,7 @@
         </p>
         <!-- Bouton don -->
         <Button
+          v-if="canReceiveDonations"
           class="bg-accent hover:bg-accent/90 w-full px-8 text-white transition-colors sm:w-auto"
           @click="$emit('don')"
         >
@@ -52,23 +53,27 @@
 </template>
 
 <script setup lang="ts">
-  import { defineEmits } from 'vue';
+  import { defineEmits, computed } from 'vue';
   import { Button } from '@/components/ui/button';
   import BackHomeButton from '@/components/ui/BackHomeButton.vue';
   import { useRouter } from 'vue-router';
+  import { usePaymentsStore } from '@/stores/payments';
+  import type { Association } from '@/interfaces/association.interface';
 
   const router = useRouter();
+  const paymentsStore = usePaymentsStore();
 
   function goHome() {
     router.push('/');
   }
 
-  defineProps({
-    association: {
-      type: Object,
-      required: true,
-    },
-  });
+  const props = defineProps<{
+    association: Association;
+  }>();
+
+  const canReceiveDonations = computed(() =>
+    paymentsStore.canAssociationReceiveDonations(props.association)
+  );
 
   defineEmits(['don']);
 </script>

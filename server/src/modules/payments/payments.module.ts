@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaymentsService } from './payments.service';
+import { StripeService } from './stripe.service';
 import { PaymentsController } from './payments.controller';
 import { AssociationsModule } from '../associations/associations.module';
 import { TransactionsModule } from '../transactions/transactions.module';
@@ -11,6 +12,7 @@ import Stripe from 'stripe';
   imports: [ConfigModule, AssociationsModule, TransactionsModule, FundraisingsModule],
   providers: [
     PaymentsService,
+    StripeService,
     {
       provide: 'STRIPE_CLIENT',
       useFactory: (configService: ConfigService) => {
@@ -22,6 +24,6 @@ import Stripe from 'stripe';
     },
   ],
   controllers: [PaymentsController],
-  exports: [PaymentsService],
+  exports: [PaymentsService, StripeService],
 })
 export class PaymentsModule {}

@@ -7,6 +7,8 @@ services:
       - '5173:5173'
     environment:
       - VITE_HOST=0.0.0.0
+    env_file:
+      - ./client/.env
     develop:
       watch:
         - action: sync

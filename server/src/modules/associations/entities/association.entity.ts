@@ -129,4 +129,19 @@ export class Association {
   })
   @Column({ type: 'text', nullable: true })
   additionalRequest?: string;
+
+  // Informations de paiement Stripe Connect
+  @ApiProperty({
+    example: 'acct_1234567890',
+    description: "ID du compte Stripe Connect de l'association",
+  })
+  @Column({ length: 100, nullable: true })
+  stripeAccountId?: string;
+
+  @ApiProperty({
+    example: true,
+    description: "Si l'association peut recevoir des dons via Stripe",
+  })
+  @Column({ default: false })
+  canReceiveDonations: boolean;
 }

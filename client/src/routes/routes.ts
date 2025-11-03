@@ -62,6 +62,15 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/profile/donations',
+    name: 'Donations',
+    component: () => import('../views/Donations.vue'),
+    meta: {
+      title: 'Mes dons',
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/associations',
     name: 'Associations',
     component: () => import('../views/Associations.vue'),
@@ -92,6 +101,14 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'CRM',
       dashboard: true,
+    },
+  },
+  {
+    path: '/donation/success',
+    name: 'DonationSuccess',
+    component: () => import('../views/DonationSuccess.vue'),
+    meta: {
+      title: 'Don réussi',
     },
   },
 ];

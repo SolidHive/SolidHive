@@ -41,10 +41,11 @@ export class TransactionsService {
   }
 
   findAll(userId: string, options?: FindOptionsDto) {
-    return this.transactionsRepository.find({
+    const result = this.transactionsRepository.find({
       ...options,
       where: { user: { id: userId } },
     });
+    return result;
   }
 
   findOne(id: string, userId: string, options?: FindOptionsDto) {

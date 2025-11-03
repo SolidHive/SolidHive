@@ -105,7 +105,7 @@
             </div>
 
             <div v-else class="bg-muted/30 flex h-32 items-center justify-center rounded-2xl">
-              <p class="font-paragraph text-muted-foreground text-sm">Chargement...</p>
+              <LoadingOverlay :show="true" message="Chargement de votre profil..." />
             </div>
           </div>
 
@@ -125,7 +125,13 @@
             </div>
 
             <!-- Liste associations -->
-            <div v-if="associations.length > 0" class="space-y-3">
+            <LoadingOverlay
+              v-if="isLoadingAssociations"
+              :show="true"
+              message="Chargement de vos associations..."
+            />
+
+            <div v-else-if="associations.length > 0" class="space-y-3">
               <div
                 v-for="userAssoc in associations"
                 :key="userAssoc.id"
@@ -184,6 +190,70 @@
                   <router-link to="/associations">Explorer les associations</router-link>
                 </Button>
               </div>
+            </div>
+          </div>
+
+          <!-- Mes dons -->
+          <div class="bg-card border-border rounded-3xl border p-6 shadow-sm">
+            <div class="mb-5 flex items-center justify-between">
+              <h2 class="font-subtitle text-foreground text-lg">Mes dons</h2>
+              <Button variant="outline" size="sm" as-child>
+                <router-link to="/profile/donations">
+                  <Heart class="mr-1.5 h-4 w-4" />
+                  Voir tout
+                </router-link>
+              </Button>
+            </div>
+
+            <!-- Liste des dons récents -->
+            <LoadingOverlay
+              v-if="isLoadingDonations"
+              :show="true"
+              message="Chargement de vos dons..."
+            />
+
+            <div v-else-if="recentDonations.length > 0" class="space-y-3">
+              <div
+                v-for="donation in recentDonations"
+                :key="donation.id"
+                class="border-border hover:border-primary/30 bg-muted/20 group rounded-2xl border p-4 transition-all hover:shadow-sm"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-xl"
+                    >
+                      <Heart class="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3
+                        class="font-subtitle text-foreground group-hover:text-primary text-base transition-colors"
+                      >
+                        {{ donation.relatedTo }}
+                      </h3>
+                      <p class="font-paragraph text-muted-foreground text-sm">
+                        {{ formatDate(donation.timestamps.createdAt) }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="text-right">
+                    <p class="font-title text-foreground text-lg font-bold">
+                      {{ formatCurrency(donation.amount) }}
+                    </p>
+                    <p class="font-paragraph text-muted-foreground text-xs">
+                      ID: {{ donation.relatedBy.slice(-8) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Placeholder si aucun don -->
+            <div v-else class="bg-muted/20 rounded-2xl py-8 text-center">
+              <Heart class="text-muted-foreground mx-auto mb-3 h-8 w-8" :stroke-width="1.5" />
+              <p class="font-paragraph text-muted-foreground mb-2 text-sm">Aucun don récent</p>
+              <p class="font-paragraph text-muted-foreground text-xs">Vos dons apparaîtront ici</p>
             </div>
           </div>
         </div>
@@ -258,7 +328,7 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue';
   import Database from '../utils/database.utils';
-  import type { User, UserAssociation } from '../interfaces/user.interface';
+  import type { User, UserAssociation, Transaction } from '../interfaces';
   import { Button } from '../components/ui/button';
   import { useRouter } from 'vue-router';
   import {
@@ -271,19 +341,30 @@
     Building2,
     Trash2,
     LogOut,
+    Heart,
   } from 'lucide-vue-next';
   import { useToast } from 'vue-toastification';
   import { useAuthStore } from '../stores/auth';
+  import LoadingOverlay from '../components/LoadingOverlay.vue';
 
+  // État réactif
   const profile = ref<User | null>(null);
   const associations = ref<UserAssociation[]>([]);
+  const recentDonations = ref<Transaction[]>([]);
+  const isLoadingProfile = ref(true);
+  const isLoadingAssociations = ref(true);
+  const isLoadingDonations = ref(true);
+  const isLoggingOut = ref(false);
+
+  // Composables
   const router = useRouter();
   const toast = useToast();
   const authStore = useAuthStore();
-  const isLoggingOut = ref(false);
 
+  // Computed
   const hasNoAssociations = computed(() => associations.value.length === 0);
 
+  // Méthodes utilitaires
   function formatDate(dateString: string, shortFormat = false): string {
     const date = new Date(dateString);
 
@@ -304,31 +385,63 @@
     }).format(date);
   }
 
-  async function loadProfile() {
+  function formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(amount);
+  }
+
+  // Méthodes de chargement des données
+  async function loadProfile(): Promise<void> {
     try {
+      isLoadingProfile.value = true;
       const data = await Database.getAll('auth/profile');
       profile.value = data || null;
     } catch (err) {
       console.error('Erreur lors du chargement du profil:', err);
       profile.value = null;
+    } finally {
+      isLoadingProfile.value = false;
     }
   }
 
-  async function loadAssociations() {
+  async function loadAssociations(): Promise<void> {
     try {
+      isLoadingAssociations.value = true;
       const data = await Database.getAll('users/me/associations');
       associations.value = data || [];
     } catch (err) {
       console.error('Erreur lors du chargement des associations:', err);
       associations.value = [];
+    } finally {
+      isLoadingAssociations.value = false;
     }
   }
 
-  function createAssociation() {
+  async function loadRecentDonations(): Promise<void> {
+    try {
+      isLoadingDonations.value = true;
+      console.log('Chargement des dons récents...');
+      const transactions = await Database.getAll('transactions', {
+        order: JSON.stringify({ 'timestamps.createdAt': 'DESC' }),
+        take: 3,
+      });
+      console.log('Dons récents reçus:', transactions);
+      recentDonations.value = transactions;
+    } catch (error) {
+      console.error('Erreur lors du chargement des dons récents:', error);
+    } finally {
+      isLoadingDonations.value = false;
+    }
+  }
+
+  // Méthodes d'actions
+  function createAssociation(): void {
     router.push('/association/create');
   }
 
-  function getStatusBadgeClass(status: string) {
+  function getStatusBadgeClass(status: string): string {
     switch (status) {
       case 'accepted':
         return 'bg-secondary/10 text-secondary border border-secondary/20';
@@ -341,7 +454,7 @@
     }
   }
 
-  function getStatusText(status: string) {
+  function getStatusText(status: string): string {
     switch (status) {
       case 'accepted':
         return 'Accepté';
@@ -354,7 +467,7 @@
     }
   }
 
-  async function handleLogout() {
+  async function handleLogout(): Promise<void> {
     try {
       isLoggingOut.value = true;
       await authStore.logout();
@@ -369,8 +482,10 @@
     }
   }
 
+  // Lifecycle
   onMounted(() => {
     loadProfile();
     loadAssociations();
+    loadRecentDonations();
   });
 </script>
