@@ -85,6 +85,15 @@ const routes: RouteRecordRaw[] = [
       title: 'Événements',
     },
   },
+  {
+    path: '/crm/:id',
+    name: 'CRM',
+    component: () => import('../views/crm/Home.vue'),
+    meta: {
+      title: 'CRM',
+      dashboard: true,
+    },
+  },
 ];
 
 export default routes;
