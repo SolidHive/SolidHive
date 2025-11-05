@@ -1,6 +1,6 @@
 # Lint et format uniquement les fichiers stagés
 echo "🔧 Vérification et formatage des fichiers modifiés..."
-npx lint-staged
+npm run lint
 
 if [ $? -ne 0 ]; then
   echo "❌ Le linting ou le formatage a échoué. Corrigez les erreurs avant de commiter."

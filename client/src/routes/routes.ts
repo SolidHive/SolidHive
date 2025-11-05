@@ -62,6 +62,15 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/profile/donations',
+    name: 'Donations',
+    component: () => import('../views/Donations.vue'),
+    meta: {
+      title: 'Mes dons',
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/associations',
     name: 'Associations',
     component: () => import('../views/Associations.vue'),
@@ -75,6 +84,14 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/AssociationDetail.vue'),
     meta: {
       title: "Détails de l'association",
+    },
+  },
+  {
+    path: '/association/:id/donate',
+    name: 'Donation',
+    component: () => import('../views/Donation.vue'),
+    meta: {
+      title: 'Faire un don',
     },
   },
   {
@@ -92,6 +109,14 @@ const routes: RouteRecordRaw[] = [
     meta: {
       title: 'CRM',
       dashboard: true,
+    },
+  },
+  {
+    path: '/donation/success',
+    name: 'DonationSuccess',
+    component: () => import('../views/DonationSuccess.vue'),
+    meta: {
+      title: 'Don réussi',
     },
   },
 ];

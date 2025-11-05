@@ -22,5 +22,6 @@ import { UserAssociation } from './modules/users/entities/user-association.entit
   ],
   controllers: [AssociationsController],
   providers: [AssociationsService],
+  exports: [AssociationsService],
 })
 export class AssociationsModule {}

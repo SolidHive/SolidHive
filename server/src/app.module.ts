@@ -11,6 +11,7 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { AnnouncementsModule } from './modules/announcements/announcements.module';
 import { FilesModule } from './modules/files/files.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { FilesModule } from './modules/files/files.module';
     TransactionsModule,
     AnnouncementsModule,
     FilesModule,
+    PaymentsModule,
   ],
   controllers: [],
   providers: [],

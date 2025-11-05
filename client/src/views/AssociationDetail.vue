@@ -125,7 +125,7 @@
 
 <script setup lang="ts">
   import { ref, computed, onMounted } from 'vue';
-  import { useRoute } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
   import AssociationHero from '@/components/associations/hero/AssociationHero.vue';
   import AssociationMenu from '@/components/associations/menu/AssociationMenu.vue';
   import AnnouncementsSlider from '@/components/associations/sliders/AnnouncementsSlider.vue';
@@ -149,6 +149,7 @@
   import type { FileMetadata } from '@/interfaces/file.interface';
 
   const route = useRoute();
+  const router = useRouter();
   const association = ref<Association | null>(null);
   const loading = ref(true);
   const error = ref<string | null>(null);
@@ -294,7 +295,7 @@
   };
 
   const faireUnDon = () => {
-    alert('Redirection vers la page de don à implémenter');
+    router.push(`/association/${route.params.id}/donate`);
   };
 
   const onTabChange = (tab: string) => {
