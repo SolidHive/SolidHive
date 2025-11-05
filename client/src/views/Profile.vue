@@ -229,7 +229,7 @@
                       <h3
                         class="font-subtitle text-foreground group-hover:text-primary text-base transition-colors"
                       >
-                        {{ donation.relatedTo }}
+                        {{ getAssociationName(donation.relatedBy) }}
                       </h3>
                       <p class="font-paragraph text-muted-foreground text-sm">
                         {{ formatDate(donation.timestamps.createdAt) }}
@@ -242,8 +242,16 @@
                       {{ formatCurrency(donation.amount) }}
                     </p>
                     <p class="font-paragraph text-muted-foreground text-xs">
-                      ID: {{ donation.relatedBy.slice(-8) }}
+                      Association • ID: {{ donation.relatedBy.slice(-8) }}
                     </p>
+                    <div
+                      v-if="donation.solidHiveAmount && donation.solidHiveAmount > 0"
+                      class="mt-1"
+                    >
+                      <p class="font-paragraph text-primary text-xs">
+                        Inclut {{ formatCurrency(donation.solidHiveAmount) }} pour SolidHive
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -350,9 +358,11 @@
   // État réactif
   const profile = ref<User | null>(null);
   const associations = ref<UserAssociation[]>([]);
+  const allAssociations = ref<any[]>([]);
   const recentDonations = ref<Transaction[]>([]);
   const isLoadingProfile = ref(true);
   const isLoadingAssociations = ref(true);
+  const isLoadingAllAssociations = ref(true);
   const isLoadingDonations = ref(true);
   const isLoggingOut = ref(false);
 
@@ -417,6 +427,25 @@
     } finally {
       isLoadingAssociations.value = false;
     }
+  }
+
+  async function loadAllAssociations(): Promise<void> {
+    try {
+      isLoadingAllAssociations.value = true;
+      const data = await Database.getAll('associations');
+      allAssociations.value = data || [];
+    } catch (err) {
+      console.error('Erreur lors du chargement de toutes les associations:', err);
+      allAssociations.value = [];
+    } finally {
+      isLoadingAllAssociations.value = false;
+    }
+  }
+
+  // Fonction pour obtenir le nom de l'association
+  function getAssociationName(associationId: string): string {
+    const association = allAssociations.value.find((assoc: any) => assoc.id === associationId);
+    return association ? association.name : 'Association inconnue';
   }
 
   async function loadRecentDonations(): Promise<void> {
@@ -486,6 +515,7 @@
   onMounted(() => {
     loadProfile();
     loadAssociations();
+    loadAllAssociations();
     loadRecentDonations();
   });
 </script>

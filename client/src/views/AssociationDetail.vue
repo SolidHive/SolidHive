@@ -120,15 +120,12 @@
     <div class="mt-8">
       <ContactSection @change-tab="onTabChange" />
     </div>
-
-    <!-- Modal de don -->
-    <DonationModal v-model:open="isDonationModalOpen" :association="association" />
   </div>
 </template>
 
 <script setup lang="ts">
   import { ref, computed, onMounted } from 'vue';
-  import { useRoute } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
   import AssociationHero from '@/components/associations/hero/AssociationHero.vue';
   import AssociationMenu from '@/components/associations/menu/AssociationMenu.vue';
   import AnnouncementsSlider from '@/components/associations/sliders/AnnouncementsSlider.vue';
@@ -143,7 +140,6 @@
   import ContactSection from '@/components/associations/ContactSection.vue';
   import PageContainer from '@/components/PageContainer.vue';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
-  import DonationModal from '@/components/associations/DonationModal.vue';
   import Database from '@/utils/database.utils';
   import api from '@/utils/api.utils';
   import type { Association } from '@/interfaces/association.interface';
@@ -153,6 +149,7 @@
   import type { FileMetadata } from '@/interfaces/file.interface';
 
   const route = useRoute();
+  const router = useRouter();
   const association = ref<Association | null>(null);
   const loading = ref(true);
   const error = ref<string | null>(null);
@@ -173,9 +170,6 @@
   const annonces = ref<Announcement[]>([]);
   const campaigns = ref<Fundraising[]>([]);
   const eventsList = ref<Event[]>([]);
-
-  // Modal de don
-  const isDonationModalOpen = ref(false);
 
   // Pagination computed
   const paginatedAnnonces = computed(() => {
@@ -301,7 +295,7 @@
   };
 
   const faireUnDon = () => {
-    isDonationModalOpen.value = true;
+    router.push(`/association/${route.params.id}/donate`);
   };
 
   const onTabChange = (tab: string) => {

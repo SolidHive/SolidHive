@@ -42,6 +42,14 @@ export class Transaction {
   @Column({ length: 255 })
   invoicePath: string;
 
+  @ApiProperty({
+    example: 5.0,
+    description: 'Montant du don à SolidHive (optionnel)',
+    required: false,
+  })
+  @Column({ type: 'float', nullable: true })
+  solidHiveAmount: number | null;
+
   @Column(() => Timestamps)
   timestamps: Timestamps;
 

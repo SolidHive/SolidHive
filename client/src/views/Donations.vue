@@ -53,7 +53,7 @@
                     <h3
                       class="font-subtitle text-foreground group-hover:text-primary text-base transition-colors"
                     >
-                      {{ donation.relatedTo }}
+                      {{ getAssociationName(donation.relatedBy) }}
                     </h3>
                     <p class="font-paragraph text-muted-foreground text-sm">
                       {{ formatDate(donation.timestamps.createdAt) }}
@@ -66,8 +66,13 @@
                     {{ formatCurrency(donation.amount) }}
                   </p>
                   <p class="font-paragraph text-muted-foreground text-xs">
-                    ID: {{ donation.relatedBy.slice(-8) }}
+                    Association • ID: {{ donation.relatedBy.slice(-8) }}
                   </p>
+                  <div v-if="donation.solidHiveAmount && donation.solidHiveAmount > 0" class="mt-1">
+                    <p class="font-paragraph text-primary text-xs">
+                      Inclut {{ formatCurrency(donation.solidHiveAmount) }} pour SolidHive
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -120,7 +125,9 @@
 
   // État
   const donations = ref<Transaction[]>([]);
+  const associations = ref<any[]>([]);
   const isLoading = ref(true);
+  const isLoadingAssociations = ref(true);
 
   // Calculs
   const totalAmount = computed(() =>
@@ -163,7 +170,28 @@
     }
   };
 
+  // Chargement des associations
+  const loadAssociations = async (): Promise<void> => {
+    try {
+      isLoadingAssociations.value = true;
+      const data = await Database.getAll('associations');
+      associations.value = data || [];
+    } catch (error) {
+      console.error('Erreur lors du chargement des associations:', error);
+      associations.value = [];
+    } finally {
+      isLoadingAssociations.value = false;
+    }
+  };
+
+  // Fonction pour obtenir le nom de l'association
+  const getAssociationName = (associationId: string): string => {
+    const association = associations.value.find((assoc) => assoc.id === associationId);
+    return association ? association.name : 'Association inconnue';
+  };
+
   onMounted(() => {
     loadDonations();
+    loadAssociations();
   });
 </script>

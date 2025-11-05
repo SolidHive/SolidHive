@@ -4,6 +4,7 @@ export interface Transaction {
   relatedTo: string;
   relatedBy: string;
   invoicePath: string;
+  solidHiveAmount?: number;
   timestamps: {
     createdAt: string;
     updatedAt: string;

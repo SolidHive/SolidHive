@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString, IsUUID, Min, IsOptional } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsUUID,
+  Min,
+  IsOptional,
+  IsBoolean,
+  Max,
+} from 'class-validator';
 
 export class CreateDonationDto {
   @ApiProperty({
@@ -36,4 +45,24 @@ export class CreateDonationDto {
   @IsOptional()
   @IsString()
   message?: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'Inclure un don à SolidHive',
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  supportSolidHive?: boolean;
+
+  @ApiProperty({
+    example: 5.0,
+    description: 'Pourcentage du don à SolidHive (optionnel, défaut 5%)',
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  solidHivePercentage?: number;
 }
