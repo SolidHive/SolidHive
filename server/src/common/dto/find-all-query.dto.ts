@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsOptional } from 'class-validator';
+import { IsOptional, IsString, IsEnum } from 'class-validator';
 
 export class FindOptionsDto {
   @ApiPropertyOptional({
@@ -52,4 +52,20 @@ export class FindOptionsDto {
   })
   @IsOptional()
   take?: number;
+
+  @ApiPropertyOptional({
+    description: 'Filtre par nom',
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiPropertyOptional({
+    description: 'Ordre de tri par nom',
+    enum: ['ASC', 'DESC'],
+  })
+  @IsOptional()
+  @IsEnum(['ASC', 'DESC'])
+  orderBy?: 'ASC' | 'DESC';
 }

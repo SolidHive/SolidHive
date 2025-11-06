@@ -11,6 +11,7 @@ export interface Association {
   image?: string;
   aboutImage?: string;
   images?: string[];
+  createdAt?: string;
   // Propriétés Stripe Connect
   stripeAccountId?: string;
   canReceiveDonations?: boolean;
