@@ -6,12 +6,13 @@ import { User } from '../users/entities/user.entity';
 import { CreateAssociationDto } from './dto/create-association.dto';
 import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
+import { StatusAssociationDto } from './dto/status-association.dto';
+import { UpdateStripeAccountDto } from './dto/update-stripe-account.dto';
 import { Permissions } from '../../common/enums/permissions';
 import { AssociationRole } from './modules/roles/entities/association-role.entity';
 import { UserAssociation } from './modules/users/entities/user-association.entity';
 import { Status } from '../../common/enums/status';
-import { StatusAssociationDto } from './dto/status-association.dto';
-import { UpdateStripeAccountDto } from './dto/update-stripe-account.dto';
+import { Like } from 'typeorm';
 
 @Injectable()
 export class AssociationsService {
@@ -60,8 +61,31 @@ export class AssociationsService {
     );
   }
 
-  findAll(options?: FindOptionsDto) {
-    return this.associationsRepository.find({ ...options, where: { status: Status.ACCEPTED } });
+  findAll(options?: FindOptionsDto & { name?: string; orderBy?: 'ASC' | 'DESC' }) {
+    const where: any = { status: Status.ACCEPTED };
+    if (options?.name) {
+      where.name = Like(`%${options.name}%`);
+    }
+
+    let order: any = options?.order;
+    if (options?.orderBy) {
+      order = { name: options.orderBy };
+    }
+
+    if (options?.take) {
+      return this.associationsRepository
+        .findAndCount({
+          where,
+          order,
+          skip: options.skip,
+          take: options.take,
+        })
+        .then(([data, total]) => ({ data, total }));
+    }
+    return this.associationsRepository.find({
+      where,
+      order,
+    });
   }
 
   findOne(id: string, options?: FindOptionsDto) {

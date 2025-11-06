@@ -1,111 +1,291 @@
 <template>
   <PageContainer>
-    <div>
-      <div class="mb-8 text-center">
-        <h1 class="mb-4 text-4xl font-bold text-gray-900">Associations</h1>
+    <div class="space-y-8">
+      <!-- Page Header -->
+      <header class="text-center">
+        <h1 class="font-title text-secondary mb-4 text-2xl md:text-4xl">
+          Rechercher une association
+        </h1>
         <p class="text-lg text-gray-600">Découvrez les associations partenaires de SolidHive</p>
-      </div>
+      </header>
 
-      <!-- Loading State -->
-      <div v-if="loading" class="flex items-center justify-center py-12">
-        <div class="loader" />
-      </div>
+      <!-- Filters Section -->
+      <section class="space-y-6">
+        <Filter
+          :filters="availableFilters"
+          :initial-filters="currentFilters"
+          name-label="Nom de l'association"
+          name-placeholder="Rechercher par nom..."
+          order-label="Ordre :"
+          apply-button-text="Appliquer les filtres"
+          clear-button-text="Effacer les filtres"
+          @apply="handleApplyFilters"
+          @clear="handleClearFilters"
+        />
+      </section>
 
-      <!-- Empty State -->
-      <div v-else-if="associations.length === 0" class="py-12 text-center">
-        <Building class="mx-auto mb-4 h-16 w-16 text-gray-400" />
-        <h3 class="mb-2 text-xl font-semibold text-gray-900">Aucune association trouvée</h3>
-        <p class="text-gray-600">Les associations seront bientôt disponibles.</p>
-      </div>
+      <!-- Content Section -->
+      <section>
+        <!-- Loading State -->
+        <LoadingOverlay v-if="isLoading" :show="true" message="Chargement des associations..." />
 
-      <!-- Associations Grid -->
-      <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <div
-          v-for="association in associations"
-          :key="association.id"
-          class="overflow-hidden rounded-lg bg-white shadow-md transition-shadow hover:shadow-lg"
-        >
-          <div class="p-6">
-            <div class="mb-4 flex items-center">
-              <div class="bg-primary mr-4 flex h-12 w-12 items-center justify-center rounded-full">
-                <Building class="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 class="text-xl font-semibold text-gray-900">{{ association.name }}</h3>
-                <p v-if="association.contact" class="text-sm text-gray-500">
-                  {{ association.contact }}
-                </p>
-              </div>
-            </div>
-
-            <p class="mb-4 line-clamp-3 text-gray-600">
-              {{ association.description || 'Aucune description disponible.' }}
-            </p>
-
-            <div class="flex items-center justify-between">
-              <div class="text-sm text-gray-500">Statut: {{ association.status }}</div>
-              <Button size="sm" @click="viewAssociation(association.id)">Voir plus</Button>
-            </div>
-          </div>
+        <!-- Empty State -->
+        <div v-else-if="hasNoAssociations" class="py-12 text-center">
+          <h3 class="text-secondary mb-2 text-xl font-semibold">Aucune association trouvée</h3>
+          <p class="text-gray-600">Les associations seront bientôt disponibles.</p>
         </div>
-      </div>
+
+        <!-- Associations Grid -->
+        <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+          <article
+            v-for="association in associations"
+            :key="association.id"
+            class="group relative aspect-square w-full overflow-hidden rounded-xl bg-gray-200 bg-cover bg-center shadow-md transition-all duration-300 hover:shadow-lg md:aspect-auto md:h-32 xl:h-40 2xl:h-48"
+            :class="{ 'bg-gray-300': !association.logo }"
+            :style="associationBackgroundStyle(association)"
+          >
+            <!-- Gradient Overlay -->
+            <div
+              class="absolute inset-0 z-10 h-full w-full"
+              :style="associationGradientStyle(association)"
+            />
+
+            <!-- Dark Overlay -->
+            <div class="absolute inset-0 z-20 h-full w-full bg-black/15" />
+
+            <!-- Association Name -->
+            <div
+              class="absolute right-0 bottom-0 left-0 z-30 -translate-y-12 p-2 transition-transform duration-300 md:translate-y-0 md:p-4 md:group-hover:-translate-y-12"
+            >
+              <h3 class="text-md font-title leading-tight text-white md:text-lg">
+                {{ association.name }}
+              </h3>
+            </div>
+
+            <!-- Action Button -->
+            <div
+              class="absolute right-0 bottom-0 left-0 z-20 flex translate-y-0 items-center justify-center p-2 transition-transform duration-300 md:translate-y-full md:p-4 md:group-hover:translate-y-0"
+            >
+              <Button
+                :style="associationButtonStyle(association)"
+                variant="secondary"
+                size="sm"
+                class="md:size-default w-full"
+                @click="navigateToAssociation(association.id)"
+              >
+                Voir l'association
+              </Button>
+            </div>
+          </article>
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="!isLoading && hasAssociations" class="mt-8">
+          <Pagination
+            :total-items="totalItems"
+            :items-per-page="ITEMS_PER_PAGE"
+            :current-page="currentPage"
+            @update:current-page="handlePageChange"
+          />
+        </div>
+      </section>
     </div>
   </PageContainer>
 </template>
 
 <script setup lang="ts">
-  import PageContainer from '@/components/PageContainer.vue';
-  import { ref, onMounted } from 'vue';
+  // Vue imports
+  import { computed, ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
+
+  // Component imports
+  import PageContainer from '@/components/PageContainer.vue';
   import { Button } from '@/components/ui/button';
-  import { Building } from 'lucide-vue-next';
+  import Pagination from '@/components/ui/Pagination.vue';
+  import Filter from '@/components/ui/Filter.vue';
+  import LoadingOverlay from '@/components/LoadingOverlay.vue';
+
+  // Utility imports
   import Database from '@/utils/database.utils';
+  import api from '@/utils/api.utils';
 
-  interface Association {
-    id: string;
-    name: string;
-    description?: string;
-    contact?: string;
-    primaryColor?: string;
-    secondaryColor?: string;
-    status: string;
-  }
+  // Type imports
+  import type { FileMetadata } from '@/interfaces/file.interface';
+  import type { Association } from '@/interfaces/association.interface';
 
+  // Types
+  type SortOrder = 'ASC' | 'DESC';
+  type AssociationFilters = {
+    name?: string;
+    order?: SortOrder;
+  };
+
+  // Constants
+  const ITEMS_PER_PAGE = 10;
+  const DEFAULT_FILTERS: AssociationFilters = {};
+
+  // Router
   const router = useRouter();
-  const associations = ref<Association[]>([]);
-  const loading = ref(true);
-  const error = ref<string | null>(null);
 
-  const loadAssociations = async () => {
+  // Reactive state
+  const associations = ref<Association[]>([]);
+  const isLoading = ref(true);
+  const error = ref<string | null>(null);
+  const currentPage = ref(1);
+  const totalItems = ref(0);
+  const currentFilters = ref<AssociationFilters>(DEFAULT_FILTERS);
+
+  // Computed properties
+  const availableFilters = computed(() => ['name', 'order']);
+
+  const hasNoAssociations = computed(() => associations.value.length === 0);
+  const hasAssociations = computed(() => associations.value.length > 0);
+
+  // Methods
+  /**
+   * Loads associations with pagination and filters
+   */
+  const loadAssociations = async (page = 1) => {
     try {
-      loading.value = true;
+      isLoading.value = true;
       error.value = null;
 
-      const response = await Database.getAll('associations');
-      associations.value = response;
+      const options: any = {
+        skip: (page - 1) * ITEMS_PER_PAGE,
+        take: ITEMS_PER_PAGE,
+      };
+
+      if (currentFilters.value.name) {
+        options.name = currentFilters.value.name;
+      }
+
+      if (currentFilters.value.order) {
+        options.orderBy = currentFilters.value.order;
+      }
+
+      const response = await Database.getAll('associations', options);
+      associations.value = response.data || [];
+      totalItems.value = response.total || 0;
+
+      // Load logos in parallel
+      await Promise.all(
+        associations.value.map(async (association: Association) => {
+          association.logo = await loadAssociationLogo(association.id);
+        })
+      );
     } catch (err) {
       error.value = 'Impossible de charger les associations. Veuillez réessayer.';
       console.error('Error loading associations:', err);
     } finally {
-      loading.value = false;
+      isLoading.value = false;
     }
   };
 
-  const viewAssociation = (id: string) => {
+  /**
+   * Loads the logo for a specific association
+   */
+  const loadAssociationLogo = async (associationId: string): Promise<string | undefined> => {
+    const files: FileMetadata[] = [];
+    let index = 0;
+
+    while (true) {
+      try {
+        const response = await api.get(`/files/Association/${associationId}/metadata`, {
+          params: { index },
+        });
+        if (response.data) {
+          files.push(response.data);
+          index++;
+        } else {
+          break;
+        }
+      } catch (err: any) {
+        if (err.response?.status === 404) break;
+        console.error('Error loading file metadata:', err);
+        break;
+      }
+    }
+
+    const logoFile = files.find((f) => f.purpose === 'logo');
+    return logoFile ? `/files/Association/${associationId}?index=${logoFile.index}` : undefined;
+  };
+
+  /**
+   * Navigates to the association detail page
+   */
+  const navigateToAssociation = (id: string) => {
     router.push(`/association/${id}`);
   };
 
+  /**
+   * Checks if a color is light (for text contrast)
+   */
+  const isLightColor = (color?: string): boolean => {
+    if (!color) return false;
+
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    return luminance > 0.5;
+  };
+
+  /**
+   * Handles page change from pagination component
+   */
+  const handlePageChange = (page: number) => {
+    currentPage.value = page;
+    loadAssociations(page);
+  };
+
+  /**
+   * Handles filter application
+   */
+  const handleApplyFilters = (filters: AssociationFilters) => {
+    currentFilters.value = filters;
+    currentPage.value = 1; // Reset to first page
+    loadAssociations(1);
+  };
+
+  /**
+   * Handles filter clearing
+   */
+  const handleClearFilters = () => {
+    currentFilters.value = { ...DEFAULT_FILTERS };
+    currentPage.value = 1;
+    loadAssociations(1);
+  };
+
+  /**
+   * Returns the background style for an association card
+   */
+  const associationBackgroundStyle = (association: Association) => {
+    return association.logo ? { backgroundImage: `url(${association.logo})` } : {};
+  };
+
+  /**
+   * Returns the gradient overlay style for an association card
+   */
+  const associationGradientStyle = (association: Association) => {
+    return association.primaryColor
+      ? `background: linear-gradient(to top, ${association.primaryColor}CC 0%, ${association.primaryColor}88 35%, rgba(0,0,0,0) 70%)`
+      : '';
+  };
+
+  /**
+   * Returns the button style for an association card
+   */
+  const associationButtonStyle = (association: Association) => {
+    return {
+      backgroundColor: association.primaryColor,
+      color: isLightColor(association.primaryColor) ? 'black' : 'white',
+    };
+  };
+
+  // Lifecycle
   onMounted(() => {
     loadAssociations();
   });
 </script>
-
-<style scoped>
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-clamp: 3;
-  }
-</style>

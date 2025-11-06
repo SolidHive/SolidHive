@@ -1,23 +1,34 @@
 <template>
   <div v-if="totalPages > 1" class="mt-8 flex items-center justify-center gap-2">
+    <!-- Double flèche gauche -->
     <button
       :disabled="currentPage === 1"
-      class="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+      class="text-secondary hover:text-secondary/80 flex h-10 w-10 items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
+      aria-label="Première page"
+      @click="goToPage(1)"
+    >
+      <ChevronsLeft class="h-4 w-4" />
+    </button>
+
+    <!-- Flèche gauche -->
+    <button
+      :disabled="currentPage === 1"
+      class="text-secondary hover:text-secondary/80 flex h-10 w-10 items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
       aria-label="Page précédente"
       @click="goToPage(currentPage - 1)"
     >
       <ChevronLeft class="h-4 w-4" />
     </button>
 
-    <div class="flex gap-1">
+    <div class="flex items-center gap-1">
       <button
         v-for="page in visiblePages"
         :key="page"
         :class="[
-          'flex h-10 w-10 items-center justify-center rounded-full border text-sm font-medium',
+          'flex items-center justify-center text-sm font-medium',
           page === currentPage
-            ? 'border-secondary bg-secondary text-white'
-            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+            ? 'bg-secondary h-7 w-7 rounded-full text-white'
+            : 'hover:text-secondary h-10 w-10 text-gray-700',
         ]"
         :aria-label="page === -1 ? '...' : `Aller à la page ${page}`"
         :disabled="page === -1"
@@ -27,20 +38,31 @@
       </button>
     </div>
 
+    <!-- Flèche droite -->
     <button
       :disabled="currentPage === totalPages"
-      class="flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+      class="text-secondary hover:text-secondary/80 flex h-10 w-10 items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
       aria-label="Page suivante"
       @click="goToPage(currentPage + 1)"
     >
       <ChevronRight class="h-4 w-4" />
+    </button>
+
+    <!-- Double flèche droite -->
+    <button
+      :disabled="currentPage === totalPages"
+      class="text-secondary hover:text-secondary/80 flex h-10 w-10 items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
+      aria-label="Dernière page"
+      @click="goToPage(totalPages)"
+    >
+      <ChevronsRight class="h-4 w-4" />
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
   import { computed } from 'vue';
-  import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
+  import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-vue-next';
 
   const props = defineProps<{
     totalItems: number;
