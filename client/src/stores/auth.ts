@@ -91,6 +91,21 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function hasAccessToAssociation(associationId: string) {
+    if (!isAuthenticated()) {
+      return false;
+    }
+    try {
+      const result = await Database.getAll(`users/me/association/${associationId}`);
+      return result;
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message: string }>;
+      error.value =
+        axiosError.response?.data?.message || "Erreur lors de la vérification de l'accès";
+      return false;
+    }
+  }
+
   return {
     user,
     error,
@@ -101,5 +116,6 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     createAssociation,
     uploadAssociationFile,
+    hasAccessToAssociation,
   };
 });

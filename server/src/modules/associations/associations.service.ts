@@ -53,6 +53,7 @@ export class AssociationsService {
           user,
           association: savedAssociation,
           role: savedRole,
+          status: Status.ACCEPTED,
         });
         await transactionalEntityManager.save(UserAssociation, addUserAssociation);
 

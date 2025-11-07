@@ -421,6 +421,7 @@
       isLoadingAssociations.value = true;
       const data = await Database.getAll('users/me/associations');
       associations.value = data || [];
+      console.log('Associations utilisateur chargées:', associations.value);
     } catch (err) {
       console.error('Erreur lors du chargement des associations:', err);
       associations.value = [];

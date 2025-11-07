@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req, UseGuards, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
@@ -38,5 +38,22 @@ export class UsersController {
       throw new Error('User not authenticated');
     }
     return this.usersService.getUserAssociations(userId);
+  }
+
+  @Get('me/association/:associationId')
+  @UseGuards(AuthenticatedGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Has access to association' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns true if the user has access to the association, false otherwise.',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async hasAccessToAssociation(@Req() req: Request, @Param('associationId') associationId: string) {
+    const userId = req.user?.['id'];
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+    return this.usersService.hasAccessToAssociation(userId, associationId);
   }
 }

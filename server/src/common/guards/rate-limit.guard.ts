@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';
-import { rateLimit, RateLimitRequestHandler, ipKeyGenerator } from 'express-rate-limit';
+import { rateLimit, RateLimitRequestHandler } from 'express-rate-limit';
 import * as requestIp from 'request-ip';
 
 export const RATE_LIMIT_KEY = 'rate_limit';
@@ -27,27 +27,54 @@ export const SetRateLimit = (config: RateLimitConfig): MethodDecorator & ClassDe
 
 @Injectable()
 export class RateLimitGuard implements CanActivate {
-  private readonly limiter: RateLimitRequestHandler;
+  private readonly limiters = new Map<string, RateLimitRequestHandler>();
+  private readonly defaultConfig: RateLimitConfig = {
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // 100 requêtes
+    message: 'Trop de requêtes, veuillez réessayer plus tard',
+  };
 
-  constructor(private reflector: Reflector) {
-    // Créer le limiter une fois dans le constructor
-    this.limiter = rateLimit({
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100, // 100 requêtes par fenêtre
-      message: { message: 'Trop de requêtes, veuillez réessayer plus tard' },
-      standardHeaders: true,
-      legacyHeaders: false,
-      keyGenerator: (req) => ipKeyGenerator(requestIp.getClientIp(req) || req.ip || 'unknown'),
-      skip: () => false,
-    });
-  }
+  constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
 
+    const handler = context.getHandler();
+    const controller = context.getClass();
+
+    const config =
+      this.reflector.get<RateLimitConfig>(RATE_LIMIT_KEY, handler) ??
+      this.reflector.get<RateLimitConfig>(RATE_LIMIT_KEY, controller) ??
+      this.defaultConfig;
+
+    const key = `${controller.name}-${handler.name}`;
+
+    if (!this.limiters.has(key)) {
+      this.limiters.set(
+        key,
+        rateLimit({
+          windowMs: config.windowMs,
+          max: config.max,
+          message: { message: config.message || this.defaultConfig.message },
+          standardHeaders: true,
+          legacyHeaders: false,
+          keyGenerator: (req) => requestIp.getClientIp(req) || req.ip || 'ip-inconnue',
+          skip: () => false,
+        })
+      );
+    }
+
+    const limiter = this.limiters.get(key);
+
+    if (!limiter) {
+      console.error(`Limiteur pour ${key} non trouvé`);
+      return true;
+    }
+
     return new Promise((resolve) => {
-      void this.limiter(request, response, () => {
+      // Utilisation de `void` pour marquer explicitement que la promesse retournée par le middleware est ignorée
+      void limiter(request, response, () => {
         resolve(true);
       });
     });
