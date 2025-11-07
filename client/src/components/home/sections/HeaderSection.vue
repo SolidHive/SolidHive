@@ -33,7 +33,7 @@
     </div>
     <!-- Image hexagonale à droite -->
     <div class="mt-4 hidden justify-center sm:mt-8 lg:mt-0 lg:flex lg:justify-end">
-      <div class="h-[240px] w-[240px] lg:h-[400px] lg:w-[400px] 2xl:h-[550px] 2xl:w-[550px]">
+      <div class="h-60 w-60 lg:h-[400px] lg:w-[400px] 2xl:h-[550px] 2xl:w-[550px]">
         <img
           :src="polygonImage"
           alt="Solidarité communautaire"

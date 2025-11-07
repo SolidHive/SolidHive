@@ -25,11 +25,16 @@ import { UserAssociationDecorator } from 'src/common/decorators/user-association
 import { UserAssociation } from '../users/entities/user-association.entity';
 
 @ApiTags('Association - Fundraisings')
-@Controller('association/:associationId')
+@Controller()
 export class FundraisingsController {
   constructor(private readonly fundraisingsService: FundraisingsService) {}
 
-  @Post('fundraising')
+  @Get('fundraisings')
+  findAllGlobal(@Query() options?: FindOptionsDto & { association?: string; date?: string }) {
+    return this.fundraisingsService.findAllGlobal(options);
+  }
+
+  @Post('association/:associationId/fundraising')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.FUNDRAISINGS_CREATE)
   @ApiCookieAuth()
@@ -43,12 +48,12 @@ export class FundraisingsController {
     return this.fundraisingsService.create(createFundraisingDto, userAssociation);
   }
 
-  @Get('fundraisings')
+  @Get('association/:associationId/fundraisings')
   findAll(@Param('associationId') associationId: string, @Query() options?: FindOptionsDto) {
     return this.fundraisingsService.findAll(associationId, options);
   }
 
-  @Get('fundraising/:id')
+  @Get('association/:associationId/fundraising/:id')
   findOne(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
@@ -57,7 +62,7 @@ export class FundraisingsController {
     return this.fundraisingsService.findOne(id, associationId, options);
   }
 
-  @Patch('fundraising/:id')
+  @Patch('association/:associationId/fundraising/:id')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.FUNDRAISINGS_UPDATE)
   @ApiCookieAuth()
@@ -71,7 +76,7 @@ export class FundraisingsController {
     return this.fundraisingsService.update(id, associationId, updateFundraisingDto);
   }
 
-  @Delete('fundraising/:id')
+  @Delete('association/:associationId/fundraising/:id')
   @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.FUNDRAISINGS_DELETE)
   @ApiCookieAuth()

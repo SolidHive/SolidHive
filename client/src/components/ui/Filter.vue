@@ -1,34 +1,60 @@
 <template>
   <!-- Filter Fields -->
   <div class="space-y-3 sm:space-y-4">
-    <!-- Name Filter -->
-    <div v-if="hasNameFilter" class="space-y-1">
-      <label class="block text-sm font-medium text-gray-700">
-        {{ nameLabel }}
-      </label>
-      <input
-        v-model="localFilters.name"
-        type="text"
-        class="focus:ring-secondary w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:outline-none"
-        :placeholder="namePlaceholder"
-      />
-    </div>
+    <!-- Custom Fields -->
+    <div v-for="field in customFields" :key="field.key" class="space-y-1">
+      <!-- Order Filter -->
+      <div v-if="field.type === 'order'" class="flex items-center gap-2">
+        <label class="shrink-0 text-sm font-medium text-gray-700">
+          {{ field.label }}
+        </label>
+        <button
+          type="button"
+          class="flex items-center gap-1 text-sm"
+          :aria-label="`Trier par ordre ${currentOrderLabel}`"
+          @click="toggleSortOrder"
+        >
+          <span class="font-semibold">{{ currentOrderLabel }}</span>
+          <ChevronUp v-if="isAscending" class="h-4 w-4" />
+          <ChevronDown v-else class="h-4 w-4" />
+        </button>
+      </div>
 
-    <!-- Order Filter -->
-    <div v-if="hasOrderFilter" class="flex items-center gap-2">
-      <label class="shrink-0 text-sm font-medium text-gray-700">
-        {{ orderLabel }}
-      </label>
-      <button
-        type="button"
-        class="flex items-center gap-1 text-sm text-gray-600 transition-colors hover:text-gray-800"
-        :aria-label="`Trier par ordre ${currentOrderLabel}`"
-        @click="toggleSortOrder"
-      >
-        <span>{{ currentOrderLabel }}</span>
-        <ChevronUp v-if="isAscending" class="h-4 w-4" />
-        <ChevronDown v-else class="h-4 w-4" />
-      </button>
+      <!-- Text Input -->
+      <template v-else>
+        <label class="block text-sm font-medium text-gray-700">
+          {{ field.label }}
+        </label>
+
+        <input
+          v-if="field.type === 'text'"
+          v-model="localFilters[field.key]"
+          type="text"
+          class="focus:ring-secondary w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:outline-none"
+          :placeholder="field.placeholder || 'Rechercher...'"
+        />
+
+        <!-- Date Input -->
+        <div v-else-if="field.type === 'date'" class="relative">
+          <input
+            :ref="
+              (el) => {
+                if (el) dateInputs[field.key] = el as HTMLInputElement;
+              }
+            "
+            v-model="localFilters[field.key]"
+            type="date"
+            class="date-input focus:ring-secondary w-full cursor-pointer rounded-md border border-gray-300 px-3 py-2 pr-10 focus:border-transparent focus:ring-2 focus:outline-none"
+            :placeholder="field.placeholder || 'Choisir une date...'"
+            @change="updateFilter(field.key, ($event.target as HTMLInputElement).value)"
+            @click="() => openDatePicker(field.key)"
+          />
+          <Calendar
+            class="calendar-icon absolute top-1/2 right-3 z-20 h-5 w-5 -translate-y-1/2 cursor-pointer text-gray-600"
+            @click="() => openDatePicker(field.key)"
+          />
+        </div>
+      </template>
     </div>
 
     <!-- Custom Filters Slot -->
@@ -36,7 +62,10 @@
   </div>
 
   <!-- Filter Actions -->
-  <div class="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:items-center sm:gap-4">
+  <div
+    v-if="showActions"
+    class="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:items-center sm:gap-4 lg:flex-col lg:items-start lg:gap-2 xl:flex-row xl:items-center xl:gap-4"
+  >
     <Button variant="primary" size="sm" class="w-full sm:w-auto" @click="handleApplyFilters">
       {{ applyButtonText }}
     </Button>
@@ -53,7 +82,7 @@
 <script setup lang="ts">
   import { computed, ref } from 'vue';
   import { Button } from '@/components/ui/button';
-  import { ChevronUp, ChevronDown } from 'lucide-vue-next';
+  import { ChevronUp, ChevronDown, Calendar } from 'lucide-vue-next';
 
   // Types
   type SortOrder = 'ASC' | 'DESC';
@@ -64,29 +93,31 @@
     [key: string]: any;
   }
 
-  interface OrderOption {
-    value: SortOrder;
+  interface CustomField {
+    key: string;
+    type: 'text' | 'date' | 'order';
     label: string;
+    placeholder?: string;
   }
 
   // Default values
   const DEFAULT_FILTERS: FilterOptions = {
     name: '',
-    order: 'ASC',
+    order: 'DESC',
   };
 
   // Props
   const props = defineProps<{
-    filters: string[];
     initialFilters?: Partial<FilterOptions>;
     title?: string;
-    nameLabel?: string;
-    namePlaceholder?: string;
-    orderLabel?: string;
-    orderOptions?: OrderOption[];
     applyButtonText?: string;
     clearButtonText?: string;
+    showActions?: boolean;
+    customFields?: CustomField[];
   }>();
+
+  // Default values
+  const showActions = computed(() => props.showActions !== false);
 
   // Emits
   const emit = defineEmits<{
@@ -100,10 +131,9 @@
     ...props.initialFilters,
   });
 
-  // Computed properties
-  const hasNameFilter = computed(() => props.filters.includes('name'));
-  const hasOrderFilter = computed(() => props.filters.includes('order'));
+  const dateInputs = ref<Record<string, HTMLInputElement>>({});
 
+  // Computed properties
   const isAscending = computed(() => localFilters.value.order === 'ASC');
   const currentOrderLabel = computed(() =>
     localFilters.value.order === 'ASC' ? 'croissant' : 'décroissant'
@@ -132,10 +162,58 @@
   };
 
   /**
+   * Opens the date picker for a specific field
+   */
+  const openDatePicker = (fieldKey: string) => {
+    const input = dateInputs.value[fieldKey];
+    if (input?.showPicker) {
+      input.showPicker();
+    } else {
+      input?.focus();
+    }
+  };
+
+  /**
    * Clears all filters and emits the clear event
    */
   const handleClearFilters = () => {
-    localFilters.value = { ...DEFAULT_FILTERS };
+    // Reset each filter value individually to ensure reactivity
+    Object.keys(localFilters.value).forEach((key) => {
+      if (key in DEFAULT_FILTERS) {
+        localFilters.value[key] = DEFAULT_FILTERS[key as keyof typeof DEFAULT_FILTERS];
+      } else {
+        delete localFilters.value[key];
+      }
+    });
+
     emit('clear');
   };
 </script>
+
+<style scoped>
+  /* Masquer l'icône calendrier par défaut du navigateur pour les inputs date */
+  .date-input::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+
+  .date-input::-webkit-inner-spin-button,
+  .date-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0;
+  }
+
+  .date-input {
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  /* Assurer que l'icône calendrier reste visible */
+  .date-input:focus + .calendar-icon,
+  .calendar-icon {
+    opacity: 1;
+    visibility: visible;
+  }
+</style>

@@ -94,10 +94,10 @@
   import { ref, computed, onMounted } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useToast } from 'vue-toastification';
-  import Database from '../../utils/database.utils';
-  import { verifyEmailMessages } from '../../utils/errors/auth/verifyEmail';
-  import LoadingOverlay from '../../components/LoadingOverlay.vue';
-  import { Button } from '../../components/ui/button';
+  import Database from '@/utils/database.utils';
+  import { verifyEmailMessages } from '@/utils/errors/auth/verifyEmail';
+  import LoadingOverlay from '@/components/LoadingOverlay.vue';
+  import { Button } from '@/components/ui/button';
   import { Loader2, Check, X, Info } from 'lucide-vue-next';
 
   // États

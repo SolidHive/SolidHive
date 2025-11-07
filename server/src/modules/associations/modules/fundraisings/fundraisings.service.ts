@@ -7,6 +7,7 @@ import { CreateFundraisingDto } from './dto/create-fundraising.dto';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
 import { UpdateFundraisingDto } from './dto/update-fundraising.dto';
 import { File } from '../../../files/entities/file.entity';
+import { Like, Between } from 'typeorm';
 
 @Injectable()
 export class FundraisingsService {
@@ -25,6 +26,60 @@ export class FundraisingsService {
     });
 
     return this.fundraisingsRepository.save(fundraising);
+  }
+
+  async findAllGlobal(
+    options?: FindOptionsDto & {
+      association?: string;
+      date?: string;
+    }
+  ) {
+    const where: any = {};
+
+    if (options?.name) {
+      where.title = Like(`%${options.name}%`);
+    }
+
+    if (options?.association) {
+      where.association = { name: Like(`%${options.association}%`) };
+    }
+
+    if (options?.date) {
+      const filterDate = new Date(options.date);
+      const startOfDay = new Date(filterDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(filterDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      where.startDate = Between(startOfDay, endOfDay);
+    }
+
+    let order: any = options?.order;
+    if (options?.orderBy) {
+      order = { startDate: options.orderBy };
+    }
+
+    const relations = ['association', 'createdBy'];
+
+    if (options?.take) {
+      const result = await this.fundraisingsRepository.findAndCount({
+        where,
+        relations,
+        order,
+        skip: options.skip,
+        take: options.take,
+      });
+
+      const enrichedData = await this.enrichWithImages(result[0]);
+      return { data: enrichedData, total: result[1] };
+    }
+
+    const fundraisings = await this.fundraisingsRepository.find({
+      where,
+      relations,
+      order,
+    });
+
+    return this.enrichWithImages(fundraisings);
   }
 
   async findAll(associationId: string, options?: FindOptionsDto) {
@@ -60,11 +115,35 @@ export class FundraisingsService {
     return enrichedFundraisings;
   }
 
-  findOne(id: string, associationId: string, options?: FindOptionsDto) {
-    return this.fundraisingsRepository.findOne({
+  async findOne(id: string, associationId: string, options?: FindOptionsDto) {
+    const fundraising = await this.fundraisingsRepository.findOne({
       ...options,
       where: { id, association: { id: associationId } },
+      relations: ['association', 'createdBy'],
     });
+
+    if (!fundraising) {
+      return null;
+    }
+
+    // Enrichir avec l'image
+    const imageFile = await this.fileRepository.findOne({
+      where: {
+        relatedTo: 'Fundraising',
+        relatedBy: fundraising.id,
+        purpose: 'image',
+        index: 0,
+      },
+    });
+
+    const imageUrl = imageFile
+      ? `/files/Fundraising/${fundraising.id}?index=${imageFile.index}`
+      : null;
+
+    return {
+      ...fundraising,
+      image: imageUrl,
+    };
   }
 
   async update(id: string, associationId: string, updateFundraisingDto: UpdateFundraisingDto) {
@@ -77,5 +156,29 @@ export class FundraisingsService {
       id,
       association: { id: associationId },
     });
+  }
+
+  private async enrichWithImages(fundraisings: Fundraising[]) {
+    return Promise.all(
+      fundraisings.map(async (fundraising) => {
+        const imageFile = await this.fileRepository.findOne({
+          where: {
+            relatedTo: 'Fundraising',
+            relatedBy: fundraising.id,
+            purpose: 'image',
+            index: 0,
+          },
+        });
+
+        const imageUrl = imageFile
+          ? `/files/Fundraising/${fundraising.id}?index=${imageFile.index}`
+          : null;
+
+        return {
+          ...fundraising,
+          image: imageUrl,
+        };
+      })
+    );
   }
 }

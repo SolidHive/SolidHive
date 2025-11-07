@@ -1,0 +1,125 @@
+<template>
+  <div class="bg-card border-border rounded-3xl border p-6 shadow-sm">
+    <div class="mb-5 flex items-center justify-between">
+      <h2 class="font-subtitle text-foreground text-lg">Mes Associations</h2>
+      <Button
+        v-if="hasNoAssociations"
+        variant="default"
+        size="sm"
+        @click="$emit('createAssociation')"
+      >
+        <Plus class="mr-1.5 h-4 w-4" />
+        Créer
+      </Button>
+    </div>
+
+    <!-- Liste associations -->
+    <LoadingOverlay v-if="isLoading" :show="true" message="Chargement de vos associations..." />
+
+    <div v-else-if="associations.length > 0" class="space-y-3">
+      <div
+        v-for="userAssoc in associations"
+        :key="userAssoc.id"
+        class="border-border hover:border-primary/30 bg-muted/20 group rounded-2xl border p-4 transition-all hover:shadow-sm"
+      >
+        <div class="mb-2 flex items-start justify-between gap-3">
+          <h3
+            class="font-subtitle text-foreground group-hover:text-primary text-base transition-colors"
+          >
+            {{ userAssoc.association.name }}
+          </h3>
+          <span
+            :class="getStatusBadgeClass(userAssoc.status)"
+            class="font-paragraph shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium"
+          >
+            {{ getStatusText(userAssoc.status) }}
+          </span>
+        </div>
+
+        <p
+          v-if="userAssoc.association.description"
+          class="font-paragraph text-muted-foreground mb-3 line-clamp-1 text-sm"
+        >
+          {{ userAssoc.association.description }}
+        </p>
+
+        <div class="flex items-center justify-between">
+          <span
+            v-if="userAssoc.role"
+            class="font-paragraph text-muted-foreground flex items-center gap-1.5 text-xs"
+          >
+            <Shield class="h-3.5 w-3.5" />
+            {{ userAssoc.role.name }}
+          </span>
+
+          <Button variant="ghost" size="sm" as-child class="h-8">
+            <router-link :to="`/associations/${userAssoc.association.id}`">Voir →</router-link>
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div v-else class="bg-muted/20 rounded-2xl py-10 text-center">
+      <Building2 class="text-muted-foreground mx-auto mb-3 h-10 w-10" :stroke-width="1.5" />
+      <p class="font-paragraph text-muted-foreground mb-4 text-sm">
+        Vous ne faites partie d'aucune association
+      </p>
+      <div class="flex flex-col items-center gap-2">
+        <Button variant="default" size="sm" @click="$emit('createAssociation')">
+          Créer une association
+        </Button>
+        <Button variant="outline" size="sm" as-child>
+          <router-link to="/associations">Explorer les associations</router-link>
+        </Button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+  import { computed } from 'vue';
+  import { Button } from '@/components/ui/button';
+  import { Plus, Shield, Building2 } from 'lucide-vue-next';
+  import LoadingOverlay from '@/components/LoadingOverlay.vue';
+  import type { UserAssociation } from '@/interfaces';
+
+  interface Props {
+    associations: UserAssociation[];
+    isLoading: boolean;
+  }
+
+  const props = defineProps<Props>();
+
+  defineEmits<{
+    createAssociation: [];
+  }>();
+
+  const hasNoAssociations = computed(() => props.associations.length === 0);
+
+  function getStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'accepted':
+        return 'bg-secondary/10 text-secondary border border-secondary/20';
+      case 'pending':
+        return 'bg-amber-500/10 text-amber-700 border border-amber-500/20';
+      case 'rejected':
+        return 'bg-destructive/10 text-destructive border border-destructive/20';
+      default:
+        return 'bg-muted/50 text-muted-foreground';
+    }
+  }
+
+  function getStatusText(status: string): string {
+    switch (status) {
+      case 'accepted':
+        return 'Accepté';
+      case 'pending':
+        return 'En attente';
+      case 'rejected':
+        return 'Refusé';
+      default:
+        return status;
+    }
+  }
+</script>
