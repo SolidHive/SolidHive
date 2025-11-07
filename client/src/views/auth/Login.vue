@@ -163,11 +163,10 @@
         }
       ).response;
       const status = response.status;
-      const message = response.data?.message;
 
-      return status in userErrorMessages.apiErrors
-        ? message || userErrorMessages.apiErrors[status as keyof typeof userErrorMessages.apiErrors]
-        : userErrorMessages.apiErrors.unknown;
+      if (status in userErrorMessages.apiErrors) {
+        return userErrorMessages.apiErrors[status as keyof typeof userErrorMessages.apiErrors];
+      }
     }
 
     return userErrorMessages.apiErrors.unknown;
@@ -196,17 +195,6 @@
         await checkAndCreatePendingAssociation();
 
         router.push('/');
-      } else {
-        const errorText = authStore.error as string | null;
-
-        if (errorText && errorText.includes("n'est pas vérifié")) {
-          formError.value = userErrorMessages.apiErrors[401];
-        } else if (errorText && errorText.includes('Trop de tentatives')) {
-          formError.value = userErrorMessages.apiErrors[429];
-        } else {
-          formError.value = userErrorMessages.auth.invalidCredentials;
-        }
-        toast.error(formError.value);
       }
     } catch (error) {
       formError.value = getErrorMessage(error);

@@ -1,10 +1,8 @@
-import { Body, Controller, Post, Get, Param, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { PaymentsService } from './payments.service';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { User } from '../../common/decorators/user.decorator';
-import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
-import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 
 /**
  * Contrôleur pour la gestion des paiements et donations
@@ -15,7 +13,6 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('donate')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Créer une session de don Stripe Checkout' })
   @ApiResponse({

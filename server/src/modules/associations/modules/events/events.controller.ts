@@ -12,7 +12,6 @@ import {
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { RateLimitGuard } from '../../../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../../../auth/guards/authenticated.guard';
 import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
@@ -36,7 +35,7 @@ export class EventsController {
   }
 
   @Post('association/:associationId/event')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.EVENTS_CREATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -64,7 +63,7 @@ export class EventsController {
   }
 
   @Patch('association/:associationId/event/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.EVENTS_UPDATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -78,7 +77,7 @@ export class EventsController {
   }
 
   @Delete('association/:associationId/event/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.EVENTS_DELETE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })

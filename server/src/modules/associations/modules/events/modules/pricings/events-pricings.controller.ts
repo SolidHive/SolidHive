@@ -12,7 +12,6 @@ import {
 import { EventsPricingsService } from './events-pricings.service';
 import { CreateEventPricingDto } from './dto/create-event-pricing.dto';
 import { UpdateEventPricingDto } from './dto/update-event-pricing.dto';
-import { RateLimitGuard } from '../../../../../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../../../../../auth/guards/authenticated.guard';
 import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../../../../../common/dto/find-all-query.dto';
@@ -28,7 +27,7 @@ export class EventsPricingsController {
   constructor(private readonly eventsPricingsService: EventsPricingsService) {}
 
   @Post('pricing')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.EVENTS_CREATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -55,7 +54,7 @@ export class EventsPricingsController {
   }
 
   @Patch('pricing/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.EVENTS_UPDATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -70,7 +69,7 @@ export class EventsPricingsController {
   }
 
   @Delete('pricing/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.EVENTS_DELETE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })

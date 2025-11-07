@@ -18,7 +18,6 @@ import { CreateFileDto } from './dto/create-file.dto';
 import { UpdateFileDto } from './dto/update-file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiCookieAuth } from '@nestjs/swagger';
-import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { User } from '../../common/decorators/user.decorator';
 import { FileCleanupFilter } from './filters/file-cleanup.filter';
@@ -29,7 +28,7 @@ export class FilesController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @UseGuards(AuthenticatedGuard)
   @UseFilters(FileCleanupFilter)
   @ApiConsumes('multipart/form-data')
   @ApiCookieAuth()

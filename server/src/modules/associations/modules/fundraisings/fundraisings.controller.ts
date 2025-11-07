@@ -12,7 +12,6 @@ import {
 import { FundraisingsService } from './fundraisings.service';
 import { CreateFundraisingDto } from './dto/create-fundraising.dto';
 import { UpdateFundraisingDto } from './dto/update-fundraising.dto';
-import { RateLimitGuard } from '../../../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../../../auth/guards/authenticated.guard';
 import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
@@ -35,7 +34,7 @@ export class FundraisingsController {
   }
 
   @Post('association/:associationId/fundraising')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.FUNDRAISINGS_CREATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -63,7 +62,7 @@ export class FundraisingsController {
   }
 
   @Patch('association/:associationId/fundraising/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.FUNDRAISINGS_UPDATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -77,7 +76,7 @@ export class FundraisingsController {
   }
 
   @Delete('association/:associationId/fundraising/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.FUNDRAISINGS_DELETE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })

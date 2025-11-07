@@ -3,7 +3,6 @@ import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { User } from '../../common/decorators/user.decorator';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
-import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
@@ -18,7 +17,7 @@ export class TransactionsController {
   }
 
   @Get()
-  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @UseGuards(AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   findAll(@User('id') userId: string, @Query() options?: FindOptionsDto) {
@@ -26,7 +25,7 @@ export class TransactionsController {
   }
 
   @Get('filtered/:type')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @UseGuards(AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   findFiltered(
@@ -38,7 +37,7 @@ export class TransactionsController {
   }
 
   @Get(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @UseGuards(AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   findOne(@Param('id') id: string, @User('id') userId: string, @Query() options?: FindOptionsDto) {
@@ -46,7 +45,7 @@ export class TransactionsController {
   }
 
   @Delete(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
+  @UseGuards(AuthenticatedGuard, RolesGuard)
   @Roles('admin')
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })

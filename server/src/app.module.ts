@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { EmailModule } from './common/utils/email/email.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -17,6 +19,12 @@ import { PaymentsModule } from './modules/payments/payments.module';
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot(getNestConfig()),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 60 secondes (durée par défaut)
+        limit: 10, // 10 requêtes par défaut
+      },
+    ]),
     EmailModule,
     UsersModule,
     AuthModule,
@@ -29,6 +37,11 @@ import { PaymentsModule } from './modules/payments/payments.module';
     PaymentsModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
