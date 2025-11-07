@@ -1,4 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -110,6 +111,25 @@ const routes: RouteRecordRaw[] = [
       title: 'CRM',
       dashboard: true,
     },
+    beforeEnter: async (to, _, next) => {
+      const authStore = useAuthStore();
+      const id = to.params.id;
+
+      if (!authStore.isAuthenticated()) {
+        return next('/login');
+      }
+
+      if (typeof id !== 'string' || id === '') {
+        return next('/unauthorized');
+      }
+
+      const hasAccess = await authStore.hasAccessToAssociation(id);
+      if (!hasAccess) {
+        return next('/unauthorized');
+      }
+
+      next();
+    },
   },
   {
     path: '/donation/success',
@@ -117,6 +137,14 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/DonationSuccess.vue'),
     meta: {
       title: 'Don réussi',
+    },
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('../views/NotFound.vue'),
+    meta: {
+      title: 'Page introuvable',
     },
   },
 ];

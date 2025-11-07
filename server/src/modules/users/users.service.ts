@@ -12,6 +12,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserSecurityService } from '../security/user-security.service';
 import { PasswordUtils } from '../../common/utils/password.utils';
 import { UserAssociation } from '../associations/modules/users/entities/user-association.entity';
+import { Status } from 'src/common/enums/status';
 
 @Injectable()
 export class UsersService {
@@ -136,5 +137,20 @@ export class UsersService {
         : null,
       status: ua.status,
     }));
+  }
+
+  async hasAccessToAssociation(userId: string, associationId: string): Promise<boolean> {
+    const userAssociation = await this.userAssociationRepository.findOne({
+      where: {
+        userId,
+        associationId,
+        status: Status.ACCEPTED,
+        association: {
+          status: Status.ACCEPTED,
+        },
+      },
+    });
+
+    return !!userAssociation;
   }
 }
