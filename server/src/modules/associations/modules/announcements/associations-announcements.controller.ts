@@ -13,7 +13,6 @@ import { AssociationsAnnouncementsService } from './associations-announcements.s
 import { CreateAssociationAnnouncementDto } from './dto/create-association-announcement.dto';
 import { UpdateAssociationAnnouncementDto } from './dto/update-association-announcement.dto';
 import { AuthenticatedGuard } from '../../../../modules/auth/guards/authenticated.guard';
-import { RateLimitGuard } from '../../../../common/guards/rate-limit.guard';
 import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
 import {
@@ -32,7 +31,7 @@ export class AssociationsAnnouncementsController {
   ) {}
 
   @Post('announcement')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ANNOUNCEMENTS_CREATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -63,7 +62,7 @@ export class AssociationsAnnouncementsController {
   }
 
   @Patch('announcement/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ANNOUNCEMENTS_UPDATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -82,7 +81,7 @@ export class AssociationsAnnouncementsController {
   }
 
   @Delete('announcement/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ANNOUNCEMENTS_DELETE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })

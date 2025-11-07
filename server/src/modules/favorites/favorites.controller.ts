@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
 import { User } from '../../common/decorators/user.decorator';
@@ -13,7 +12,7 @@ export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
   @Post()
-  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @UseGuards(AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   create(@Body() createFavoriteDto: CreateFavoriteDto, @User('id') userId: string) {
@@ -21,7 +20,7 @@ export class FavoritesController {
   }
 
   @Get()
-  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @UseGuards(AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   findAll(@User('id') userId: string, @Query() options?: FindOptionsDto) {
@@ -29,7 +28,7 @@ export class FavoritesController {
   }
 
   @Get(':relatedTo/:relatedBy')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @UseGuards(AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   findOne(
@@ -41,7 +40,7 @@ export class FavoritesController {
   }
 
   @Delete(':relatedTo/:relatedBy')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @UseGuards(AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   remove(

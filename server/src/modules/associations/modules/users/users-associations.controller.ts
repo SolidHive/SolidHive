@@ -12,7 +12,6 @@ import {
 import { UsersAssociationsService } from './users-associations.service';
 import { CreateUserAssociationDto } from './dto/create-user-association.dto';
 import { UpdateUserAssociationDto } from './dto/update-user-association.dto';
-import { RateLimitGuard } from '../../../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../../../auth/guards/authenticated.guard';
 import { ApiCookieAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
@@ -30,7 +29,7 @@ export class UsersAssociationsController {
   constructor(private readonly usersAssociationsService: UsersAssociationsService) {}
 
   @Post('user')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.REGISTERS_CREATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -43,7 +42,7 @@ export class UsersAssociationsController {
   }
 
   @Get('users')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.REGISTERS_VIEW)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -53,7 +52,7 @@ export class UsersAssociationsController {
   }
 
   @Get('user/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.REGISTERS_VIEW)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -68,7 +67,7 @@ export class UsersAssociationsController {
 
   // Get all users with a certain status in an association (ex: pending, accepted, rejected)
   @Get('users/status/:status')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.REGISTERS_VIEW)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -83,7 +82,7 @@ export class UsersAssociationsController {
 
   // Get user with a certain status in an association (ex: pending, accepted, rejected)
   @Get('user/:id/status/:status')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.REGISTERS_VIEW)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -100,7 +99,7 @@ export class UsersAssociationsController {
   // You can update the role of an user in an association (ex: from member to admin)
   // Only a specific role created by the association can do it (ex: super admin of the association)
   @Patch('user/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.REGISTERS_UPDATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -116,7 +115,7 @@ export class UsersAssociationsController {
   // Update the status of an user in an association (ex: from pending to accepted)
   // Only the user himself can accept or reject his membership to an association
   @Patch('user/status')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @UseGuards(AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
@@ -134,7 +133,7 @@ export class UsersAssociationsController {
 
   // To remove an user from an association, the user himself can do it and an admin from the association too
   @Delete('user/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.REGISTERS_DELETE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })

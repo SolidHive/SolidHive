@@ -44,7 +44,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (err: unknown) {
       const axiosError = err as AxiosError<{ message: string }>;
       error.value = axiosError.response?.data?.message || 'Échec de connexion';
-      return false;
+      throw err;
     }
   }
 

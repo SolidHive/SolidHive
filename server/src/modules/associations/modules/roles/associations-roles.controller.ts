@@ -12,7 +12,6 @@ import {
 import { AssociationsRolesService } from './associations-roles.service';
 import { CreateAssociationRoleDto } from './dto/create-association-role.dto';
 import { UpdateAssociationRoleDto } from './dto/update-association-role.dto';
-import { RateLimitGuard } from '../../../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../../../auth/guards/authenticated.guard';
 import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
@@ -30,7 +29,7 @@ export class AssociationsRolesController {
   constructor(private readonly associationsRolesService: AssociationsRolesService) {}
 
   @Post('role')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ROLES_CREATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -45,7 +44,7 @@ export class AssociationsRolesController {
   }
 
   @Get('roles')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ROLES_VIEW)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -55,7 +54,7 @@ export class AssociationsRolesController {
   }
 
   @Get('role/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ROLES_VIEW)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -69,7 +68,7 @@ export class AssociationsRolesController {
   }
 
   @Patch('role/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ROLES_UPDATE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -83,7 +82,7 @@ export class AssociationsRolesController {
   }
 
   @Delete('role/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, AssociationPermissionsGuard)
+  @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ROLES_DELETE)
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })

@@ -13,7 +13,6 @@ import {
 import { AnnouncementsService } from './announcements.service';
 import { CreateAnnouncementDto } from './dto/create-announcement.dto';
 import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
-import { RateLimitGuard } from '../../common/guards/rate-limit.guard';
 import { User } from '../../common/decorators/user.decorator';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
@@ -25,7 +24,7 @@ export class AnnouncementsController {
   constructor(private readonly announcementsService: AnnouncementsService) {}
 
   @Post()
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
+  @UseGuards(AuthenticatedGuard, RolesGuard)
   @Roles('admin')
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -45,7 +44,7 @@ export class AnnouncementsController {
   }
 
   @Patch(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
+  @UseGuards(AuthenticatedGuard, RolesGuard)
   @Roles('admin')
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
@@ -55,7 +54,7 @@ export class AnnouncementsController {
   }
 
   @Delete(':id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
+  @UseGuards(AuthenticatedGuard, RolesGuard)
   @Roles('admin')
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })

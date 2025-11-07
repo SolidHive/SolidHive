@@ -3,7 +3,6 @@ import { EventsRegistersService } from './events-registers.service';
 import { CreateEventRegisterDto } from './dto/create-event-register.dto';
 import { Roles, RolesGuard } from '../../../../../auth/guards/roles.guard';
 import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { RateLimitGuard } from '../../../../../../common/guards/rate-limit.guard';
 import { AuthenticatedGuard } from '../../../../../../modules/auth/guards/authenticated.guard';
 import { User } from '../../../../../../common/decorators/user.decorator';
 import { FindOptionsDto } from '../../../../../../common/dto/find-all-query.dto';
@@ -14,7 +13,6 @@ export class EventsRegistersController {
   constructor(private readonly eventsRegistersService: EventsRegistersService) {}
 
   @Post('register')
-  @UseGuards(RateLimitGuard)
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   @ApiParam({ name: 'associationId', type: 'string' })
@@ -40,7 +38,7 @@ export class EventsRegistersController {
   }
 
   @Delete('register/:id')
-  @UseGuards(RateLimitGuard, AuthenticatedGuard, RolesGuard)
+  @UseGuards(AuthenticatedGuard, RolesGuard)
   @Roles('admin')
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })

@@ -6,7 +6,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiCookieAuth } from '@nes
 import { LoginDto } from './dto/login.dto';
 import { Request as ExpressRequest, Response } from 'express';
 import { Session, SessionData } from 'express-session';
-import { RateLimitGuard, SetRateLimit } from '../../common/guards/rate-limit.guard';
+import { Throttle } from '@nestjs/throttler';
 
 interface RequestWithUser extends ExpressRequest {
   user: {
@@ -22,12 +22,8 @@ interface RequestWithUser extends ExpressRequest {
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @UseGuards(RateLimitGuard, LocalAuthGuard)
-  @SetRateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // 5 tentatives maximum
-    message: 'Trop de tentatives de connexion, veuillez réessayer plus tard',
-  })
+  @UseGuards(LocalAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 900000 } }) // 5 tentatives en 15 minutes (900000 ms)
   @Post('login')
   @ApiOperation({ summary: 'Connecte un utilisateur' })
   @ApiBody({ type: LoginDto })
@@ -41,17 +37,14 @@ export class AuthController {
     },
   })
   @ApiResponse({ status: 401, description: 'Identifiants invalides' })
+  @ApiResponse({ status: 429, description: 'Trop de tentatives de connexion' })
   login(@Body() loginDto: LoginDto) {
     console.log(`Tentative de connexion avec l'email: ${loginDto.email}`);
     return this.authService.login();
   }
 
-  @UseGuards(RateLimitGuard, AuthenticatedGuard)
-  @SetRateLimit({
-    windowMs: 5 * 60 * 1000, // 5 minutes
-    max: 30, // 30 requêtes maximum
-    message: 'Trop de requêtes, veuillez réessayer plus tard',
-  })
+  @UseGuards(AuthenticatedGuard)
+  @Throttle({ default: { limit: 30, ttl: 300000 } }) // 30 requêtes en 5 minutes (300000 ms)
   @Get('profile')
   @ApiOperation({ summary: "Récupère le profil de l'utilisateur connecté" })
   @ApiCookieAuth()
@@ -71,6 +64,7 @@ export class AuthController {
     },
   })
   @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 429, description: 'Trop de requêtes' })
   getProfile(@Request() req: RequestWithUser) {
     return this.authService.getProfile(req.user.id);
   }
