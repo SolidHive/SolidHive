@@ -104,14 +104,14 @@
   import { ref, reactive } from 'vue';
   import { useRouter } from 'vue-router';
   import { useToast } from 'vue-toastification';
-  import { useAuthStore } from '../../stores/auth';
-  import LoadingOverlay from '../../components/LoadingOverlay.vue';
-  import InputForm from '../../components/form/InputForm.vue';
-  import { Button } from '../../components/ui/button';
+  import { useAuthStore } from '@/stores/auth';
+  import LoadingOverlay from '@/components/LoadingOverlay.vue';
+  import InputForm from '@/components/form/InputForm.vue';
+  import { Button } from '@/components/ui/button';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
   import * as yup from 'yup';
-  import { userErrorMessages } from '../../utils/errors/auth/users';
-  import { associationErrorMessages } from '../../utils/errors/auth/associations';
+  import { userErrorMessages } from '@/utils/errors/auth/users';
+  import { associationErrorMessages } from '@/utils/errors/auth/associations';
   import {
     hasPendingAssociation,
     getPendingAssociation,

@@ -10,5 +10,6 @@ import { File } from '../../../files/entities/file.entity';
   imports: [TypeOrmModule.forFeature([Fundraising, UserAssociation, File])],
   controllers: [FundraisingsController],
   providers: [FundraisingsService],
+  exports: [TypeOrmModule],
 })
 export class FundraisingsModule {}

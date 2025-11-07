@@ -105,13 +105,13 @@
   import { ref, reactive, onMounted } from 'vue';
   import { useRoute } from 'vue-router';
   import { useToast } from 'vue-toastification';
-  import Database from '../../utils/database.utils';
-  import InputForm from '../../components/form/InputForm.vue';
-  import LoadingOverlay from '../../components/LoadingOverlay.vue';
-  import { Button } from '../../components/ui/button';
+  import Database from '@/utils/database.utils';
+  import InputForm from '@/components/form/InputForm.vue';
+  import LoadingOverlay from '@/components/LoadingOverlay.vue';
+  import { Button } from '@/components/ui/button';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
   import * as yup from 'yup';
-  import { userErrorMessages } from '../../utils/errors/auth/users';
+  import { userErrorMessages } from '@/utils/errors/auth/users';
   import { Loader2, Check, X } from 'lucide-vue-next';
 
   // États

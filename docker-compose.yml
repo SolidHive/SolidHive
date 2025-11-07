@@ -82,6 +82,13 @@ services:
     ports:
       - "1080:80"   # Interface web : identifiant et mot de passe => mailtrap
       - "1025:25"   # SMTP
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    restart: unless-stopped
 
 volumes:
   db_data:

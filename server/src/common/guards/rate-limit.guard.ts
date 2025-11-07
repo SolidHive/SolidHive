@@ -34,7 +34,34 @@ export class RateLimitGuard implements CanActivate {
     message: 'Trop de requêtes, veuillez réessayer plus tard',
   };
 
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) {
+    // Pré-créer les limiters avec la configuration par défaut
+    this.createLimiter('default', this.defaultConfig);
+  }
+
+  private createLimiter(key: string, config: RateLimitConfig): void {
+    this.limiters.set(
+      key,
+      rateLimit({
+        windowMs: config.windowMs,
+        max: config.max,
+        message: { message: config.message || this.defaultConfig.message },
+        standardHeaders: true,
+        legacyHeaders: false,
+        keyGenerator: (req) => {
+          const clientIp = requestIp.getClientIp(req) || req.ip || 'unknown';
+          // Normaliser les adresses IPv6 pour éviter le contournement
+          if (clientIp.includes(':')) {
+            // Pour IPv6, utiliser seulement le préfixe /64 pour éviter la fragmentation
+            const ipv6Parts = clientIp.split(':');
+            return ipv6Parts.slice(0, 4).join(':') + '::/64';
+          }
+          return clientIp;
+        },
+        skip: () => false,
+      })
+    );
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
@@ -50,19 +77,9 @@ export class RateLimitGuard implements CanActivate {
 
     const key = `${controller.name}-${handler.name}`;
 
+    // Créer le limiter seulement s'il n'existe pas encore
     if (!this.limiters.has(key)) {
-      this.limiters.set(
-        key,
-        rateLimit({
-          windowMs: config.windowMs,
-          max: config.max,
-          message: { message: config.message || this.defaultConfig.message },
-          standardHeaders: true,
-          legacyHeaders: false,
-          keyGenerator: (req) => requestIp.getClientIp(req) || req.ip || 'ip-inconnue',
-          skip: () => false,
-        })
-      );
+      this.createLimiter(key, config);
     }
 
     const limiter = this.limiters.get(key);

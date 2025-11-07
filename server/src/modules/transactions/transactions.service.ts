@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, Not } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Transaction } from './entities/transaction.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
@@ -41,17 +41,77 @@ export class TransactionsService {
   }
 
   findAll(userId: string, options?: FindOptionsDto) {
-    const result = this.transactionsRepository.find({
+    // Traiter les opérateurs spéciaux dans where
+    let whereCondition: any = {
+      user: { id: userId },
+    };
+
+    if (options?.where) {
+      // Convertir les opérateurs MongoDB-style en opérateurs TypeORM
+      const processedWhere = this.processWhereCondition(options.where);
+      whereCondition = {
+        ...whereCondition,
+        ...processedWhere,
+      };
+    }
+
+    return this.transactionsRepository.find({
       ...options,
-      where: { user: { id: userId } },
+      where: whereCondition,
     });
-    return result;
+  }
+
+  private processWhereCondition(where: Record<string, any>): Record<string, any> {
+    const processed: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(where)) {
+      if (typeof value === 'object' && value !== null) {
+        // Gérer les opérateurs spéciaux
+        if ('$ne' in value) {
+          processed[key] = Not(value.$ne);
+        } else {
+          processed[key] = value;
+        }
+      } else {
+        processed[key] = value;
+      }
+    }
+
+    return processed;
   }
 
   findOne(id: string, userId: string, options?: FindOptionsDto) {
     return this.transactionsRepository.findOne({
       ...options,
       where: { id, user: { id: userId } },
+    });
+  }
+
+  findFiltered(userId: string, type: 'associations' | 'cagnottes', options?: FindOptionsDto) {
+    // Construire la condition where de base
+    let whereCondition: any = {
+      user: { id: userId },
+    };
+
+    // Ajouter le filtre par type
+    if (type === 'associations') {
+      whereCondition.relatedTo = Not('Fundraising');
+    } else if (type === 'cagnottes') {
+      whereCondition.relatedTo = 'Fundraising';
+    }
+
+    // Fusionner avec les options supplémentaires si elles existent
+    if (options?.where) {
+      const processedWhere = this.processWhereCondition(options.where);
+      whereCondition = {
+        ...whereCondition,
+        ...processedWhere,
+      };
+    }
+
+    return this.transactionsRepository.find({
+      ...options,
+      where: whereCondition,
     });
   }
 

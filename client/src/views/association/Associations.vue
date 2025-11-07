@@ -2,23 +2,19 @@
   <PageContainer>
     <div class="space-y-8">
       <!-- Page Header -->
-      <header class="text-center">
-        <h1 class="font-title text-secondary mb-4 text-2xl md:text-4xl">
-          Rechercher une association
-        </h1>
-        <p class="text-lg text-gray-600">Découvrez les associations partenaires de SolidHive</p>
-      </header>
+      <PageHeader
+        title="Rechercher une association"
+        subtitle="Découvrez les associations partenaires de SolidHive"
+      />
 
       <!-- Filters Section -->
       <section class="space-y-6">
         <Filter
-          :filters="availableFilters"
           :initial-filters="currentFilters"
-          name-label="Nom de l'association"
-          name-placeholder="Rechercher par nom..."
-          order-label="Ordre :"
+          :show-actions="true"
           apply-button-text="Appliquer les filtres"
           clear-button-text="Effacer les filtres"
+          :custom-fields="customFields"
           @apply="handleApplyFilters"
           @clear="handleClearFilters"
         />
@@ -104,6 +100,7 @@
   import Pagination from '@/components/ui/Pagination.vue';
   import Filter from '@/components/ui/Filter.vue';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
+  import PageHeader from '@/components/ui/PageHeader.vue';
 
   // Utility imports
   import Database from '@/utils/database.utils';
@@ -122,7 +119,9 @@
 
   // Constants
   const ITEMS_PER_PAGE = 10;
-  const DEFAULT_FILTERS: AssociationFilters = {};
+  const DEFAULT_FILTERS: AssociationFilters = {
+    order: 'DESC',
+  };
 
   // Router
   const router = useRouter();
@@ -136,7 +135,19 @@
   const currentFilters = ref<AssociationFilters>(DEFAULT_FILTERS);
 
   // Computed properties
-  const availableFilters = computed(() => ['name', 'order']);
+  const customFields = computed(() => [
+    {
+      key: 'name',
+      type: 'text' as const,
+      label: "Nom de l'association",
+      placeholder: 'Rechercher par nom...',
+    },
+    {
+      key: 'order',
+      type: 'order' as const,
+      label: 'Ordre :',
+    },
+  ]);
 
   const hasNoAssociations = computed(() => associations.value.length === 0);
   const hasAssociations = computed(() => associations.value.length > 0);

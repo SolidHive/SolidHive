@@ -14,6 +14,9 @@ import {
 } from './exceptions/payment.exceptions';
 import { PaymentCalculationHelper } from './helpers/payment-calculation.helper';
 import { StripeSessionBuilder } from './helpers/stripe-session.builder';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Fundraising } from '../associations/modules/fundraisings/entities/fundraising.entity';
 
 export interface DonationSessionResult {
   sessionId: string;
@@ -33,7 +36,9 @@ export class PaymentsService {
     private readonly configService: ConfigService,
     private readonly associationsService: AssociationsService,
     private readonly transactionsService: TransactionsService,
-    private readonly stripeService: StripeService
+    private readonly stripeService: StripeService,
+    @InjectRepository(Fundraising)
+    private fundraisingsRepository: Repository<Fundraising>
   ) {
     this.isMockMode = this.configService.get<string>('USE_STRIPE_MOCK') === 'true';
     this.logger.log(
@@ -107,6 +112,11 @@ export class PaymentsService {
       session.id,
       userId
     );
+
+    // Mettre à jour le montant de la cagnotte si c'est un don pour une cagnotte
+    if (createDonationDto.fundraisingId) {
+      await this.updateFundraisingAmount(createDonationDto.fundraisingId, associationAmount);
+    }
 
     this.logger.log(`Session de don créée avec succès: ${session.id}`);
 
@@ -217,5 +227,31 @@ export class PaymentsService {
   async getSession(sessionId: string): Promise<Stripe.Checkout.Session> {
     this.logger.debug(`Récupération de la session ${sessionId}`);
     return await this.stripe.checkout.sessions.retrieve(sessionId);
+  }
+
+  /**
+   * Mettre à jour le montant récolté d'une cagnotte
+   */
+  private async updateFundraisingAmount(fundraisingId: string, amount: number): Promise<void> {
+    try {
+      const fundraising = await this.fundraisingsRepository.findOne({
+        where: { id: fundraisingId },
+      });
+
+      if (!fundraising) {
+        this.logger.error(`Cagnotte non trouvée: ${fundraisingId}`);
+        return;
+      }
+
+      // Mettre à jour le montant actuel
+      const newAmount = fundraising.amount + amount;
+      await this.fundraisingsRepository.update(fundraisingId, { amount: newAmount });
+
+      this.logger.log(
+        `Montant de la cagnotte ${fundraising.title} mis à jour: ${fundraising.amount}€ → ${newAmount}€`
+      );
+    } catch (error) {
+      this.logger.error(`Erreur lors de la mise à jour de la cagnotte ${fundraisingId}`, error);
+    }
   }
 }

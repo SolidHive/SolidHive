@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-  import { defineEmits, computed } from 'vue';
+  import { computed } from 'vue';
   import { Button } from '@/components/ui/button';
   import BackHomeButton from '@/components/ui/BackHomeButton.vue';
   import { useRouter } from 'vue-router';

@@ -25,6 +25,18 @@ export class TransactionsController {
     return this.transactionsService.findAll(userId, options);
   }
 
+  @Get('filtered/:type')
+  @UseGuards(RateLimitGuard, AuthenticatedGuard)
+  @ApiCookieAuth()
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  findFiltered(
+    @Param('type') type: 'associations' | 'cagnottes',
+    @User('id') userId: string,
+    @Query() options?: FindOptionsDto
+  ) {
+    return this.transactionsService.findFiltered(userId, type, options);
+  }
+
   @Get(':id')
   @UseGuards(RateLimitGuard, AuthenticatedGuard)
   @ApiCookieAuth()

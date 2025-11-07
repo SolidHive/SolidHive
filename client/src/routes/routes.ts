@@ -56,7 +56,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/profile',
     name: 'Profile',
-    component: () => import('../views/Profile.vue'),
+    component: () => import('../views/profile/Profile.vue'),
     meta: {
       title: 'Mon profil',
       requiresAuth: true,
@@ -65,7 +65,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/profile/donations',
     name: 'Donations',
-    component: () => import('../views/Donations.vue'),
+    component: () => import('../views/profile/Donations.vue'),
     meta: {
       title: 'Mes dons',
       requiresAuth: true,
@@ -74,15 +74,31 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/associations',
     name: 'Associations',
-    component: () => import('../views/Associations.vue'),
+    component: () => import('../views/association/Associations.vue'),
     meta: {
       title: 'Associations',
     },
   },
   {
+    path: '/cagnottes',
+    name: 'Cagnottes',
+    component: () => import('../views/cagnotte/Cagnottes.vue'),
+    meta: {
+      title: 'Cagnottes',
+    },
+  },
+  {
+    path: '/association/:associationId/fundraising/:id',
+    name: 'CagnotteDetail',
+    component: () => import('../views/cagnotte/CagnotteDetail.vue'),
+    meta: {
+      title: 'Détails de la cagnotte',
+    },
+  },
+  {
     path: '/association/:id',
     name: 'AssociationDetail',
-    component: () => import('../views/AssociationDetail.vue'),
+    component: () => import('../views/association/AssociationDetail.vue'),
     meta: {
       title: "Détails de l'association",
     },
@@ -90,7 +106,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/association/:id/donate',
     name: 'Donation',
-    component: () => import('../views/Donation.vue'),
+    component: () => import('../views/donation/Donation.vue'),
     meta: {
       title: 'Faire un don',
     },
@@ -134,7 +150,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/donation/success',
     name: 'DonationSuccess',
-    component: () => import('../views/DonationSuccess.vue'),
+    component: () => import('../views/donation/DonationSuccess.vue'),
     meta: {
       title: 'Don réussi',
     },

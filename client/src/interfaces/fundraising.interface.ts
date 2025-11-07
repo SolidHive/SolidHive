@@ -9,4 +9,15 @@ export interface Fundraising {
   endDate: string;
   createdAt?: string;
   updatedAt?: string;
+  association?: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface FundraisingCard extends Fundraising {
+  association: {
+    id: string;
+    name: string;
+  };
 }

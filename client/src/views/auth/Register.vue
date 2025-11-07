@@ -380,17 +380,17 @@
 <script setup lang="ts">
   import { ref, reactive } from 'vue';
   import { useRouter } from 'vue-router';
-  import Database from '../../utils/database.utils';
-  import InputForm from '../../components/form/InputForm.vue';
-  import { Button } from '../../components/ui/button';
+  import Database from '@/utils/database.utils';
+  import InputForm from '@/components/form/InputForm.vue';
+  import { Button } from '@/components/ui/button';
   import { useToast } from 'vue-toastification';
-  import LoadingOverlay from '../../components/LoadingOverlay.vue';
+  import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import { Loader2, ChevronLeft, Building2, Upload, Image } from 'lucide-vue-next';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
   import * as yup from 'yup';
-  import { userErrorMessages } from '../../utils/errors/auth/users';
-  import { associationErrorMessages } from '../../utils/errors/auth/associations';
-  import { savePendingAssociation, savePendingFile } from '../../utils/localStorage.utils';
+  import { userErrorMessages } from '@/utils/errors/auth/users';
+  import { associationErrorMessages } from '@/utils/errors/auth/associations';
+  import { savePendingAssociation, savePendingFile } from '@/utils/localStorage.utils';
 
   const toast = useToast();
   const router = useRouter();
