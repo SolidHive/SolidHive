@@ -107,9 +107,15 @@ export class UsersAssociationsController {
   update(
     @Param('id') id: string,
     @Param('associationId') associationId: string,
-    @Body() updateUserAssociationDto: UpdateUserAssociationDto
+    @Body() updateUserAssociationDto: UpdateUserAssociationDto,
+    @User('id') currentUserId: string
   ) {
-    return this.usersAssociationsService.update(id, associationId, updateUserAssociationDto);
+    return this.usersAssociationsService.update(
+      id,
+      associationId,
+      updateUserAssociationDto,
+      currentUserId
+    );
   }
 
   // Update the status of an user in an association (ex: from pending to accepted)
@@ -138,7 +144,11 @@ export class UsersAssociationsController {
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
-  remove(@Param('id') id: string, @Param('associationId') associationId: string) {
-    return this.usersAssociationsService.remove(id, associationId);
+  remove(
+    @Param('id') id: string,
+    @Param('associationId') associationId: string,
+    @User('id') currentUserId: string
+  ) {
+    return this.usersAssociationsService.remove(id, associationId, currentUserId);
   }
 }

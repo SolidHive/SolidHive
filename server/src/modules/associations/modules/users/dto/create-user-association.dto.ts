@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreateUserAssociationDto {
   @ApiProperty({
@@ -16,9 +16,7 @@ export class CreateUserAssociationDto {
     example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
     description: "Identifiant de l'utilisateur dans l'association (UUID)",
   })
-  @IsUUID('4', {
-    message: "L'identifiant de l'utilisateur doit être un UUID valide",
-  })
-  @IsNotEmpty({ message: "L'identifiant de l'utilisateur est requis" })
-  userId: string;
+  @IsEmail({}, { message: "L'adresse e-mail doit être valide" })
+  @IsNotEmpty({ message: "L'adresse e-mail est requise" })
+  email: string;
 }

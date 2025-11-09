@@ -1,48 +1,71 @@
 <template>
-  <aside
-    class="bg-accent flex min-h-screen w-16 flex-col justify-between px-2 py-4 lg:w-60 lg:px-4 lg:py-6 xl:w-70 2xl:w-80"
-  >
-    <div>
-      <div
-        class="border-accent-foreground flex w-full items-center justify-center border-b pb-4 lg:pb-6"
-      >
-        <RouterLink to="/">
-          <div class="h-12 w-12 rounded-full bg-white lg:h-16 lg:w-16">
-            <img :src="logo" alt="Logo SolidHive" class="h-full w-full object-contain p-2" />
-          </div>
-        </RouterLink>
-      </div>
-      <div class="flex flex-col gap-4 py-4 lg:py-6">
-        <RouterLink
-          :to="`${$route.fullPath}`"
-          class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
-          active-class="bg-secondary rounded-lg font-semibold"
-        >
-          <Home :size="20" />
-          <span class="hidden lg:block">Accueil</span>
-        </RouterLink>
-        <RouterLink
-          :to="`${$route.fullPath}/category`"
-          class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
-          active-class="bg-secondary rounded-lg font-semibold"
-        >
-          <Settings :size="20" />
-          <span class="hidden lg:block">Paramètres</span>
-        </RouterLink>
-      </div>
+  <aside class="bg-accent flex min-h-screen w-16 flex-col lg:w-45 xl:w-55 2xl:w-65">
+    <div
+      id="crm-aside-header"
+      class="flex h-16 w-full items-center justify-center border-b border-gray-200 sm:h-24"
+    >
+      <RouterLink to="/">
+        <div class="h-12 w-12 rounded-full bg-white lg:h-16 lg:w-16">
+          <img :src="logo" alt="Logo SolidHive" class="h-full w-full object-contain p-2" />
+        </div>
+      </RouterLink>
     </div>
-    <div class="border-accent-foreground border-t">
-      <p class="text-accent-foreground mt-4 text-xs">
-        <span>{{ width >= 1024 ? 'Copyright' : '©' }}</span>
-        {{ new Date().getFullYear() }}
-      </p>
+    <div class="flex flex-1 flex-col justify-between">
+      <div id="crm-aside-links" class="px-2 lg:px-4">
+        <div class="flex flex-col gap-4 py-4 lg:py-6">
+          <RouterLink
+            :to="{ name: 'CRMHome', params: { locale: $route.params.locale } }"
+            class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
+            active-class="bg-secondary rounded-lg font-semibold"
+          >
+            <Home :size="20" />
+            <span class="hidden lg:block">Accueil</span>
+          </RouterLink>
+          <RouterLink
+            v-if="hasAccessToMembers"
+            :to="{ name: 'CRMMembers', params: { locale: $route.params.locale } }"
+            class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
+            active-class="bg-secondary rounded-lg font-semibold"
+          >
+            <Users :size="20" />
+            <span class="hidden lg:block">Membres</span>
+          </RouterLink>
+          <RouterLink
+            v-if="hasAccessToRoles"
+            :to="{ name: 'CRMRoles', params: { locale: $route.params.locale } }"
+            class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
+            active-class="bg-secondary rounded-lg font-semibold"
+          >
+            <ShieldCheck :size="20" />
+            <span class="hidden lg:block">Rôles</span>
+          </RouterLink>
+        </div>
+      </div>
+      <div id="crm-aside-footer" class="border-accent-foreground border-t px-2 py-4 lg:px-4">
+        <p class="text-accent-foreground text-xs">
+          <span>{{ width >= 1024 ? 'Copyright' : '©' }}</span>
+          {{ new Date().getFullYear() }}
+        </p>
+      </div>
     </div>
   </aside>
 </template>
 <script setup lang="ts">
   import logo from '@/assets/images/logo-small-solidhive.svg';
-  import { Settings, Home } from 'lucide-vue-next';
+  import { Home, Users, ShieldCheck } from 'lucide-vue-next';
   import { useWindowSize } from '@vueuse/core';
+  import { useCrmStore } from '@/stores/crm';
+  import { Permissions } from '@/enums/permissions';
 
   const { width } = useWindowSize();
+  const crmStore = useCrmStore();
+  const member = crmStore.member;
+
+  const hasAccessToMembers = member?.role.permissions.some(
+    (permission) => permission === Permissions.REGISTERS_VIEW || permission === Permissions.ALL
+  );
+
+  const hasAccessToRoles = member?.role.permissions.some(
+    (permission) => permission === Permissions.ROLES_VIEW || permission === Permissions.ALL
+  );
 </script>

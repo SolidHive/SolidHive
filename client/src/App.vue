@@ -2,24 +2,16 @@
   <div class="flex min-h-screen flex-col">
     <div v-if="$route.meta.dashboard !== true">
       <Navbar />
-      <main class="w-full flex-grow">
+      <main class="w-full grow">
         <router-view />
       </main>
       <Footer />
     </div>
-    <div v-else class="w-full flex-grow">
-      <div class="flex h-full w-full">
-        <Aside />
-        <main class="flex-grow bg-gray-50 p-6">
-          <router-view />
-        </main>
-      </div>
-    </div>
+    <router-view v-else />
   </div>
 </template>
 
 <script setup lang="ts">
   import Navbar from './components/Navbar.vue';
   import Footer from './components/Footer.vue';
-  import Aside from './components/dashboard/Aside.vue';
 </script>

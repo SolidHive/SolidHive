@@ -1,6 +1,4 @@
 import type { RouteRecordRaw } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
-
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -122,30 +120,34 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/crm/:id',
     name: 'CRM',
-    component: () => import('../views/crm/Home.vue'),
+    component: () => import('../views/crm/Shell.vue'),
     meta: {
       title: 'CRM',
       dashboard: true,
     },
-    beforeEnter: async (to, _, next) => {
-      const authStore = useAuthStore();
-      const id = to.params.id;
-
-      if (!authStore.isAuthenticated()) {
-        return next('/login');
-      }
-
-      if (typeof id !== 'string' || id === '') {
-        return next('/unauthorized');
-      }
-
-      const hasAccess = await authStore.hasAccessToAssociation(id);
-      if (!hasAccess) {
-        return next('/unauthorized');
-      }
-
-      next();
+    redirect(to, _) {
+      return { name: 'CRMHome', params: to.params };
     },
+    children: [
+      {
+        path: 'home',
+        name: 'CRMHome',
+        component: () => import('../views/crm/Home.vue'),
+        meta: { title: 'Accueil - CRM', header: 'Accueil' },
+      },
+      {
+        path: 'members',
+        name: 'CRMMembers',
+        component: () => import('../views/crm/Members.vue'),
+        meta: { title: 'Membres - CRM', header: 'Membres' },
+      },
+      {
+        path: 'roles',
+        name: 'CRMRoles',
+        component: () => import('../views/crm/Roles.vue'),
+        meta: { title: 'Rôles - CRM', header: 'Rôles' },
+      },
+    ],
   },
   {
     path: '/donation/success',
