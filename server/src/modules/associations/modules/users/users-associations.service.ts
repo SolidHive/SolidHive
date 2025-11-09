@@ -1,7 +1,7 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserAssociation } from './entities/user-association.entity';
-import { Repository } from 'typeorm';
+import { Repository, ILike, FindOptionsWhere } from 'typeorm';
 import { User } from '../../../users/entities/user.entity';
 import { Association } from '../../entities/association.entity';
 import { AssociationRole } from '../roles/entities/association-role.entity';
@@ -26,7 +26,7 @@ export class UsersAssociationsService {
 
   async create(createUserAssociationDto: CreateUserAssociationDto, associationId: string) {
     const user = await this.usersRepository.findOne({
-      where: { id: createUserAssociationDto.userId },
+      where: { email: createUserAssociationDto.email },
     });
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -56,9 +56,40 @@ export class UsersAssociationsService {
   }
 
   async findAll(associationId: string, options?: FindOptionsDto) {
+    let whereConditions: FindOptionsWhere<UserAssociation>[] = [{ associationId }];
+
+    if (options?.where !== undefined && typeof options.where === 'string' && options.where !== '') {
+      const searchTerm = `%${options.where}%`;
+      whereConditions = [
+        { associationId, user: { name: ILike(searchTerm) } },
+        { associationId, user: { firstname: ILike(searchTerm) } },
+        { associationId, user: { email: ILike(searchTerm) } },
+        { associationId, user: { phone: ILike(searchTerm) } },
+        { associationId, role: { name: ILike(searchTerm) } },
+      ];
+    }
+
     return this.usersAssociationsRepository.find({
       ...options,
-      where: { associationId, status: Status.ACCEPTED },
+      relations: {
+        user: true,
+        role: true,
+      },
+      select: {
+        id: true,
+        user: {
+          id: true,
+          firstname: true,
+          name: true,
+          email: true,
+          phone: true,
+        },
+        role: {
+          name: true,
+        },
+        status: true,
+      },
+      where: whereConditions,
     });
   }
 
@@ -99,8 +130,29 @@ export class UsersAssociationsService {
   async update(
     id: string,
     associationId: string,
-    updateUserAssociationDto: UpdateUserAssociationDto
+    updateUserAssociationDto: UpdateUserAssociationDto,
+    currentUserId?: string
   ) {
+    // Récupérer l'association utilisateur à modifier
+    const userAssociation = await this.usersAssociationsRepository.findOne({
+      where: { id, associationId },
+      relations: ['user', 'role'],
+    });
+
+    if (!userAssociation) {
+      throw new HttpException('User association not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Empêcher la modification d'un propriétaire
+    if (userAssociation.role.name === 'owner') {
+      throw new ForbiddenException("Impossible de modifier le rôle d'un propriétaire");
+    }
+
+    // Empêcher l'auto-modification
+    if (currentUserId && userAssociation.user.id === currentUserId) {
+      throw new ForbiddenException('Vous ne pouvez pas modifier votre propre rôle');
+    }
+
     const role = await this.associationsRolesRepository.findOne({
       where: { id: updateUserAssociationDto.roleId },
     });
@@ -139,7 +191,27 @@ export class UsersAssociationsService {
     return this.findOne(userId, associationId);
   }
 
-  async remove(id: string, associationId: string) {
+  async remove(id: string, associationId: string, currentUserId?: string) {
+    // Récupérer l'association utilisateur à supprimer
+    const userAssociation = await this.usersAssociationsRepository.findOne({
+      where: { id, associationId },
+      relations: ['user', 'role'],
+    });
+
+    if (!userAssociation) {
+      throw new HttpException('User association not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Empêcher la suppression d'un propriétaire
+    if (userAssociation.role.name === 'owner') {
+      throw new ForbiddenException('Impossible de supprimer un propriétaire');
+    }
+
+    // Empêcher l'auto-suppression
+    if (currentUserId && userAssociation.user.id === currentUserId) {
+      throw new ForbiddenException('Vous ne pouvez pas vous supprimer vous-même');
+    }
+
     return this.usersAssociationsRepository.delete({ id, associationId });
   }
 }

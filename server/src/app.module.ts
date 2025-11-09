@@ -22,7 +22,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 60 secondes (durée par défaut)
-        limit: 10, // 10 requêtes par défaut
+        limit: 60, // 60 requêtes par défaut
       },
     ]),
     EmailModule,

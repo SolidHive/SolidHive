@@ -114,7 +114,7 @@ export class UsersService {
 
   async getUserAssociations(userId: string) {
     const userAssociations = await this.userAssociationRepository.find({
-      where: { userId },
+      where: { userId, status: Status.ACCEPTED },
       relations: ['association', 'role'],
     });
 
@@ -139,8 +139,34 @@ export class UsersService {
     }));
   }
 
-  async hasAccessToAssociation(userId: string, associationId: string): Promise<boolean> {
+  async hasAccessToAssociation(
+    userId: string,
+    associationId: string
+  ): Promise<UserAssociation | null> {
     const userAssociation = await this.userAssociationRepository.findOne({
+      relations: {
+        role: true,
+        association: true,
+        user: true,
+      },
+      select: {
+        id: true,
+        role: {
+          id: true,
+          name: true,
+          description: true,
+          permissions: true,
+        },
+        user: {
+          id: true,
+          name: true,
+          firstname: true,
+          email: true,
+          phone: true,
+        },
+        status: true,
+        association: {},
+      },
       where: {
         userId,
         associationId,
@@ -151,6 +177,6 @@ export class UsersService {
       },
     });
 
-    return !!userAssociation;
+    return userAssociation;
   }
 }

@@ -28,7 +28,7 @@ import { UserAssociation } from '../users/entities/user-association.entity';
 export class AssociationsRolesController {
   constructor(private readonly associationsRolesService: AssociationsRolesService) {}
 
-  @Post('role')
+  @Post('roles')
   @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ROLES_CREATE)
   @ApiCookieAuth()
@@ -53,7 +53,7 @@ export class AssociationsRolesController {
     return this.associationsRolesService.findAll(associationId, options);
   }
 
-  @Get('role/:id')
+  @Get('roles/:id')
   @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ROLES_VIEW)
   @ApiCookieAuth()
@@ -67,7 +67,7 @@ export class AssociationsRolesController {
     return this.associationsRolesService.findOne(id, associationId, options);
   }
 
-  @Patch('role/:id')
+  @Patch('roles/:id')
   @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ROLES_UPDATE)
   @ApiCookieAuth()
@@ -81,7 +81,7 @@ export class AssociationsRolesController {
     return this.associationsRolesService.update(id, associationId, updateAssociationsRoleDto);
   }
 
-  @Delete('role/:id')
+  @Delete('roles/:id')
   @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
   @AssociationPermissions(Permissions.ROLES_DELETE)
   @ApiCookieAuth()

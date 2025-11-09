@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import Database from '../utils/database.utils';
 import type { AxiosError } from 'axios';
+import type { User, UserAssociation } from '@/interfaces';
 
 // Interface pour les informations d'identification
 interface LoginCredentials {
@@ -10,7 +11,8 @@ interface LoginCredentials {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref(null);
+  const user = ref<User | null>(null);
+  const associations = ref<UserAssociation[]>([]);
   const error = ref<string | null>(null);
   const isLoading = ref(true);
 
@@ -23,8 +25,14 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const data = await Database.getAll('auth/profile'); // Vérifie la session
       user.value = data || null;
+
+      if (user.value !== null) {
+        const data = await Database.getAll('users/me/associations');
+        associations.value = data || [];
+      }
     } catch (err) {
       user.value = null;
+      associations.value = [];
       const axiosError = err as AxiosError<{ message: string }>;
       error.value = axiosError.response?.data?.message || 'Erreur lors du chargement du profil';
     } finally {
@@ -91,23 +99,9 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function hasAccessToAssociation(associationId: string) {
-    if (!isAuthenticated()) {
-      return false;
-    }
-    try {
-      const result = await Database.getAll(`users/me/association/${associationId}`);
-      return result;
-    } catch (err) {
-      const axiosError = err as AxiosError<{ message: string }>;
-      error.value =
-        axiosError.response?.data?.message || "Erreur lors de la vérification de l'accès";
-      return false;
-    }
-  }
-
   return {
     user,
+    associations,
     error,
     isLoading,
     login,
@@ -116,6 +110,5 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     createAssociation,
     uploadAssociationFile,
-    hasAccessToAssociation,
   };
 });

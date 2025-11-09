@@ -2,7 +2,7 @@
   <header class="sticky top-0 z-50 border-b border-gray-200 bg-white">
     <nav class="flex w-full items-center justify-between px-6 py-3 xl:px-20">
       <!-- Logo -->
-      <div class="flex-shrink-0">
+      <div class="shrink-0">
         <router-link to="/" class="flex items-center">
           <img :src="logoUrl" alt="SolidHive Logo" class="h-12 w-auto" />
         </router-link>
@@ -33,15 +33,61 @@
       <!-- Desktop Auth -->
       <div class="hidden items-center space-x-4 md:flex">
         <template v-if="authStore.isAuthenticated()">
-          <router-link
-            to="/profile"
-            class="text-secondary font-paragraph text-sm transition-opacity hover:opacity-80"
-          >
-            Mon compte
-          </router-link>
-          <div class="bg-accent flex h-8 w-8 items-center justify-center rounded-full">
-            <User class="h-4 w-4 text-white" />
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <div class="bg-accent flex h-8 w-8 items-center justify-center rounded-full">
+                <User class="h-4 w-4 text-white" />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <div class="flex px-2 py-1.5 text-sm font-normal">
+                <div class="flex flex-col space-y-1">
+                  <p class="text-sm leading-none font-medium">
+                    {{ authStore.user?.name }} {{ authStore.user?.firstname }}
+                  </p>
+                  <p class="text-muted-foreground text-xs leading-none">
+                    {{ authStore.user?.email }}
+                  </p>
+                </div>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <router-link to="/profile" class="w-full">Mon compte</router-link>
+              </DropdownMenuItem>
+              <DropdownMenuSub v-if="authStore.associations.length > 0">
+                <DropdownMenuSubTrigger>Accès CRM</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem
+                    v-for="userInAssociation in authStore.associations"
+                    :key="userInAssociation.id"
+                  >
+                    <router-link
+                      :to="{
+                        name: 'CRMHome',
+                        params: {
+                          locale: $route.params.locale,
+                          id: userInAssociation.association.id,
+                        },
+                      }"
+                      class="w-full"
+                    >
+                      {{ userInAssociation.association.name }}
+                    </router-link>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                @click="
+                  authStore.logout();
+                  $router.push('/');
+                "
+              >
+                <LogOut class="h-4 w-4" />
+                Déconnexion
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </template>
         <template v-else>
           <Button variant="secondary" size="sm" @click="$router.push('/login')">
@@ -134,7 +180,17 @@
   import { useRouter } from 'vue-router';
   import { useAuthStore } from '../stores/auth';
   import { Button } from '@/components/ui/button';
-  import { User, Menu, X } from 'lucide-vue-next';
+  import { User, Menu, X, LogOut } from 'lucide-vue-next';
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+  } from '@/components/ui/dropdown-menu';
   import logoUrl from '@/assets/images/logo-solidhive.png';
 
   const authStore = useAuthStore();

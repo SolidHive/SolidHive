@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AssociationRole } from './entities/association-role.entity';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserAssociation } from '../users/entities/user-association.entity';
 import { CreateAssociationRoleDto } from './dto/create-association-role.dto';
@@ -30,11 +30,18 @@ export class AssociationsRolesService {
   }
 
   async findAll(associationId: string, options?: FindOptionsDto) {
+    let whereConditions: FindOptionsWhere<AssociationRole>[] = [
+      { association: { id: associationId } },
+    ];
+
+    if (options?.where !== undefined && typeof options.where === 'string' && options.where !== '') {
+      const searchTerm = `%${options.where}%`;
+      whereConditions = [{ association: { id: associationId }, name: ILike(searchTerm) }];
+    }
+
     return this.associationsRolesRepository.find({
       ...options,
-      where: {
-        association: { id: associationId },
-      },
+      where: whereConditions,
     });
   }
 
