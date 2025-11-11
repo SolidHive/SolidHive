@@ -34,9 +34,10 @@
 <script setup lang="ts">
   import { toRef } from 'vue';
   import Carousel from '@/components/ui/Carousel.vue';
+  import type { Announcement } from '@/interfaces';
 
   const props = defineProps<{
-    items?: Array<{ title: string; description: string; image: string | null }>;
+    items?: Announcement[];
     color?: string;
   }>();
   const items = toRef(props, 'items');
