@@ -42,7 +42,7 @@ export class AssociationsAnnouncementsService {
       announcements.map(async (announcement) => {
         const imageFile = await this.fileRepository.findOne({
           where: {
-            relatedTo: 'Announcement',
+            relatedTo: 'AssociationAnnouncement',
             relatedBy: announcement.id,
             purpose: 'image',
             index: 0,
@@ -50,13 +50,12 @@ export class AssociationsAnnouncementsService {
         });
 
         const imageUrl = imageFile
-          ? `/files/Announcement/${announcement.id}?index=${imageFile.index}`
-          : null; // Pas d'image par défaut, sera géré côté frontend
+          ? `/files/AssociationAnnouncement/${announcement.id}?index=${imageFile.index}`
+          : null;
 
         return {
           ...announcement,
           image: imageUrl,
-          description: announcement.content, // Pour la compatibilité avec le frontend
         };
       })
     );

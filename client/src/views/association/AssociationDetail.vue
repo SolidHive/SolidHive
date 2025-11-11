@@ -227,6 +227,7 @@
     associationId: string
   ): string | undefined => {
     const file = files.find((f) => f.purpose === purpose);
+    console.log(file);
     return file ? `/files/Association/${associationId}?index=${file.index}` : undefined;
   };
 

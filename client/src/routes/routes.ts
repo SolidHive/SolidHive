@@ -147,6 +147,12 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../views/crm/Roles.vue'),
         meta: { title: 'Rôles - CRM', header: 'Rôles' },
       },
+      {
+        path: 'announcements',
+        name: 'CRMAnnouncements',
+        component: () => import('../views/crm/Announcements.vue'),
+        meta: { title: 'Annonces - CRM', header: 'Annonces' },
+      },
     ],
   },
   {

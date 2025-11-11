@@ -18,14 +18,16 @@
     ></div>
     <div class="absolute right-0 bottom-0 left-0 z-20 p-4">
       <h3 class="font-title text-lg leading-tight text-white">{{ item.title }}</h3>
-      <p class="font-paragraph mt-1 line-clamp-2 text-sm text-white">{{ item.description }}</p>
+      <p class="font-paragraph mt-1 line-clamp-2 text-sm text-white">{{ item.content }}</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+  import type { Announcement } from '@/interfaces';
+
   defineProps<{
-    item: { title: string; description: string; image: string | null };
+    item: Announcement;
     color?: string;
   }>();
 </script>
