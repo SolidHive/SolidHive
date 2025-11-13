@@ -118,7 +118,7 @@ export async function seedAnnouncements(
 
       const imageUrl = `https://picsum.photos/id/${imageId}/${width}/${height}`;
       const filename = `announcement_${savedAnnouncement.id}_image`;
-      const filepath = path.join(userDir, `${filename}.jpg`);
+      const filepath = path.join(userDir, filename);
 
       try {
         // Download the image
@@ -127,12 +127,12 @@ export async function seedAnnouncements(
         // Create file entity
         const file = fileRepository.create({
           filename: filename, // Without extension - fullFilename() will add it
-          relatedTo: 'Announcement',
+          relatedTo: 'AssociationAnnouncement',
           relatedBy: savedAnnouncement.id,
           purpose: 'image',
           index: 0,
           userId: randomUser.userId,
-          oldFilename: `announcement_image.jpg`,
+          oldFilename: `announcement_image`,
           mimetype: mimetype,
           extension: 'jpg',
           size: size,
@@ -140,7 +140,7 @@ export async function seedAnnouncements(
 
         await fileRepository.save(file);
 
-        console.log(`📸 Downloaded and saved image for announcement: ${filename}.jpg`);
+        console.log(`📸 Downloaded and saved image for announcement: ${filename}`);
       } catch (error) {
         console.error(
           `❌ Failed to download image for announcement ${savedAnnouncement.id}:`,

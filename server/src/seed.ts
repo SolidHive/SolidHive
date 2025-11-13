@@ -45,7 +45,7 @@ async function seed(dataSource: DataSource): Promise<void> {
     // Seed announcements
     await seedAnnouncements(dataSource, associations, userAssociations);
 
-    // Seed fundraisings (campaigns)
+    // Seed fundraisings (cagnottes)
     await seedFundraisings(dataSource, associations, userAssociations);
 
     // Seed events

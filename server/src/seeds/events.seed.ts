@@ -110,7 +110,7 @@ export async function seedEvents(
 
         const imageUrl = `https://picsum.photos/id/${imageId}/${width}/${height}`;
         const filename = `event_${event.id}_image`;
-        const filepath = path.join(userDir, `${filename}.jpg`);
+        const filepath = path.join(userDir, filename);
 
         try {
           // Download the image
@@ -124,7 +124,7 @@ export async function seedEvents(
             purpose: 'image',
             index: 0,
             userId: event.createdBy.userId,
-            oldFilename: `event_image.jpg`,
+            oldFilename: `event_image`,
             mimetype: mimetype,
             extension: 'jpg',
             size: size,
@@ -132,7 +132,7 @@ export async function seedEvents(
 
           await fileRepository.save(file);
 
-          console.log(`📸 Added image for existing event: ${filename}.jpg`);
+          console.log(`📸 Added image for existing event: ${filename}`);
         } catch (error) {
           console.error(`❌ Failed to add image for existing event ${event.id}:`, error);
         }
@@ -195,7 +195,7 @@ export async function seedEvents(
 
       const imageUrl = `https://picsum.photos/id/${imageId}/${width}/${height}`;
       const filename = `event_${savedEvent.id}_image`;
-      const filepath = path.join(userDir, `${filename}.jpg`);
+      const filepath = path.join(userDir, filename);
 
       try {
         // Download the image
@@ -209,7 +209,7 @@ export async function seedEvents(
           purpose: 'image',
           index: 0,
           userId: randomUser.userId,
-          oldFilename: `event_image.jpg`,
+          oldFilename: `event_image`,
           mimetype: mimetype,
           extension: 'jpg',
           size: size,
@@ -217,7 +217,7 @@ export async function seedEvents(
 
         await fileRepository.save(file);
 
-        console.log(`📸 Downloaded and saved image for event: ${filename}.jpg`);
+        console.log(`📸 Downloaded and saved image for event: ${filename}`);
       } catch (error) {
         console.error(`❌ Failed to download image for event ${savedEvent.id}:`, error);
       }
