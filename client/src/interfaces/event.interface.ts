@@ -6,6 +6,11 @@ export interface Event {
   startDate: string;
   endDate: string;
   amount?: number;
+  association?: {
+    id: string;
+    name: string;
+    primaryColor?: string;
+  };
   address?: {
     street: string;
     city: string;

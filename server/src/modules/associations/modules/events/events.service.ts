@@ -6,9 +6,8 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { Event } from './entities/event.entity';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { FilterEventsDto } from './dto/filter-events.dto';
 import { File } from '../../../files/entities/file.entity';
-import { Like, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
+import { Like, Between } from 'typeorm';
 
 @Injectable()
 export class EventsService {
@@ -29,44 +28,65 @@ export class EventsService {
     return this.eventsRepository.save(event);
   }
 
-  async findAll(associationId?: string, options?: FindOptionsDto, filters?: FilterEventsDto) {
-    const whereClause: any = associationId
-      ? { association: { id: associationId }, ...(options?.where || {}) }
-      : options?.where || {};
+  async findAllGlobal(
+    options?: FindOptionsDto & {
+      association?: string;
+      date?: string;
+    }
+  ) {
+    const where: any = {};
 
-    // Ajoute les filtres de recherche
-    if (filters?.search) {
-      whereClause.title = Like(`%${filters.search}%`);
+    if (options?.name) {
+      where.title = Like(`%${options.name}%`);
     }
 
-    if (filters?.isPaid !== undefined) {
-      if (filters.isPaid) {
-        // Événements payants (amount > 0)
-        whereClause.amount = MoreThanOrEqual(0.01);
-      } else {
-        // Événements gratuits (amount = 0 ou null)
-        whereClause.amount = 0;
-      }
+    if (options?.association) {
+      where.association = { name: Like(`%${options.association}%`) };
     }
 
-    if (filters?.startDate) {
-      whereClause.startDate = MoreThanOrEqual(new Date(filters.startDate));
+    if (options?.date) {
+      const filterDate = new Date(options.date);
+      const startOfDay = new Date(filterDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(filterDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      where.startDate = Between(startOfDay, endOfDay);
     }
 
-    if (filters?.endDate) {
-      whereClause.endDate = LessThanOrEqual(new Date(filters.endDate));
+    let order: any = options?.order;
+    if (options?.orderBy) {
+      order = { startDate: options.orderBy };
     }
 
-    // Compter le total d'événements (sans pagination)
-    const total = await this.eventsRepository.count({
-      where: whereClause,
-    });
+    const relations = ['association', 'createdBy'];
+
+    if (options?.take) {
+      const result = await this.eventsRepository.findAndCount({
+        where,
+        relations,
+        order,
+        skip: options.skip,
+        take: options.take,
+      });
+
+      const enrichedData = await this.enrichWithImages(result[0]);
+      return { data: enrichedData, total: result[1] };
+    }
 
     const events = await this.eventsRepository.find({
+      where,
+      relations,
+      order,
+    });
+
+    return this.enrichWithImages(events);
+  }
+
+  async findAll(associationId: string, options?: FindOptionsDto) {
+    const events = await this.eventsRepository.find({
       ...options,
-      where: whereClause,
+      where: { association: { id: associationId } },
       relations: ['createdBy', 'association'],
-      order: options?.order || { startDate: 'DESC' },
     });
 
     // Enrichir avec les images
@@ -90,22 +110,36 @@ export class EventsService {
       })
     );
 
-    return {
-      data: enrichedEvents,
-      meta: {
-        total,
-        page: options?.skip ? Math.floor(options.skip / (options.take || 10)) + 1 : 1,
-        limit: options?.take || 10,
-        totalPages: Math.ceil(total / (options?.take || 10)),
-      },
-    };
+    return enrichedEvents;
   }
 
-  findOne(id: string, associationId: string, options?: FindOptionsDto) {
-    return this.eventsRepository.findOne({
+  async findOne(id: string, associationId: string, options?: FindOptionsDto) {
+    const event = await this.eventsRepository.findOne({
       ...options,
       where: { id, association: { id: associationId } },
+      relations: ['association', 'createdBy'],
     });
+
+    if (!event) {
+      return null;
+    }
+
+    // Enrichir avec l'image
+    const imageFile = await this.fileRepository.findOne({
+      where: {
+        relatedTo: 'Event',
+        relatedBy: event.id,
+        purpose: 'image',
+        index: 0,
+      },
+    });
+
+    const imageUrl = imageFile ? `/files/Event/${event.id}?index=${imageFile.index}` : null;
+
+    return {
+      ...event,
+      image: imageUrl,
+    };
   }
 
   async update(id: string, associationId: string, updateEventDto: UpdateEventDto) {
@@ -118,5 +152,27 @@ export class EventsService {
       id,
       association: { id: associationId },
     });
+  }
+
+  private async enrichWithImages(events: Event[]) {
+    return Promise.all(
+      events.map(async (event) => {
+        const imageFile = await this.fileRepository.findOne({
+          where: {
+            relatedTo: 'Event',
+            relatedBy: event.id,
+            purpose: 'image',
+            index: 0,
+          },
+        });
+
+        const imageUrl = imageFile ? `/files/Event/${event.id}?index=${imageFile.index}` : null;
+
+        return {
+          ...event,
+          image: imageUrl,
+        };
+      })
+    );
   }
 }
