@@ -57,6 +57,7 @@
     }
 
     const hasAccess = await crmStore.hasAccessToAssociation(id);
+
     if (!hasAccess) {
       router.push('/unauthorized');
       return;

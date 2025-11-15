@@ -58,7 +58,9 @@
                 <DropdownMenuSubTrigger>Accès CRM</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
                   <DropdownMenuItem
-                    v-for="userInAssociation in authStore.associations"
+                    v-for="userInAssociation in authStore.associations.filter(
+                      (uia) => uia.status === Status.ACCEPTED
+                    )"
                     :key="userInAssociation.id"
                   >
                     <router-link
@@ -192,6 +194,7 @@
     DropdownMenuTrigger,
   } from '@/components/ui/dropdown-menu';
   import logoUrl from '@/assets/images/logo-solidhive.png';
+  import { Status } from '@/enums/status';
 
   const authStore = useAuthStore();
   const menuOpen = ref(false);
