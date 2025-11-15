@@ -49,8 +49,14 @@ export const useCrmStore = defineStore('crm', () => {
     }
   }
 
+  function getMember(): Member {
+    if (!member.value) {
+      throw new Error('No member available');
+    }
+    return member.value;
+  }
+
   function reset() {
-    console.log('Resetting CRM store');
     currentAssociationId.value = null;
     currentRoute.value = null;
     error.value = null;
@@ -59,7 +65,7 @@ export const useCrmStore = defineStore('crm', () => {
   }
 
   return {
-    member,
+    getMember,
     currentAssociationId,
     currentRoute,
     error,

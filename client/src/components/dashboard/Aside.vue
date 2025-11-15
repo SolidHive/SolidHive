@@ -22,7 +22,7 @@
             <span class="hidden lg:block">Accueil</span>
           </RouterLink>
           <RouterLink
-            v-if="hasAccessToMembers"
+            v-if="crmAccess.canAccessToMembers"
             :to="{ name: 'CRMMembers', params: { locale: $route.params.locale } }"
             class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
             active-class="bg-secondary rounded-lg font-semibold"
@@ -31,7 +31,7 @@
             <span class="hidden lg:block">Membres</span>
           </RouterLink>
           <RouterLink
-            v-if="hasAccessToRoles"
+            v-if="crmAccess.canAccessToRoles"
             :to="{ name: 'CRMRoles', params: { locale: $route.params.locale } }"
             class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
             active-class="bg-secondary rounded-lg font-semibold"
@@ -63,17 +63,10 @@
   import { Home, Users, ShieldCheck, Megaphone } from 'lucide-vue-next';
   import { useWindowSize } from '@vueuse/core';
   import { useCrmStore } from '@/stores/crm';
-  import { Permissions } from '@/enums/permissions';
+  import { useCrmAccess } from '@/composables/crm-access';
 
   const { width } = useWindowSize();
   const crmStore = useCrmStore();
-  const member = crmStore.member;
-
-  const hasAccessToMembers = member?.role.permissions.some(
-    (permission) => permission === Permissions.REGISTERS_VIEW || permission === Permissions.ALL
-  );
-
-  const hasAccessToRoles = member?.role.permissions.some(
-    (permission) => permission === Permissions.ROLES_VIEW || permission === Permissions.ALL
-  );
+  const member = crmStore.getMember();
+  const crmAccess = useCrmAccess(member);
 </script>
