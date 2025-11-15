@@ -1,5 +1,6 @@
 <template>
   <Read
+    :table-headers="tableHeaders"
     :fetch-items="`association/${associationId}/roles`"
     :can-create-items="crmAccess.canCreateRole"
     :can-update-items="crmAccess.canUpdateRole"
@@ -8,9 +9,6 @@
   >
     <template #header>Rôles</template>
     <template #add-button>Créer un rôle</template>
-    <template #table-header>
-      <TableHead v-for="header in tableHeaders" :key="header">{{ header }}</TableHead>
-    </template>
     <template #table-row="{ name, description, permissions }">
       <TableCell class="font-medium">
         <div class="capitalize">{{ name }}</div>
@@ -54,7 +52,7 @@
   import { onBeforeMount } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useCrmStore } from '@/stores/crm';
-  import { TableCell, TableHead } from '@/components/ui/table';
+  import { TableCell } from '@/components/ui/table';
   import { useCrmAccess } from '@/composables/crm-access';
   import { Read } from '@/components/dashboard/crud';
   import type { Role } from '@/interfaces/roles.interface';
@@ -65,8 +63,13 @@
     TooltipTrigger,
     Tooltip,
   } from '@/components/ui/tooltip';
+  import type { TableHeader } from '@/interfaces/table-header.interface';
 
-  const tableHeaders = ['Nom', 'Description', 'Permissions'];
+  const tableHeaders: TableHeader<Role>[] = [
+    { text: 'Nom', sortKey: 'name' },
+    { text: 'Description' },
+    { text: 'Permissions' },
+  ];
 
   const crmStore = useCrmStore();
   const member = crmStore.getMember();

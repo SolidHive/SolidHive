@@ -1,5 +1,6 @@
 <template>
   <Read
+    :table-headers="tableHeaders"
     :fetch-items="`association/${associationId}/users`"
     :can-create-items="crmAccess.canCreateMember"
     :can-update-items="crmAccess.canUpdateMember"
@@ -8,9 +9,6 @@
   >
     <template #header>Membres</template>
     <template #add-button>Inviter un membre</template>
-    <template #table-header>
-      <TableHead v-for="header in tableHeaders" :key="header">{{ header }}</TableHead>
-    </template>
     <template #table-row="{ user, role, status }">
       <TableCell class="font-medium">
         <div class="flex items-center gap-3">
@@ -65,12 +63,19 @@
   import { useRoute, useRouter } from 'vue-router';
   import type { Member } from '@/interfaces/member.interface';
   import { useCrmStore } from '@/stores/crm';
-  import { TableCell, TableHead } from '@/components/ui/table';
+  import { TableCell } from '@/components/ui/table';
   import StatusTag from '@/components/dashboard/tags/StatusTag.vue';
   import { useCrmAccess } from '@/composables/crm-access';
   import { Read } from '@/components/dashboard/crud';
+  import type { TableHeader } from '@/interfaces/table-header.interface';
 
-  const tableHeaders = ['Nom', 'Email', 'Rôle', 'Statut'];
+  const tableHeaders: TableHeader<Member>[] = [
+    { text: 'Nom', sortKey: 'user.name' },
+    { text: 'Email', sortKey: 'user.email' },
+    { text: 'Téléphone', sortKey: 'user.phone' },
+    { text: 'Rôle', sortKey: 'role.name' },
+    { text: 'Statut', sortKey: 'status' },
+  ];
 
   const crmStore = useCrmStore();
   const member = crmStore.getMember();
