@@ -1,7 +1,7 @@
 <template>
   <div class="mt-4 flex items-center justify-between">
     <div class="flex items-center gap-2">
-      <span class="text-muted-foreground text-sm">Annonces par page:</span>
+      <span class="text-muted-foreground text-sm">Éléments par page:</span>
       <select
         :value="itemsPerPage"
         class="border-input bg-background ring-offset-background focus-visible:ring-ring h-8 rounded-md border px-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
@@ -14,7 +14,7 @@
     </div>
     <div class="flex items-center gap-2">
       <span class="text-muted-foreground text-sm">
-        Page {{ currentPage }} sur {{ totalPages }} ({{ totalItems }} annonce{{
+        Page {{ currentPage }} sur {{ totalPages }} ({{ totalItems }} élément{{
           totalItems > 1 ? 's' : ''
         }})
       </span>

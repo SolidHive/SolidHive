@@ -1,5 +1,6 @@
 <template>
   <Read
+    :table-headers="tableHeaders"
     :fetch-items="`association/${associationId}/announcements`"
     :can-create-items="crmAccess.canCreateAnnouncement"
     :can-update-items="crmAccess.canUpdateAnnouncement"
@@ -8,9 +9,6 @@
   >
     <template #header>Annonces</template>
     <template #add-button>Créer une annonce</template>
-    <template #table-header>
-      <TableHead v-for="header in tableHeaders" :key="header">{{ header }}</TableHead>
-    </template>
     <template #table-row="{ title, isActive, timestamps, image }">
       <TableCell class="font-medium">
         <div>{{ title }}</div>
@@ -53,15 +51,22 @@
   import { onBeforeMount } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useCrmStore } from '@/stores/crm';
-  import { TableCell, TableHead } from '@/components/ui/table';
+  import { TableCell } from '@/components/ui/table';
   import { useCrmAccess } from '@/composables/crm-access';
   import { Read as ReadRaw } from '@/components/dashboard/crud';
   import { Permissions } from '@/enums/permissions';
   import type { Announcement } from '@/interfaces';
   import Image from '@/components/dashboard/Image.vue';
+  import type { TableHeader } from '@/interfaces/table-header.interface';
 
   const Read = ReadRaw<Announcement>;
-  const tableHeaders = ['Titre', 'Image', 'Statut', 'Date de création', 'Date de mise à jour'];
+  const tableHeaders: TableHeader<Announcement>[] = [
+    { text: 'Titre', sortKey: 'title' },
+    { text: 'Image' },
+    { text: 'Statut', sortKey: 'isActive' },
+    { text: 'Date de création', sortKey: 'timestamps.createdAt' },
+    { text: 'Date de mise à jour', sortKey: 'timestamps.updatedAt' },
+  ];
 
   const crmStore = useCrmStore();
   const member = crmStore.getMember();

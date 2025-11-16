@@ -23,7 +23,34 @@
       :can-modify-specific-item="canModifySpecificItem"
     >
       <template #header>
-        <slot name="table-header"></slot>
+        <TableHead
+          v-for="header in tableHeaders"
+          :key="header.text"
+          :class="sortBy && sortBy.sortKey === header.sortKey ? 'text-foreground' : ''"
+        >
+          <button
+            v-if="header.sortKey"
+            class="hover:bg-background flex cursor-pointer flex-row items-center justify-center gap-2 rounded-md px-4 py-2 transition-all"
+            @click="toggleSort(header.sortKey ?? header.text)"
+          >
+            {{ header.text }}
+            <ArrowUpDown
+              v-if="(sortBy && sortBy.sortKey !== header.sortKey) || !sortBy"
+              class="inline-block h-4 w-4"
+            />
+            <ArrowUp
+              v-else-if="sortBy && sortBy.sortKey === header.sortKey && sortBy.direction === 'ASC'"
+              class="inline-block h-4 w-4"
+            />
+            <ArrowDown
+              v-else-if="sortBy && sortBy.sortKey === header.sortKey && sortBy.direction === 'DESC'"
+              class="inline-block h-4 w-4"
+            />
+          </button>
+          <span v-else>
+            {{ header.text }}
+          </span>
+        </TableHead>
       </template>
       <template #table-row>
         <TableRow v-for="item in items" :key="item.id">
@@ -103,11 +130,15 @@
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from '@/components/ui/dropdown-menu';
-  import { Ellipsis } from 'lucide-vue-next';
-  import { TableCell, TableRow } from '../../ui/table';
+  import { Ellipsis, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-vue-next';
+  import { TableCell, TableHead, TableRow } from '../../ui/table';
   import router from '@/routes';
+  import type { TableHeader } from '@/interfaces/table-header.interface';
+  import { sortKeyToNested } from '@/utils/sort.utils';
+  import type { NestedKeyOf } from '@/types/nested-key-of.type';
 
   const props = defineProps<{
+    tableHeaders: TableHeader<T>[];
     createRouteName?: string;
     updateRouteName?: string;
     deleteRouteName?: string;
@@ -125,6 +156,7 @@
   const itemsPerPage = ref(10);
   const totalItems = ref(0);
   const totalPages = ref(1);
+  const sortBy = ref<{ sortKey: NestedKeyOf<T>; direction: 'ASC' | 'DESC' } | null>(null);
 
   let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -170,6 +202,16 @@
     }
   }
 
+  function toggleSort(field: NestedKeyOf<T>) {
+    if (sortBy.value && sortBy.value.sortKey === field) {
+      sortBy.value.direction = sortBy.value.direction === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+      sortBy.value = { sortKey: field, direction: 'ASC' };
+    }
+    currentPage.value = 1;
+    fetchItems();
+  }
+
   const fetchItems = async () => {
     if (typeof props.fetchItems !== 'string') {
       items.value = props.fetchItems;
@@ -187,6 +229,12 @@
 
       if (searchQuery.value) {
         params.where = JSON.stringify(searchQuery.value);
+      }
+
+      if (sortBy.value) {
+        params.order = JSON.stringify(
+          sortKeyToNested(sortBy.value.sortKey, sortBy.value.direction)
+        );
       }
 
       const response = await Database.getAll(props.fetchItems, params);
