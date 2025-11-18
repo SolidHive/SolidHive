@@ -1,5 +1,6 @@
-export interface Transaction {
-  id: string;
+import type { HasId } from './has_id.interface';
+
+export interface Transaction extends HasId {
   amount: number;
   relatedTo: string;
   relatedBy: string;
