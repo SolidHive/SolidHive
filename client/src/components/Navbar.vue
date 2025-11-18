@@ -14,24 +14,25 @@
           to="/cagnottes"
           class="text-secondary font-paragraph text-sm transition-opacity hover:opacity-80"
         >
-          Cagnottes
+          {{ t('navbar.fundraisers') }}
         </router-link>
         <router-link
           to="/events"
           class="text-secondary font-paragraph text-sm transition-opacity hover:opacity-80"
         >
-          Événements
+          {{ t('navbar.events') }}
         </router-link>
         <router-link
           to="/associations"
           class="text-secondary font-paragraph text-sm transition-opacity hover:opacity-80"
         >
-          Associations
+          {{ t('navbar.associations') }}
         </router-link>
       </div>
 
       <!-- Desktop Auth -->
       <div class="hidden items-center space-x-4 md:flex">
+        <LanguageSwitcher />
         <template v-if="authStore.isAuthenticated()">
           <DropdownMenu>
             <DropdownMenuTrigger>
@@ -52,10 +53,10 @@
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <router-link to="/profile" class="w-full">Mon compte</router-link>
+                <router-link to="/profile" class="w-full">{{ t('navbar.myAccount') }}</router-link>
               </DropdownMenuItem>
               <DropdownMenuSub v-if="authStore.associations.length > 0">
-                <DropdownMenuSubTrigger>Accès CRM</DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger>{{ t('navbar.crmAccess') }}</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
                   <DropdownMenuItem
                     v-for="userInAssociation in authStore.associations.filter(
@@ -87,14 +88,14 @@
                 "
               >
                 <Unplug class="size-4" />
-                Déconnexion
+                {{ t('navbar.logout') }}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </template>
         <template v-else>
           <Button variant="secondary" size="sm" @click="$router.push('/login')">
-            Se connecter
+            {{ t('navbar.login') }}
           </Button>
         </template>
       </div>
@@ -134,21 +135,21 @@
             class="text-secondary font-paragraph py-2 text-base"
             @click="closeMenu"
           >
-            Cagnottes
+            {{ t('navbar.fundraisers') }}
           </router-link>
           <router-link
             to="/evenements"
             class="text-secondary font-paragraph py-2 text-base"
             @click="closeMenu"
           >
-            Événements
+            {{ t('navbar.events') }}
           </router-link>
           <router-link
             to="/associations"
             class="text-secondary font-paragraph py-2 text-base"
             @click="closeMenu"
           >
-            Associations
+            {{ t('navbar.associations') }}
           </router-link>
         </nav>
         <div class="flex-1" />
@@ -160,7 +161,9 @@
                   <div class="bg-accent flex h-8 w-8 items-center justify-center rounded-full">
                     <User class="h-4 w-4 text-white" />
                   </div>
-                  <div class="text-secondary font-paragraph py-2 text-base">Mon compte</div>
+                  <div class="text-secondary font-paragraph py-2 text-base">
+                    {{ t('navbar.myAccount') }}
+                  </div>
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -176,10 +179,12 @@
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <router-link to="/profile" class="w-full">Mon compte</router-link>
+                  <router-link to="/profile" class="w-full">
+                    {{ t('navbar.myAccount') }}
+                  </router-link>
                 </DropdownMenuItem>
                 <DropdownMenuSub v-if="authStore.associations.length > 0">
-                  <DropdownMenuSubTrigger>Accès CRM</DropdownMenuSubTrigger>
+                  <DropdownMenuSubTrigger>{{ t('navbar.crmAccess') }}</DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
                     <DropdownMenuItem
                       v-for="userInAssociation in authStore.associations.filter(
@@ -211,14 +216,14 @@
                   "
                 >
                   <Unplug class="h-4 w-4" />
-                  Déconnexion
+                  {{ t('navbar.logout') }}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </template>
           <template v-else>
             <Button variant="secondary" size="sm" class="w-full" @click="goToLogin">
-              Se connecter
+              {{ t('navbar.login') }}
             </Button>
           </template>
         </div>
@@ -230,6 +235,7 @@
 <script setup lang="ts">
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
+  import { useI18n } from 'vue-i18n';
   import { useAuthStore } from '../stores/auth';
   import { Button } from '@/components/ui/button';
   import { User, Menu, X, Unplug } from 'lucide-vue-next';
@@ -243,12 +249,14 @@
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from '@/components/ui/dropdown-menu';
+  import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
   import logoUrl from '@/assets/images/logo-solidhive.png';
   import { Status } from '@/enums/status';
 
   const authStore = useAuthStore();
   const menuOpen = ref(false);
   const router = useRouter();
+  const { t } = useI18n();
 
   function toggleMenu() {
     menuOpen.value = !menuOpen.value;

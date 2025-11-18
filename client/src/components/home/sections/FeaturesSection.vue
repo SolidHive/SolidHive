@@ -3,7 +3,7 @@
     <!-- Titre principal -->
     <div class="mb-12">
       <h2 class="font-title text-secondary mb-8 text-2xl sm:text-3xl lg:text-4xl">
-        Pourquoi choisir SolidHive ?
+        {{ t('home.features.title') }}
       </h2>
     </div>
 
@@ -16,13 +16,12 @@
           <Search class="text-accent h-6 w-6 flex-shrink-0" />
           <!-- Titre -->
           <h3 class="font-subtitle text-secondary text-base lg:text-xl">
-            Trouvez l’association qui vous ressemble
+            {{ t('home.features.search.title') }}
           </h3>
         </div>
         <!-- Paragraphe -->
         <p class="font-paragraph text-sm lg:text-base">
-          Grâce à nos filtres malins, explorez des associations alignées avec vos valeurs, vos
-          envies et votre cœur.
+          {{ t('home.features.search.description') }}
         </p>
       </div>
 
@@ -33,13 +32,12 @@
           <Zap class="text-accent h-6 w-6 flex-shrink-0" />
           <!-- Titre -->
           <h3 class="font-subtitle text-secondary text-base lg:text-xl">
-            Un don en quelques clics
+            {{ t('home.features.speed.title') }}
           </h3>
         </div>
         <!-- Paragraphe -->
         <p class="font-paragraph text-sm lg:text-base">
-          Une interface fluide et rapide, pensée pour vous faire gagner du temps. Donner devient
-          simple et naturel.
+          {{ t('home.features.speed.description') }}
         </p>
       </div>
 
@@ -50,12 +48,12 @@
           <User class="text-accent h-6 w-6 flex-shrink-0" />
           <!-- Titre -->
           <h3 class="font-subtitle text-secondary text-base lg:text-xl">
-            Votre espace donateur personnel
+            {{ t('home.features.community.title') }}
           </h3>
         </div>
         <!-- Paragraphe -->
         <p class="font-paragraph text-sm lg:text-base">
-          Retrouvez vos dons, vos associations favorites, vos reçus et l’historique de vos actions.
+          {{ t('home.features.community.description') }}
         </p>
       </div>
 
@@ -65,11 +63,13 @@
           <!-- Icône bouclier -->
           <Shield class="text-accent h-6 w-6 flex-shrink-0" />
           <!-- Titre -->
-          <h3 class="font-subtitle text-secondary text-base lg:text-xl">Transparence total</h3>
+          <h3 class="font-subtitle text-secondary text-base lg:text-xl">
+            {{ t('home.features.security.title') }}
+          </h3>
         </div>
         <!-- Paragraphe -->
         <p class="font-paragraph text-sm lg:text-base">
-          Chaque association est vérifiée. Vous voyez tout.
+          {{ t('home.features.security.description') }}
         </p>
       </div>
     </div>
@@ -77,5 +77,8 @@
 </template>
 
 <script setup lang="ts">
+  import { useI18n } from 'vue-i18n';
   import { Search, Zap, User, Shield } from 'lucide-vue-next';
+
+  const { t } = useI18n();
 </script>

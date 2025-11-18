@@ -1,0 +1,136 @@
+{
+  "navbar": {
+    "fundraisers": "Cagnottes",
+    "events": "Événements",
+    "associations": "Associations",
+    "login": "Se connecter",
+    "myAccount": "Mon compte",
+    "crmAccess": "Accès CRM",
+    "logout": "Déconnexion"
+  },
+  "footer": {
+    "platform": {
+      "title": "Notre Plateforme",
+      "aboutUs": "Qui sommes-nous ?",
+      "findAssociation": "Trouver une Association",
+      "becomeVolunteer": "Devenir Bénévole",
+      "registerAssociation": "Inscrire une association"
+    },
+    "resources": {
+      "title": "Ressources",
+      "newsletter": "Newletter",
+      "faq": "FAQ"
+    },
+    "legal": {
+      "title": "CGU",
+      "legalNotice": "Mentions légales",
+      "cookies": "Gestion des cookies"
+    },
+    "contact": {
+      "title": "Contact",
+      "contactTeam": "Contactez notre équipe"
+    },
+    "copyright": "Tous droits réservés."
+  },
+  "home": {
+    "header": {
+      "title": "La ruche qui fait Bourdonner la solidarité",
+      "description": "Rejoignez une communauté engagée qui transforme les bonnes intentions en actions concrètes. Ensemble, créons un réseau de solidarité qui unit les associations et amplifie leur impact social.",
+      "findAssociation": "Trouver mon association",
+      "discoverProjects": "Découvrir les projets",
+      "imageAlt": "Solidarité communautaire"
+    },
+    "associations": {
+      "title": "L'association qu'il te faut",
+      "subtitle": "Pars à la rencontre de ton association idéale",
+      "noAssociations": "Aucune association disponible pour le moment.",
+      "viewAll": "Voir toutes les associations",
+      "logoAlt": "Logo de {name}"
+    },
+    "features": {
+      "title": "Pourquoi choisir SolidHive ?",
+      "search": {
+        "title": "Trouvez l'association qui vous ressemble",
+        "description": "Grâce à nos filtres malins, explorez des associations alignées avec vos valeurs, vos envies et votre cœur."
+      },
+      "speed": {
+        "title": "Un don en quelques clics",
+        "description": "Une interface fluide et rapide, pensée pour vous faire gagner du temps. Donner devient simple et naturel."
+      },
+      "community": {
+        "title": "Votre espace donateur personnel",
+        "description": "Retrouvez vos dons, vos associations favorites, vos reçus et l'historique de vos actions."
+      },
+      "security": {
+        "title": "Transparence total",
+        "description": "Chaque association est vérifiée. Vous voyez tout."
+      }
+    },
+    "cta": {
+      "title": "Une ruche solidaire pour agir ensemble",
+      "point1": "👉 Donner de la visibilité aux associations et structures engagées, en leur fournissant des outils pratiques pour présenter leurs projets, mobiliser des bénévoles et recevoir des dons facilement.",
+      "point2": "👉 Faciliter l'engagement des donateurs et citoyens solidaires, grâce à une interface intuitive, des filtres personnalisés, un espace donateur dédié et un suivi concret de l'impact de leurs contributions.",
+      "point3": "SolidHive, c'est une ruche où chaque action, grande ou petite, compte.",
+      "bold": "Ensemble, faisons grandir les causes qui font sens.",
+      "button": "En savoir plus",
+      "imageAlt": "Mouvement solidaire"
+    },
+    "stats": {
+      "title": "SolidHive c'est...",
+      "associations": "associations déjà référencées",
+      "donations": "de vos dons vont directement aux associations",
+      "total": "dons réalisés via SolidHive depuis le lancement"
+    },
+    "testimonials": {
+      "title": "Ils utilisent notre solution",
+      "goToPage": "Aller à la page {n}",
+      "items": [
+        {
+          "name": "Alice Dupont",
+          "text": "SolidHive m'a permis de trouver une association qui correspond à mes valeurs. L'expérience est simple et humaine !"
+        },
+        {
+          "name": "Jean Martin",
+          "text": "Grâce à SolidHive, nous avons recruté de nouveaux bénévoles motivés et reçu plus de dons en quelques semaines."
+        },
+        {
+          "name": "Sophie Bernard",
+          "text": "J'ai pu soutenir des projets locaux en toute confiance. La plateforme est claire et très agréable à utiliser."
+        },
+        {
+          "name": "Lucas Petit",
+          "text": "Une expérience fluide et des rencontres inspirantes. Merci SolidHive !"
+        },
+        {
+          "name": "Emma Leroy",
+          "text": "J'ai trouvé une cause qui me tient à cœur et j'ai pu m'engager facilement."
+        },
+        {
+          "name": "Karim Benali",
+          "text": "La plateforme est très intuitive et l'équipe est à l'écoute. Je recommande !"
+        }
+      ]
+    },
+    "faq": {
+      "title": "On répond à toutes vos questions",
+      "items": [
+        {
+          "question": "Comment fonctionne SolidHive ?",
+          "answer": "SolidHive met en relation des bénévoles, des donateurs et des associations pour faciliter l'engagement solidaire. Vous pouvez rechercher des projets, postuler ou soutenir en quelques clics."
+        },
+        {
+          "question": "Est-ce que l'inscription est gratuite ?",
+          "answer": "Oui, l'inscription sur SolidHive est entièrement gratuite pour les bénévoles et les associations."
+        },
+        {
+          "question": "Comment puis-je contacter une association ?",
+          "answer": "Une fois inscrit, vous pouvez contacter les associations directement via la plateforme grâce à la messagerie intégrée."
+        },
+        {
+          "question": "Puis-je proposer mon association sur SolidHive ?",
+          "answer": "Bien sûr ! Il suffit de créer un compte association et de remplir le formulaire de présentation."
+        }
+      ]
+    }
+  }
+}

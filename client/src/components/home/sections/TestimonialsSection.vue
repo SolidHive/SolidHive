@@ -1,7 +1,7 @@
 <template>
   <section>
     <h2 class="font-title text-secondary mb-8 text-center text-2xl sm:text-3xl md:text-4xl">
-      Ils utilisent notre solution
+      {{ t('home.testimonials.title') }}
     </h2>
     <Carousel
       class="mx-auto w-full max-w-7xl bg-transparent"
@@ -39,7 +39,7 @@
           'h-3 w-3 rounded-full transition-colors',
           currentSlide === n - 1 ? 'bg-secondary' : 'hover:bg-secondary/60 bg-gray-300',
         ]"
-        aria-label="Aller à la page {{ n }}"
+        :aria-label="t('home.testimonials.goToPage', { n })"
         @click="goToSlide(n - 1)"
       />
     </div>
@@ -47,48 +47,29 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue';
+  import { ref, computed } from 'vue';
+  import { useI18n } from 'vue-i18n';
   import type { EmblaCarouselType } from 'embla-carousel';
   import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 
-  const testimonials = ref([
-    {
-      photo:
-        'https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=facearea&w=128&q=80',
-      name: 'Alice Dupont',
-      text: 'SolidHive m’a permis de trouver une association qui correspond à mes valeurs. L’expérience est simple et humaine !',
-    },
-    {
-      photo:
-        'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=facearea&w=128&q=80',
-      name: 'Jean Martin',
-      text: 'Grâce à SolidHive, nous avons recruté de nouveaux bénévoles motivés et reçu plus de dons en quelques semaines.',
-    },
-    {
-      photo:
-        'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=facearea&w=128&q=80',
-      name: 'Sophie Bernard',
-      text: 'J’ai pu soutenir des projets locaux en toute confiance. La plateforme est claire et très agréable à utiliser.',
-    },
-    {
-      photo:
-        'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=facearea&w=128&q=80',
-      name: 'Lucas Petit',
-      text: 'Une expérience fluide et des rencontres inspirantes. Merci SolidHive !',
-    },
-    {
-      photo:
-        'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=facearea&w=128&q=80',
-      name: 'Emma Leroy',
-      text: 'J’ai trouvé une cause qui me tient à cœur et j’ai pu m’engager facilement.',
-    },
-    {
-      photo:
-        'https://images.unsplash.com/photo-1519340333755-c190485c36c8?auto=format&fit=facearea&w=128&q=80',
-      name: 'Karim Benali',
-      text: 'La plateforme est très intuitive et l’équipe est à l’écoute. Je recommande !',
-    },
-  ]);
+  const { t, tm } = useI18n();
+
+  const photoUrls = [
+    'https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=facearea&w=128&q=80',
+    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=facearea&w=128&q=80',
+    'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=facearea&w=128&q=80',
+    'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=facearea&w=128&q=80',
+    'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=facearea&w=128&q=80',
+    'https://images.unsplash.com/photo-1519340333755-c190485c36c8?auto=format&fit=facearea&w=128&q=80',
+  ];
+
+  const testimonials = computed(() => {
+    const items = tm('home.testimonials.items') as Array<{ name: string; text: string }>;
+    return items.map((item, index) => ({
+      ...item,
+      photo: photoUrls[index],
+    }));
+  });
 
   // Pagination logic & autoplay
   import { onUnmounted } from 'vue';

@@ -1,0 +1,136 @@
+{
+  "navbar": {
+    "fundraisers": "筹款",
+    "events": "活动",
+    "associations": "协会",
+    "login": "登录",
+    "myAccount": "我的账户",
+    "crmAccess": "CRM 访问",
+    "logout": "登出"
+  },
+  "footer": {
+    "platform": {
+      "title": "我们的平台",
+      "aboutUs": "我们是谁？",
+      "findAssociation": "查找协会",
+      "becomeVolunteer": "成为志愿者",
+      "registerAssociation": "注册协会"
+    },
+    "resources": {
+      "title": "资源",
+      "newsletter": "通讯",
+      "faq": "常见问题"
+    },
+    "legal": {
+      "title": "条款",
+      "legalNotice": "法律声明",
+      "cookies": "Cookie 管理"
+    },
+    "contact": {
+      "title": "联系方式",
+      "contactTeam": "联系我们的团队"
+    },
+    "copyright": "版权所有。"
+  },
+  "home": {
+    "header": {
+      "title": "让团结凝聚的蜂巢",
+      "description": "加入一个充满活力的社区，将美好的意愿转化为具体的行动。让我们共同建立一个团结的网络，将协会联合起来，扩大他们的社会影响力。",
+      "findAssociation": "寻找我的协会",
+      "discoverProjects": "探索项目",
+      "imageAlt": "社区团结"
+    },
+    "associations": {
+      "title": "找到适合你的协会",
+      "subtitle": "开始寻找你理想的协会",
+      "noAssociations": "目前没有可用的协会。",
+      "viewAll": "查看所有协会",
+      "logoAlt": "{name}的标志"
+    },
+    "features": {
+      "title": "为什么选择 SolidHive？",
+      "search": {
+        "title": "找到与你相似的协会",
+        "description": "通过我们智能的筛选器，探索与你的价值观、愿望和内心相符的协会。"
+      },
+      "speed": {
+        "title": "几次点击即可捐赠",
+        "description": "流畅快速的界面，旨在为你节省时间。捐赠变得简单自然。"
+      },
+      "community": {
+        "title": "你的个人捐赠者空间",
+        "description": "查找你的捐赠、最喜欢的协会、收据和行动历史记录。"
+      },
+      "security": {
+        "title": "完全透明",
+        "description": "每个协会都经过验证。你可以看到一切。"
+      }
+    },
+    "cta": {
+      "title": "一个团结的蜂巢，共同行动",
+      "point1": "👉 为参与的协会和机构提供可见性，为他们提供实用的工具来展示他们的项目、动员志愿者并轻松接收捐赠。",
+      "point2": "👉 通过直观的界面、个性化的筛选器、专门的捐赠者空间和对贡献影响的具体跟踪，促进捐赠者和团结公民的参与。",
+      "point3": "SolidHive 是一个蜂巢，每一个行动，无论大小，都很重要。",
+      "bold": "让我们一起壮大有意义的事业。",
+      "button": "了解更多",
+      "imageAlt": "团结运动"
+    },
+    "stats": {
+      "title": "SolidHive 是...",
+      "associations": "已注册的协会",
+      "donations": "您的捐款直接送到协会",
+      "total": "自推出以来通过 SolidHive 完成的捐赠"
+    },
+    "testimonials": {
+      "title": "他们使用我们的解决方案",
+      "goToPage": "转到第 {n} 页",
+      "items": [
+        {
+          "name": "Alice Dupont",
+          "text": "SolidHive 让我找到了一个符合我价值观的协会。体验简单而人性化！"
+        },
+        {
+          "name": "Jean Martin",
+          "text": "多亏了 SolidHive，我们在几周内招募了新的积极志愿者并获得了更多捐赠。"
+        },
+        {
+          "name": "Sophie Bernard",
+          "text": "我能够自信地支持当地项目。平台清晰且非常易于使用。"
+        },
+        {
+          "name": "Lucas Petit",
+          "text": "流畅的体验和鼓舞人心的相遇。谢谢 SolidHive！"
+        },
+        {
+          "name": "Emma Leroy",
+          "text": "我找到了一个我关心的事业，并且能够轻松地参与其中。"
+        },
+        {
+          "name": "Karim Benali",
+          "text": "平台非常直观，团队倾听意见。我推荐！"
+        }
+      ]
+    },
+    "faq": {
+      "title": "我们回答您的所有问题",
+      "items": [
+        {
+          "question": "SolidHive 如何工作？",
+          "answer": "SolidHive 将志愿者、捐赠者和协会联系起来，以促进团结参与。你可以在几次点击中搜索项目、申请或支持。"
+        },
+        {
+          "question": "注册是免费的吗？",
+          "answer": "是的，SolidHive 的注册对志愿者和协会完全免费。"
+        },
+        {
+          "question": "我如何联系协会？",
+          "answer": "注册后，你可以通过平台的集成消息功能直接联系协会。"
+        },
+        {
+          "question": "我可以在 SolidHive 上推荐我的协会吗？",
+          "answer": "当然！只需创建一个协会帐户并填写演示表单。"
+        }
+      ]
+    }
+  }
+}

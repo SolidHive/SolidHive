@@ -3,9 +3,9 @@
     <!-- Section Header -->
     <header class="mb-12 text-center">
       <h2 class="font-title text-secondary mb-8 text-2xl sm:text-3xl lg:text-4xl">
-        L'association qu'il te faut
+        {{ t('home.associations.title') }}
       </h2>
-      <p class="text-md font-paragraph lg:text-lg">Pars à la rencontre de ton association idéale</p>
+      <p class="text-md font-paragraph lg:text-lg">{{ t('home.associations.subtitle') }}</p>
     </header>
 
     <!-- Associations Grid -->
@@ -54,14 +54,14 @@
 
       <!-- Empty State -->
       <div v-else class="py-12 text-center">
-        <p class="text-gray-500">Aucune association disponible pour le moment.</p>
+        <p class="text-gray-500">{{ t('home.associations.noAssociations') }}</p>
       </div>
     </div>
 
     <!-- Call to Action -->
     <div class="text-center">
       <Button variant="default" size="lg" class="px-8" @click="navigateToAssociations">
-        Voir toutes les associations
+        {{ t('home.associations.viewAll') }}
       </Button>
     </div>
   </section>
@@ -71,6 +71,7 @@
   // Vue imports
   import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
+  import { useI18n } from 'vue-i18n';
 
   // Component imports
   import { Button } from '@/components/ui/button';
@@ -88,6 +89,7 @@
 
   // Router
   const router = useRouter();
+  const { t } = useI18n();
 
   // Reactive state
   const associations = ref<Association[]>([]);

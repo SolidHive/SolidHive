@@ -6,7 +6,7 @@
         <div class="aspect-square w-full lg:h-[450px] lg:w-[450px] 2xl:h-[600px] 2xl:w-[600px]">
           <img
             :src="phoneSolidHive"
-            alt="Mouvement solidaire"
+            :alt="t('home.cta.imageAlt')"
             class="h-full w-full rounded-xl object-cover"
           />
         </div>
@@ -16,27 +16,23 @@
       <div class="space-y-6">
         <!-- Titre principal -->
         <h2 class="font-title text-secondary text-2xl leading-tight sm:text-3xl xl:text-4xl">
-          Une ruche solidaire pour agir ensemble
+          {{ t('home.cta.title') }}
         </h2>
 
         <!-- Texte descriptif -->
         <div class="space-y-4">
           <p class="font-paragraph text-sm leading-relaxed xl:text-lg">
-            👉 Donner de la visibilité aux associations et structures engagées, en leur fournissant
-            des outils pratiques pour présenter leurs projets, mobiliser des bénévoles et recevoir
-            des dons facilement.
+            {{ t('home.cta.point1') }}
           </p>
 
           <p class="font-paragraph text-sm leading-relaxed xl:text-lg">
-            👉 Faciliter l'engagement des donateurs et citoyens solidaires, grâce à une interface
-            intuitive, des filtres personnalisés, un espace donateur dédié et un suivi concret de
-            l'impact de leurs contributions.
+            {{ t('home.cta.point2') }}
           </p>
 
           <p class="font-paragraph text-sm leading-relaxed xl:text-lg">
-            SolidHive, c'est une ruche où chaque action, grande ou petite, compte.
+            {{ t('home.cta.point3') }}
             <br />
-            <span class="font-bold">Ensemble, faisons grandir les causes qui font sens.</span>
+            <span class="font-bold">{{ t('home.cta.bold') }}</span>
           </p>
         </div>
 
@@ -46,7 +42,7 @@
             variant="outline"
             class="border-accent text-accent hover:bg-accent w-full px-8 py-3 transition-colors hover:text-white sm:w-auto"
           >
-            En savoir plus
+            {{ t('home.cta.button') }}
           </Button>
         </div>
       </div>
@@ -55,6 +51,9 @@
 </template>
 
 <script setup lang="ts">
+  import { useI18n } from 'vue-i18n';
   import { Button } from '@/components/ui/button';
   import phoneSolidHive from '@/assets/images/home/phone_solidhive.jpg';
+
+  const { t } = useI18n();
 </script>

@@ -13,23 +13,27 @@
         <!-- Plateforme -->
         <div>
           <h3 class="font-title text-secondary mb-4 text-center text-lg md:text-left">
-            Notre Plateforme
+            {{ t('footer.platform.title') }}
           </h3>
           <ul class="space-y-2 text-center md:text-left">
             <li>
-              <router-link to="/" class="hover:underline">Qui sommes-nous ?</router-link>
-            </li>
-            <li>
-              <router-link to="/associations" class="hover:underline">
-                Trouver une Association
+              <router-link to="/" class="hover:underline">
+                {{ t('footer.platform.aboutUs') }}
               </router-link>
             </li>
             <li>
-              <router-link to="/projets" class="hover:underline">Devenir Bénévole</router-link>
+              <router-link to="/associations" class="hover:underline">
+                {{ t('footer.platform.findAssociation') }}
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/projets" class="hover:underline">
+                {{ t('footer.platform.becomeVolunteer') }}
+              </router-link>
             </li>
             <li>
               <router-link to="/connexion" class="hover:underline">
-                Inscrire une association
+                {{ t('footer.platform.registerAssociation') }}
               </router-link>
             </li>
           </ul>
@@ -37,33 +41,39 @@
         <!-- Ressources -->
         <div>
           <h3 class="font-title text-secondary mb-4 text-center text-lg md:text-left">
-            Ressources
+            {{ t('footer.resources.title') }}
           </h3>
           <ul class="space-y-2 text-center md:text-left">
             <li>
-              <a href="#" class="hover:underline">Newletter</a>
+              <a href="#" class="hover:underline">{{ t('footer.resources.newsletter') }}</a>
             </li>
-            <li><a href="#" class="hover:underline">FAQ</a></li>
+            <li>
+              <a href="#" class="hover:underline">{{ t('footer.resources.faq') }}</a>
+            </li>
           </ul>
         </div>
         <!-- Références légales -->
         <div>
-          <h3 class="font-title text-secondary mb-4 text-center text-lg md:text-left">CGU</h3>
+          <h3 class="font-title text-secondary mb-4 text-center text-lg md:text-left">
+            {{ t('footer.legal.title') }}
+          </h3>
           <ul class="space-y-2 text-center md:text-left">
             <li>
-              <a href="#" class="hover:underline">Mentions légales</a>
+              <a href="#" class="hover:underline">{{ t('footer.legal.legalNotice') }}</a>
             </li>
             <li>
-              <a href="#" class="hover:underline">Gestion des cookies</a>
+              <a href="#" class="hover:underline">{{ t('footer.legal.cookies') }}</a>
             </li>
           </ul>
         </div>
         <!-- Contact -->
         <div>
-          <h3 class="font-title text-secondary mb-4 text-center text-lg md:text-left">Contact</h3>
+          <h3 class="font-title text-secondary mb-4 text-center text-lg md:text-left">
+            {{ t('footer.contact.title') }}
+          </h3>
           <ul class="space-y-2 text-center md:text-left">
             <li>
-              <a href="#" class="hover:underline">Contactez notre équipe</a>
+              <a href="#" class="hover:underline">{{ t('footer.contact.contactTeam') }}</a>
             </li>
             <li>
               <div class="mt-2 flex justify-center gap-4 md:justify-start">
@@ -89,13 +99,16 @@
 
       <!-- Droits réservés -->
       <div class="text-secondary text-center text-sm">
-        © {{ new Date().getFullYear() }} SolidHive. Tous droits réservés.
+        © {{ new Date().getFullYear() }} SolidHive. {{ t('footer.copyright') }}
       </div>
     </div>
   </footer>
 </template>
 
 <script setup lang="ts">
+  import { useI18n } from 'vue-i18n';
   import logoUrl from '@/assets/images/logo-solidhive.png';
   import { Facebook, Instagram, Linkedin } from 'lucide-vue-next';
+
+  const { t } = useI18n();
 </script>
