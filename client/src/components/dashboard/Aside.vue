@@ -1,5 +1,5 @@
 <template>
-  <aside class="bg-accent flex min-h-screen w-16 flex-col lg:w-45 xl:w-55 2xl:w-65">
+  <aside class="bg-accent flex min-h-screen min-w-16 flex-col lg:w-45 xl:w-55 2xl:w-65">
     <div
       id="crm-aside-header"
       class="flex h-16 w-full items-center justify-center border-b border-gray-200 sm:h-24"
