@@ -1,5 +1,6 @@
-export interface Fundraising {
-  id: string;
+import type { HasId } from './has_id.interface';
+
+export interface Fundraising extends HasId {
   title: string;
   description: string;
   image: string | null;
