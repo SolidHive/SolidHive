@@ -50,6 +50,10 @@
     formData?: Record<string, any>;
   }>();
 
+  const emit = defineEmits<{
+    afterUpdate: [updatedItem: any];
+  }>();
+
   const route = useRoute();
 
   const item = ref<T | null>(null) as Ref<T | null>;
@@ -78,7 +82,10 @@
     try {
       isLoading.value = true;
 
-      await Database.patch(props.updateEndpoint, props.formData || {});
+      const updatedItem = await Database.patch(props.updateEndpoint, props.formData || {});
+
+      // Émettre l'événement après mise à jour
+      emit('afterUpdate', updatedItem);
 
       returnToView();
     } catch (error) {

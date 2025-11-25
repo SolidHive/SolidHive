@@ -71,19 +71,37 @@ export default class Database {
 
   /**
    * Upload un fichier avec FormData
+   * @param file Le fichier à uploader
+   * @param data Les données du DTO CreateFileDto (relatedTo, relatedBy, purpose, index, etc.)
    */
-  static async uploadFile(endpoint: string, file: File, additionalData?: Record<string, string>) {
+  static async uploadFile(
+    file: File,
+    data: {
+      relatedTo: string;
+      relatedBy: string;
+      purpose: string;
+      index?: number;
+      allowedSystemRoles?: number[];
+      allowedAssociationRoles?: string[];
+    }
+  ) {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('relatedTo', data.relatedTo);
+      formData.append('relatedBy', data.relatedBy);
+      formData.append('purpose', data.purpose);
+      formData.append('index', String(data.index ?? 0));
 
-      if (additionalData) {
-        Object.entries(additionalData).forEach(([key, value]) => {
-          formData.append(key, value);
-        });
+      if (data.allowedSystemRoles) {
+        formData.append('allowedSystemRoles', data.allowedSystemRoles.join(','));
       }
 
-      const response = await api.post(endpoint, formData, {
+      if (data.allowedAssociationRoles) {
+        formData.append('allowedAssociationRoles', data.allowedAssociationRoles.join(','));
+      }
+
+      const response = await api.post('files', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -93,5 +111,34 @@ export default class Database {
       console.error('API Error in Database.uploadFile:', err);
       throw err;
     }
+  }
+
+  /**
+   * Met à jour ou crée un fichier (écrase l'ancien si existe)
+   * Note: Grâce à la contrainte unique sur [relatedTo, relatedBy, index, purpose],
+   * créer un fichier avec les mêmes paramètres écrasera l'ancien
+   */
+  static async updateFile(
+    file: File,
+    data: {
+      relatedTo: string;
+      relatedBy: string;
+      purpose: string;
+      index?: number;
+      allowedSystemRoles?: number[];
+      allowedAssociationRoles?: string[];
+    }
+  ) {
+    // Pour mettre à jour, on supprime d'abord l'ancien fichier puis on crée le nouveau
+    try {
+      // Supprimer l'ancien fichier s'il existe
+      await api.delete(`files/${data.relatedTo}/${data.relatedBy}?index=${data.index ?? 0}`);
+    } catch (err) {
+      // Ignorer l'erreur si le fichier n'existe pas
+      console.log('No existing file to delete or error deleting:', err);
+    }
+
+    // Créer le nouveau fichier
+    return this.uploadFile(file, data);
   }
 }

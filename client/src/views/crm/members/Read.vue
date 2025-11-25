@@ -6,6 +6,9 @@
     :can-update-items="crmAccess.canUpdateMember"
     :can-delete-items="crmAccess.canRemoveMember"
     :can-modify-specific-item="(item: Member) => item.role.name !== 'owner'"
+    create-route-name="CRMMembersCreate"
+    update-route-name="CRMMembersUpdate"
+    delete-route-name="CRMMembersDelete"
   >
     <template #header>Membres</template>
     <template #add-button>Inviter un membre</template>

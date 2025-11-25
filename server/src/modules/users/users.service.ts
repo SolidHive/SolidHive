@@ -171,9 +171,6 @@ export class UsersService {
         userId,
         associationId,
         status: Status.ACCEPTED,
-        association: {
-          status: Status.ACCEPTED,
-        },
       },
     });
 

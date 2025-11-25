@@ -49,6 +49,18 @@ export function useCrmAccess(member: Member) {
       permission === Permissions.ALL || permission === Permissions.ANNOUNCEMENTS_DELETE
   );
 
+  const canCreateFundraising = member.role.permissions.some(
+    (permission) => permission === Permissions.ALL || permission === Permissions.FUNDRAISINGS_CREATE
+  );
+
+  const canUpdateFundraising = member.role.permissions.some(
+    (permission) => permission === Permissions.ALL || permission === Permissions.FUNDRAISINGS_UPDATE
+  );
+
+  const canRemoveFundraising = member.role.permissions.some(
+    (permission) => permission === Permissions.ALL || permission === Permissions.FUNDRAISINGS_DELETE
+  );
+
   return {
     canAccessToMembers,
     canCreateMember,
@@ -61,5 +73,8 @@ export function useCrmAccess(member: Member) {
     canCreateAnnouncement,
     canUpdateAnnouncement,
     canRemoveAnnouncement,
+    canCreateFundraising,
+    canUpdateFundraising,
+    canRemoveFundraising,
   };
 }
