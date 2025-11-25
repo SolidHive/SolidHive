@@ -292,7 +292,7 @@
     try {
       loadingEvents.value = true;
       const response = await api.get(`/association/${associationId}/events`);
-      eventsList.value = response.data?.data || [];
+      eventsList.value = response.data || [];
     } catch (err) {
       console.error('Error loading events:', err);
       eventsList.value = [];
