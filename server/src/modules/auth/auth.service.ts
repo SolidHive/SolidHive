@@ -45,6 +45,9 @@ export class AuthService {
   async getProfile(userId: string) {
     const user = await this.usersService.findOne(userId);
 
+    // Récupérer les associations de l'utilisateur
+    const userAssociations = await this.usersService.getUserAssociations(userId);
+
     return {
       name: user.name,
       firstname: user.firstname,
@@ -52,6 +55,7 @@ export class AuthService {
       phone: user.phone,
       createdAt: user.timestamps.createdAt,
       updatedAt: user.timestamps.updatedAt,
+      associations: userAssociations,
     };
   }
 

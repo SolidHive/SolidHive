@@ -94,6 +94,14 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/association/:associationId/event/:id',
+    name: 'EventDetail',
+    component: () => import('../views/event/EventDetail.vue'),
+    meta: {
+      title: "Détails de l'événement",
+    },
+  },
+  {
     path: '/association/:id',
     name: 'AssociationDetail',
     component: () => import('../views/association/AssociationDetail.vue'),
@@ -112,7 +120,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/events',
     name: 'Events',
-    component: () => import('../views/Events.vue'),
+    component: () => import('../views/event/Events.vue'),
     meta: {
       title: 'Événements',
     },
