@@ -96,7 +96,26 @@ export class UsersAssociationsService {
   async findOne(id: string, associationId: string, options?: FindOptionsDto) {
     return this.usersAssociationsRepository.findOne({
       ...options,
-      where: { id, associationId, status: Status.ACCEPTED },
+      relations: {
+        user: true,
+        role: true,
+      },
+      select: {
+        id: true,
+        user: {
+          id: true,
+          firstname: true,
+          name: true,
+          email: true,
+          phone: true,
+        },
+        role: {
+          name: true,
+          id: true,
+        },
+        status: true,
+      },
+      where: { id, associationId },
     });
   }
 

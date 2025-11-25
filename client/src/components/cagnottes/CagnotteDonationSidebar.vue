@@ -87,7 +87,7 @@
     </div>
 
     <!-- Boutons -->
-    <div class="mt-4 flex gap-3 sm:mt-6">
+    <div class="mt-4 flex flex-col gap-3 sm:mt-6 sm:flex-row">
       <Button
         class="bg-accent hover:bg-accent/90 flex-1 text-white"
         :disabled="!authStore.isAuthenticated()"

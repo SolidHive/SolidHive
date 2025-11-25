@@ -15,14 +15,13 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { AuthenticatedGuard } from '../../../auth/guards/authenticated.guard';
 import { ApiCookieAuth, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
-import { FilterEventsDto } from './dto/filter-events.dto';
 import {
   AssociationPermissions,
   AssociationPermissionsGuard,
 } from '../../guards/association-permissions.guard';
 import { Permissions } from '../../../../common/enums/permissions';
+import { UserAssociationDecorator } from 'src/common/decorators/user-association.decorator';
 import { UserAssociation } from '../users/entities/user-association.entity';
-import { UserAssociationDecorator } from '../../../../common/decorators/user-association.decorator';
 
 @ApiTags('Association - Events')
 @Controller()
@@ -30,8 +29,8 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Get('events')
-  findAllGlobal(@Query() filters: FilterEventsDto) {
-    return this.eventsService.findAll(undefined, filters, filters);
+  findAllGlobal(@Query() options?: FindOptionsDto & { association?: string; date?: string }) {
+    return this.eventsService.findAllGlobal(options);
   }
 
   @Post('association/:associationId/event')
@@ -49,8 +48,8 @@ export class EventsController {
   }
 
   @Get('association/:associationId/events')
-  findAll(@Param('associationId') associationId: string, @Query() filters: FilterEventsDto) {
-    return this.eventsService.findAll(associationId, filters, filters);
+  findAll(@Param('associationId') associationId: string, @Query() options?: FindOptionsDto) {
+    return this.eventsService.findAll(associationId, options);
   }
 
   @Get('association/:associationId/event/:id')

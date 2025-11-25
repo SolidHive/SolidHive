@@ -143,12 +143,10 @@
   interface Props {
     recentDonations: Transaction[];
     recentFundraisingDonations: Transaction[];
-    allAssociations: any[];
-    allFundraisings: any[];
     isLoading: boolean;
   }
 
-  const props = defineProps<Props>();
+  defineProps<Props>();
 
   function formatDate(dateString: string): string {
     const date = new Date(dateString);
@@ -169,12 +167,12 @@
   }
 
   function getAssociationName(associationId: string): string {
-    const association = props.allAssociations.find((assoc: any) => assoc.id === associationId);
-    return association ? association.name : 'Association inconnue';
+    // Pour l'instant, on affiche juste l'ID jusqu'à ce que les transactions contiennent les noms
+    return `Association ${associationId.slice(-8)}`;
   }
 
   function getFundraisingName(fundraisingId: string): string {
-    const fundraising = props.allFundraisings.find((fund: any) => fund.id === fundraisingId);
-    return fundraising ? fundraising.title : 'Cagnotte inconnue';
+    // Pour l'instant, on affiche juste l'ID jusqu'à ce que les transactions contiennent les noms
+    return `Cagnotte ${fundraisingId.slice(-8)}`;
   }
 </script>

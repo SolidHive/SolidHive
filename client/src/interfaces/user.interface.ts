@@ -1,3 +1,5 @@
+import type { HasId } from './has_id.interface';
+
 export interface User {
   name: string;
   firstname: string;
@@ -5,10 +7,10 @@ export interface User {
   phone?: string;
   createdAt: string;
   updatedAt: string;
+  associations?: UserAssociation[];
 }
 
-export interface UserAssociation {
-  id: string;
+export interface UserAssociation extends HasId {
   association: {
     id: string;
     name: string;

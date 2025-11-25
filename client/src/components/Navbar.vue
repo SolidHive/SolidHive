@@ -42,7 +42,7 @@
             <DropdownMenuContent align="end">
               <div class="flex px-2 py-1.5 text-sm font-normal">
                 <div class="flex flex-col space-y-1">
-                  <p class="text-sm leading-none font-medium">
+                  <p class="text-secondary text-sm leading-none font-semibold">
                     {{ authStore.user?.name }} {{ authStore.user?.firstname }}
                   </p>
                   <p class="text-muted-foreground text-xs leading-none">
@@ -58,7 +58,9 @@
                 <DropdownMenuSubTrigger>Accès CRM</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
                   <DropdownMenuItem
-                    v-for="userInAssociation in authStore.associations"
+                    v-for="userInAssociation in authStore.associations.filter(
+                      (uia) => uia.status === Status.ACCEPTED
+                    )"
                     :key="userInAssociation.id"
                   >
                     <router-link
@@ -78,12 +80,13 @@
               </DropdownMenuSub>
               <DropdownMenuSeparator />
               <DropdownMenuItem
+                class="text-destructive"
                 @click="
                   authStore.logout();
                   $router.push('/');
                 "
               >
-                <LogOut class="h-4 w-4" />
+                <Unplug class="size-4" />
                 Déconnexion
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -151,18 +154,67 @@
         <div class="flex-1" />
         <div>
           <template v-if="authStore.isAuthenticated()">
-            <div class="flex items-center gap-2">
-              <div class="bg-accent flex h-8 w-8 items-center justify-center rounded-full">
-                <User class="h-4 w-4 text-white" />
-              </div>
-              <router-link
-                to="/profile"
-                class="text-secondary font-paragraph py-2 text-base"
-                @click="closeMenu"
-              >
-                Mon compte
-              </router-link>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <div class="flex items-center gap-2">
+                  <div class="bg-accent flex h-8 w-8 items-center justify-center rounded-full">
+                    <User class="h-4 w-4 text-white" />
+                  </div>
+                  <div class="text-secondary font-paragraph py-2 text-base">Mon compte</div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <div class="flex px-2 py-1.5 text-sm font-normal">
+                  <div class="flex flex-col space-y-1">
+                    <p class="text-secondary text-sm leading-none font-semibold">
+                      {{ authStore.user?.name }} {{ authStore.user?.firstname }}
+                    </p>
+                    <p class="text-muted-foreground text-xs leading-none">
+                      {{ authStore.user?.email }}
+                    </p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <router-link to="/profile" class="w-full">Mon compte</router-link>
+                </DropdownMenuItem>
+                <DropdownMenuSub v-if="authStore.associations.length > 0">
+                  <DropdownMenuSubTrigger>Accès CRM</DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem
+                      v-for="userInAssociation in authStore.associations.filter(
+                        (uia) => uia.status === Status.ACCEPTED
+                      )"
+                      :key="userInAssociation.id"
+                    >
+                      <router-link
+                        :to="{
+                          name: 'CRMHome',
+                          params: {
+                            locale: $route.params.locale,
+                            id: userInAssociation.association.id,
+                          },
+                        }"
+                        class="w-full"
+                      >
+                        {{ userInAssociation.association.name }}
+                      </router-link>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  class="text-destructive"
+                  @click="
+                    authStore.logout();
+                    $router.push('/');
+                  "
+                >
+                  <Unplug class="h-4 w-4" />
+                  Déconnexion
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </template>
           <template v-else>
             <Button variant="secondary" size="sm" class="w-full" @click="goToLogin">
@@ -180,7 +232,7 @@
   import { useRouter } from 'vue-router';
   import { useAuthStore } from '../stores/auth';
   import { Button } from '@/components/ui/button';
-  import { User, Menu, X, LogOut } from 'lucide-vue-next';
+  import { User, Menu, X, Unplug } from 'lucide-vue-next';
   import {
     DropdownMenu,
     DropdownMenuContent,
@@ -192,6 +244,7 @@
     DropdownMenuTrigger,
   } from '@/components/ui/dropdown-menu';
   import logoUrl from '@/assets/images/logo-solidhive.png';
+  import { Status } from '@/enums/status';
 
   const authStore = useAuthStore();
   const menuOpen = ref(false);
@@ -199,9 +252,11 @@
 
   function toggleMenu() {
     menuOpen.value = !menuOpen.value;
+    document.body.style.overflow = menuOpen.value ? 'hidden' : 'auto';
   }
   function closeMenu() {
     menuOpen.value = false;
+    document.body.style.overflow = 'auto';
   }
   function goToLogin() {
     closeMenu();

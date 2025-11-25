@@ -33,10 +33,24 @@ export class EventsPricingsService {
     return this.eventsPricingsRepository.save(eventPricing);
   }
 
-  findAll(eventId: string, options?: FindOptionsDto) {
-    return this.eventsPricingsRepository.find({
+  async findAll(eventId: string, options?: FindOptionsDto) {
+    const pricings = await this.eventsPricingsRepository.find({
       ...options,
       where: { event: { id: eventId } },
+      relations: ['registers'],
+    });
+
+    // Calculate available capacity for each pricing
+    return pricings.map((pricing) => {
+      const registeredCount = pricing.registers?.length || 0;
+      const availableCapacity = pricing.maxCapacity ? pricing.maxCapacity - registeredCount : null;
+
+      // Return pricing with calculated available capacity
+      const { registers: _registers, ...pricingData } = pricing;
+      return {
+        ...pricingData,
+        availableCapacity,
+      };
     });
   }
 

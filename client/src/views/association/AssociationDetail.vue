@@ -10,10 +10,15 @@
         <AnnouncementsSlider v-else :items="annonces" :color="association?.primaryColor" />
 
         <div class="mt-8">
-          <div v-if="loadingCampaigns">
-            <LoadingOverlay message="Chargement des campagnes..." />
+          <div v-if="loadingCagnottes">
+            <LoadingOverlay message="Chargement des cagnottes..." />
           </div>
-          <CampaignsSlider v-else :items="campaigns" :color="association?.primaryColor" />
+          <CagnottesSlider
+            v-else
+            :items="cagnottes"
+            :color="association?.primaryColor"
+            @view-details="viewCagnotteDetails"
+          />
         </div>
 
         <div class="mt-8">
@@ -58,32 +63,33 @@
           />
         </div>
       </div>
-      <div v-if="currentTab === 'campagnes'" class="mt-8">
-        <div v-if="loadingCampaigns">
-          <LoadingOverlay message="Chargement des campagnes..." />
+      <div v-if="currentTab === 'cagnottes'" class="mt-8">
+        <div v-if="loadingCagnottes">
+          <LoadingOverlay message="Chargement des cagnottes..." />
         </div>
         <div
-          v-else-if="campaigns.length === 0"
+          v-else-if="cagnottes.length === 0"
           class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
         >
           <p class="font-paragraph text-muted-foreground text-lg">
-            Aucune campagne de financement n'est active pour le moment.
+            Aucune cagnotte de financement n'est active pour le moment.
           </p>
         </div>
         <div v-else>
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <CampaignCard
-              v-for="(campaign, index) in paginatedCampaigns"
-              :key="`campaign-${campaignsPage}-${index}`"
-              :item="campaign"
+            <CagnotteCard
+              v-for="(cagnotte, index) in paginatedCagnottes"
+              :key="`cagnotte-${cagnottesPage}-${index}`"
+              :item="cagnotte"
               :color="association?.primaryColor"
+              @view-details="viewCagnotteDetails"
             />
           </div>
           <Pagination
-            :total-items="campaigns.length"
+            :total-items="cagnottes.length"
             :items-per-page="itemsPerPage"
-            :current-page="campaignsPage"
-            @update:current-page="campaignsPage = $event"
+            :current-page="cagnottesPage"
+            @update:current-page="cagnottesPage = $event"
           />
         </div>
       </div>
@@ -129,12 +135,12 @@
   import AssociationHero from '@/components/associations/hero/AssociationHero.vue';
   import AssociationMenu from '@/components/associations/menu/AssociationMenu.vue';
   import AnnouncementsSlider from '@/components/associations/sliders/AnnouncementsSlider.vue';
-  import CampaignsSlider from '@/components/associations/sliders/CampaignsSlider.vue';
+  import CagnottesSlider from '@/components/associations/sliders/CagnottesSlider.vue';
   import EventsSlider from '@/components/associations/sliders/EventsSlider.vue';
   import ImageGallery from '@/components/associations/sliders/ImageGallery.vue';
   import AboutUs from '@/components/associations/home/AboutUs.vue';
   import AnnouncementCard from '@/components/associations/AnnouncementCard.vue';
-  import CampaignCard from '@/components/associations/CampaignCard.vue';
+  import CagnotteCard from '@/components/associations/CagnotteCard.vue';
   import EventCard from '@/components/associations/EventCard.vue';
   import Pagination from '@/components/ui/Pagination.vue';
   import ContactSection from '@/components/associations/ContactSection.vue';
@@ -157,18 +163,18 @@
 
   // États de chargement
   const loadingAnnonces = ref(true);
-  const loadingCampaigns = ref(true);
+  const loadingCagnottes = ref(true);
   const loadingEvents = ref(true);
 
   // Pagination
   const annoncesPage = ref(1);
-  const campaignsPage = ref(1);
+  const cagnottesPage = ref(1);
   const eventsPage = ref(1);
   const itemsPerPage = 10;
 
   // Données
   const annonces = ref<Announcement[]>([]);
-  const campaigns = ref<Fundraising[]>([]);
+  const cagnottes = ref<Fundraising[]>([]);
   const eventsList = ref<Event[]>([]);
 
   // Pagination computed
@@ -177,9 +183,9 @@
     return annonces.value.slice(start, start + itemsPerPage);
   });
 
-  const paginatedCampaigns = computed(() => {
-    const start = (campaignsPage.value - 1) * itemsPerPage;
-    return campaigns.value.slice(start, start + itemsPerPage);
+  const paginatedCagnottes = computed(() => {
+    const start = (cagnottesPage.value - 1) * itemsPerPage;
+    return cagnottes.value.slice(start, start + itemsPerPage);
   });
 
   const paginatedEvents = computed(() => {
@@ -227,6 +233,7 @@
     associationId: string
   ): string | undefined => {
     const file = files.find((f) => f.purpose === purpose);
+    console.log(file);
     return file ? `/files/Association/${associationId}?index=${file.index}` : undefined;
   };
 
@@ -270,14 +277,14 @@
 
   const loadAssociationFundraisings = async (associationId: string) => {
     try {
-      loadingCampaigns.value = true;
+      loadingCagnottes.value = true;
       const response = await api.get(`/association/${associationId}/fundraisings`);
-      campaigns.value = response.data || [];
+      cagnottes.value = response.data || [];
     } catch (err) {
       console.error('Error loading fundraisings:', err);
-      campaigns.value = [];
+      cagnottes.value = [];
     } finally {
-      loadingCampaigns.value = false;
+      loadingCagnottes.value = false;
     }
   };
 
@@ -285,7 +292,7 @@
     try {
       loadingEvents.value = true;
       const response = await api.get(`/association/${associationId}/events`);
-      eventsList.value = response.data?.data || [];
+      eventsList.value = response.data || [];
     } catch (err) {
       console.error('Error loading events:', err);
       eventsList.value = [];
@@ -298,11 +305,15 @@
     router.push(`/association/${route.params.id}/donate`);
   };
 
+  const viewCagnotteDetails = (fundraising: Fundraising) => {
+    router.push(`/association/${route.params.id}/fundraising/${fundraising.id}`);
+  };
+
   const onTabChange = (tab: string) => {
     currentTab.value = tab;
     // Reset pagination
     if (tab === 'annonces') annoncesPage.value = 1;
-    else if (tab === 'campagnes') campaignsPage.value = 1;
+    else if (tab === 'cagnottes') cagnottesPage.value = 1;
     else if (tab === 'evenements') eventsPage.value = 1;
   };
 

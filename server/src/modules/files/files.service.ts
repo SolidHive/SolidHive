@@ -157,20 +157,25 @@ export class FilesService {
     relatedBy: string,
     index: number = 0
   ): Promise<StreamableFile | null> {
-    const file = await this.findOne(relatedTo, relatedBy, index);
+    try {
+      const file = await this.findOne(relatedTo, relatedBy, index);
 
-    if (!file) {
-      return null;
+      if (!file) {
+        return null;
+      }
+
+      const fileStream = createReadStream(
+        join(process.cwd(), 'uploads', file.userId, file.filename)
+      );
+
+      return new StreamableFile(fileStream, {
+        type: file.mimetype,
+        disposition: `inline; filename="${file.oldFilename}"`,
+      });
+    } catch (error) {
+      console.error('Error getting file stream:', error);
+      throw error;
     }
-
-    const fileStream = createReadStream(
-      join(process.cwd(), 'uploads', file.userId, file.fullFilename())
-    );
-
-    return new StreamableFile(fileStream, {
-      type: file.mimetype,
-      disposition: `inline; filename="${file.oldFilename}"`,
-    });
   }
 
   remove(relatedTo: string, relatedBy: string, index: number = 0) {

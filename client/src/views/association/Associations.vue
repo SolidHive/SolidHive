@@ -1,90 +1,104 @@
 <template>
   <PageContainer>
-    <div class="space-y-8">
-      <!-- Page Header -->
-      <PageHeader
-        title="Rechercher une association"
-        subtitle="Découvrez les associations partenaires de SolidHive"
-      />
+    <!-- Page Header -->
+    <PageHeader
+      title="Rechercher une association"
+      subtitle="Découvrez les associations partenaires de SolidHive"
+    />
 
-      <!-- Filters Section -->
-      <section class="space-y-6">
-        <Filter
-          :initial-filters="currentFilters"
-          :show-actions="true"
-          apply-button-text="Appliquer les filtres"
-          clear-button-text="Effacer les filtres"
-          :custom-fields="customFields"
-          @apply="handleApplyFilters"
-          @clear="handleClearFilters"
-        />
-      </section>
-
-      <!-- Content Section -->
-      <section>
-        <!-- Loading State -->
-        <LoadingOverlay v-if="isLoading" :show="true" message="Chargement des associations..." />
-
-        <!-- Empty State -->
-        <div v-else-if="hasNoAssociations" class="py-12 text-center">
-          <h3 class="text-secondary mb-2 text-xl font-semibold">Aucune association trouvée</h3>
-          <p class="text-gray-600">Les associations seront bientôt disponibles.</p>
-        </div>
-
-        <!-- Associations Grid -->
-        <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-          <article
-            v-for="association in associations"
-            :key="association.id"
-            class="group relative aspect-square w-full overflow-hidden rounded-xl bg-gray-200 bg-cover bg-center shadow-md transition-all duration-300 hover:shadow-lg md:aspect-auto md:h-32 xl:h-40 2xl:h-48"
-            :class="{ 'bg-gray-300': !association.logo }"
-            :style="associationBackgroundStyle(association)"
+    <div class="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-4">
+      <!-- Filters Sidebar -->
+      <aside class="lg:col-span-1">
+        <div class="sticky top-24 space-y-6">
+          <Filter
+            :initial-filters="currentFilters"
+            :show-actions="true"
+            apply-button-text="Appliquer les filtres"
+            clear-button-text="Effacer les filtres"
+            :custom-fields="customFields"
+            @apply="handleApplyFilters"
+            @clear="handleClearFilters"
           >
-            <!-- Gradient Overlay -->
-            <div
-              class="absolute inset-0 z-10 h-full w-full"
-              :style="associationGradientStyle(association)"
-            />
+            <!-- Total Count -->
+            <template #custom-filters>
+              <div class="mt-4 rounded-lg border bg-gray-50 px-4 py-3">
+                <p class="text-sm font-medium text-gray-700">
+                  <span class="font-semibold">{{ totalItems }}</span>
+                  associations trouvées
+                </p>
+              </div>
+            </template>
+          </Filter>
+        </div>
+      </aside>
 
-            <!-- Dark Overlay -->
-            <div class="absolute inset-0 z-20 h-full w-full bg-black/15" />
+      <!-- Main Content -->
+      <main class="lg:col-span-3">
+        <section class="space-y-6">
+          <!-- Loading State -->
+          <LoadingOverlay v-if="isLoading" :show="true" message="Chargement des associations..." />
 
-            <!-- Association Name -->
-            <div
-              class="absolute right-0 bottom-0 left-0 z-30 -translate-y-12 p-2 transition-transform duration-300 md:translate-y-0 md:p-4 md:group-hover:-translate-y-12"
+          <!-- Empty State -->
+          <div v-else-if="hasNoAssociations" class="py-12 text-center">
+            <h3 class="text-secondary mb-2 text-xl font-semibold">Aucune association trouvée</h3>
+            <p class="text-gray-600">Les associations seront bientôt disponibles.</p>
+          </div>
+
+          <!-- Associations Grid -->
+          <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <article
+              v-for="association in associations"
+              :key="association.id"
+              class="group relative aspect-square w-full overflow-hidden rounded-xl bg-gray-200 bg-cover bg-center shadow-md transition-all duration-300 hover:shadow-lg md:aspect-auto md:h-32 xl:h-40 2xl:h-48"
+              :class="{ 'bg-gray-300': !association.logo }"
+              :style="associationBackgroundStyle(association)"
             >
-              <h3 class="text-md font-title leading-tight text-white md:text-lg">
-                {{ association.name }}
-              </h3>
-            </div>
+              <!-- Gradient Overlay -->
+              <div
+                class="absolute inset-0 z-10 h-full w-full"
+                :style="associationGradientStyle(association)"
+              />
 
-            <!-- Action Button -->
-            <div
-              class="absolute right-0 bottom-0 left-0 z-20 flex translate-y-0 items-center justify-center p-2 transition-transform duration-300 md:translate-y-full md:p-4 md:group-hover:translate-y-0"
-            >
-              <Button
-                :style="associationButtonStyle(association)"
-                variant="secondary"
-                size="sm"
-                class="md:size-default w-full"
-                @click="navigateToAssociation(association.id)"
+              <!-- Dark Overlay -->
+              <div class="absolute inset-0 z-20 h-full w-full bg-black/15" />
+
+              <!-- Association Name -->
+              <div
+                class="absolute right-0 bottom-0 left-0 z-30 -translate-y-12 p-2 transition-transform duration-300 md:translate-y-0 md:p-4 md:group-hover:-translate-y-12"
               >
-                Voir l'association
-              </Button>
-            </div>
-          </article>
-        </div>
+                <h3 class="text-md font-title leading-tight text-white md:text-lg">
+                  {{ association.name }}
+                </h3>
+              </div>
 
-        <!-- Pagination -->
-        <div v-if="!isLoading && hasAssociations" class="mt-8">
-          <Pagination
-            :total-items="totalItems"
-            :items-per-page="ITEMS_PER_PAGE"
-            :current-page="currentPage"
-            @update:current-page="handlePageChange"
-          />
-        </div>
-      </section>
+              <!-- Action Button -->
+              <div
+                class="absolute right-0 bottom-0 left-0 z-20 flex translate-y-0 items-center justify-center p-2 transition-transform duration-300 md:translate-y-full md:p-4 md:group-hover:translate-y-0"
+              >
+                <Button
+                  :style="associationButtonStyle(association)"
+                  variant="secondary"
+                  size="sm"
+                  class="md:size-default w-full"
+                  @click="navigateToAssociation(association.id)"
+                >
+                  Voir l'association
+                </Button>
+              </div>
+            </article>
+          </div>
+
+          <!-- Pagination -->
+          <div v-if="!isLoading && hasAssociations" class="mt-8">
+            <Pagination
+              :total-items="totalItems"
+              :items-per-page="ITEMS_PER_PAGE"
+              :current-page="currentPage"
+              @update:current-page="handlePageChange"
+            />
+          </div>
+        </section>
+      </main>
     </div>
   </PageContainer>
 </template>

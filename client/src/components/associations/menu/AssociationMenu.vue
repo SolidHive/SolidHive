@@ -69,7 +69,7 @@
   const tabs = [
     { key: 'accueil', label: 'Accueil' },
     { key: 'annonces', label: 'Annonces' },
-    { key: 'campagnes', label: 'Campagnes' },
+    { key: 'cagnottes', label: 'Cagnottes' },
     { key: 'evenements', label: 'Événements' },
     { key: 'contact', label: 'Contact' },
   ];

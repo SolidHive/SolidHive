@@ -1,5 +1,5 @@
 <template>
-  <aside class="bg-accent flex min-h-screen w-16 flex-col lg:w-45 xl:w-55 2xl:w-65">
+  <aside class="bg-accent flex min-h-screen min-w-16 flex-col lg:w-45 xl:w-55 2xl:w-65">
     <div
       id="crm-aside-header"
       class="flex h-16 w-full items-center justify-center border-b border-gray-200 sm:h-24"
@@ -22,7 +22,7 @@
             <span class="hidden lg:block">Accueil</span>
           </RouterLink>
           <RouterLink
-            v-if="hasAccessToMembers"
+            v-if="crmAccess.canAccessToMembers"
             :to="{ name: 'CRMMembers', params: { locale: $route.params.locale } }"
             class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
             active-class="bg-secondary rounded-lg font-semibold"
@@ -31,13 +31,21 @@
             <span class="hidden lg:block">Membres</span>
           </RouterLink>
           <RouterLink
-            v-if="hasAccessToRoles"
+            v-if="crmAccess.canAccessToRoles"
             :to="{ name: 'CRMRoles', params: { locale: $route.params.locale } }"
             class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
             active-class="bg-secondary rounded-lg font-semibold"
           >
             <ShieldCheck :size="20" />
             <span class="hidden lg:block">Rôles</span>
+          </RouterLink>
+          <RouterLink
+            :to="{ name: 'CRMAnnouncements', params: { locale: $route.params.locale } }"
+            class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
+            active-class="bg-secondary rounded-lg font-semibold"
+          >
+            <Megaphone :size="20" />
+            <span class="hidden lg:block">Annonces</span>
           </RouterLink>
         </div>
       </div>
@@ -52,20 +60,13 @@
 </template>
 <script setup lang="ts">
   import logo from '@/assets/images/logo-small-solidhive.svg';
-  import { Home, Users, ShieldCheck } from 'lucide-vue-next';
+  import { Home, Users, ShieldCheck, Megaphone } from 'lucide-vue-next';
   import { useWindowSize } from '@vueuse/core';
   import { useCrmStore } from '@/stores/crm';
-  import { Permissions } from '@/enums/permissions';
+  import { useCrmAccess } from '@/composables/crm-access';
 
   const { width } = useWindowSize();
   const crmStore = useCrmStore();
-  const member = crmStore.member;
-
-  const hasAccessToMembers = member?.role.permissions.some(
-    (permission) => permission === Permissions.REGISTERS_VIEW || permission === Permissions.ALL
-  );
-
-  const hasAccessToRoles = member?.role.permissions.some(
-    (permission) => permission === Permissions.ROLES_VIEW || permission === Permissions.ALL
-  );
+  const member = crmStore.getMember();
+  const crmAccess = useCrmAccess(member);
 </script>

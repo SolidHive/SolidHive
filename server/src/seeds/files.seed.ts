@@ -95,7 +95,7 @@ export async function seedFiles(
 
       const imageUrl = `https://picsum.photos/id/${imageId}/${width}/${height}`;
       const filename = `association_${association.id}_${imageType.purpose}`;
-      const filepath = path.join(userDir, `${filename}.jpg`);
+      const filepath = path.join(userDir, filename);
 
       try {
         // Download the image
@@ -109,7 +109,7 @@ export async function seedFiles(
           purpose: imageType.purpose,
           index: imageType.index,
           userId: association.createdBy.id,
-          oldFilename: `${imageType.purpose}.jpg`,
+          oldFilename: imageType.purpose,
           mimetype: mimetype,
           extension: 'jpg',
           size: size,
@@ -118,7 +118,7 @@ export async function seedFiles(
         const savedFile = await fileRepository.save(file);
         files.push(savedFile);
 
-        console.log(`📸 Downloaded and saved ${imageType.purpose}: ${filename}.jpg in ${userDir}`);
+        console.log(`📸 Downloaded and saved ${imageType.purpose}: ${filename} in ${userDir}`);
       } catch (error) {
         console.error(
           `❌ Failed to download ${imageType.purpose} for association ${association.id}:`,
@@ -137,7 +137,7 @@ export async function seedFiles(
 
       const imageUrl = `https://picsum.photos/id/${imageId}/${width}/${height}`;
       const filename = `association_${association.id}_gallery_${i + 1}`;
-      const filepath = path.join(userDir, `${filename}.jpg`);
+      const filepath = path.join(userDir, filename);
 
       try {
         // Download the image
@@ -151,7 +151,7 @@ export async function seedFiles(
           purpose: 'gallery',
           index: i + 3, // Start from index 3 (after logo:0, main_image:1, about_image:2)
           userId: association.createdBy.id,
-          oldFilename: `gallery_${i + 1}.jpg`,
+          oldFilename: `gallery_${i + 1}`,
           mimetype: mimetype,
           extension: 'jpg',
           size: size,
@@ -160,7 +160,7 @@ export async function seedFiles(
         const savedFile = await fileRepository.save(file);
         files.push(savedFile);
 
-        console.log(`📸 Downloaded and saved gallery image: ${filename}.jpg in ${userDir}`);
+        console.log(`📸 Downloaded and saved gallery image: ${filename} in ${userDir}`);
       } catch (error) {
         console.error(
           `❌ Failed to download gallery image for association ${association.id}:`,
