@@ -41,8 +41,8 @@
 
             <!-- Fundraisings Cards -->
             <CagnotteCard
-              v-else-if="hasFundraisings"
               v-for="fundraising in allFundraisings"
+              v-else-if="hasFundraisings"
               :key="fundraising.id"
               :cagnotte="fundraising"
               @view-details="handleViewDetails"
@@ -50,11 +50,9 @@
           </div>
 
           <!-- Empty State -->
-          <div
-            v-if="!isLoading && hasNoFundraisings"
-            class="border-muted rounded-xl border border-dashed p-8 text-center"
-          >
-            <p class="text-gray-600">Aucune cagnotte trouvée.</p>
+          <div v-if="!isLoading && hasNoFundraisings" class="py-12 text-center">
+            <h3 class="text-secondary mb-2 text-xl font-semibold">Aucune cagnotte trouvée</h3>
+            <p class="text-gray-600">Les cagnottes solidaires seront bientôt disponibles.</p>
           </div>
         </section>
 

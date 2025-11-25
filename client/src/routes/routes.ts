@@ -94,6 +94,14 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/association/:associationId/event/:id',
+    name: 'EventDetail',
+    component: () => import('../views/event/EventDetail.vue'),
+    meta: {
+      title: "Détails de l'événement",
+    },
+  },
+  {
     path: '/association/:id',
     name: 'AssociationDetail',
     component: () => import('../views/association/AssociationDetail.vue'),
@@ -112,7 +120,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/events',
     name: 'Events',
-    component: () => import('../views/Events.vue'),
+    component: () => import('../views/event/Events.vue'),
     meta: {
       title: 'Événements',
     },
@@ -133,19 +141,85 @@ const routes: RouteRecordRaw[] = [
         path: 'home',
         name: 'CRMHome',
         component: () => import('../views/crm/Home.vue'),
-        meta: { title: 'Accueil - CRM', header: 'Accueil' },
+        meta: { title: 'Accueil - CRM' },
       },
       {
         path: 'members',
         name: 'CRMMembers',
-        component: () => import('../views/crm/Members.vue'),
-        meta: { title: 'Membres - CRM', header: 'Membres' },
+        component: () => import('../views/crm/members/Read.vue'),
+        meta: { title: 'Membres - CRM' },
+        children: [
+          {
+            path: 'create',
+            name: 'CRMMembersCreate',
+            component: () => import('../views/crm/members/Create.vue'),
+            meta: { title: 'Créer un membre - CRM' },
+          },
+          {
+            path: 'update/:itemId',
+            name: 'CRMMembersUpdate',
+            component: () => import('../views/crm/members/Update.vue'),
+            meta: { title: 'Modifier un membre - CRM' },
+          },
+          {
+            path: 'delete/:itemId',
+            name: 'CRMMembersDelete',
+            component: () => import('../views/crm/members/Delete.vue'),
+            meta: { title: 'Supprimer un membre - CRM' },
+          },
+        ],
       },
       {
         path: 'roles',
         name: 'CRMRoles',
-        component: () => import('../views/crm/Roles.vue'),
-        meta: { title: 'Rôles - CRM', header: 'Rôles' },
+        component: () => import('../views/crm/roles/Read.vue'),
+        meta: { title: 'Rôles - CRM' },
+        children: [
+          {
+            path: 'create',
+            name: 'CRMRolesCreate',
+            component: () => import('../views/crm/roles/Create.vue'),
+            meta: { title: 'Créer un rôle - CRM' },
+          },
+          {
+            path: 'update/:itemId',
+            name: 'CRMRolesUpdate',
+            component: () => import('../views/crm/roles/Update.vue'),
+            meta: { title: 'Modifier un rôle - CRM' },
+          },
+          {
+            path: 'delete/:itemId',
+            name: 'CRMRolesDelete',
+            component: () => import('../views/crm/roles/Delete.vue'),
+            meta: { title: 'Supprimer un rôle - CRM' },
+          },
+        ],
+      },
+      {
+        path: 'announcements',
+        name: 'CRMAnnouncements',
+        component: () => import('../views/crm/announcements/Read.vue'),
+        meta: { title: 'Annonces - CRM', header: 'Annonces' },
+        children: [
+          {
+            path: 'create',
+            name: 'CRMAnnouncementsCreate',
+            component: () => import('../views/crm/announcements/Create.vue'),
+            meta: { title: 'Créer une annonce - CRM' },
+          },
+          {
+            path: 'update/:itemId',
+            name: 'CRMAnnouncementsUpdate',
+            component: () => import('../views/crm/announcements/Update.vue'),
+            meta: { title: 'Modifier une annonce - CRM' },
+          },
+          {
+            path: 'delete/:itemId',
+            name: 'CRMAnnouncementsDelete',
+            component: () => import('../views/crm/announcements/Delete.vue'),
+            meta: { title: 'Supprimer une annonce - CRM' },
+          },
+        ],
       },
     ],
   },

@@ -117,8 +117,4 @@ export class File {
   })
   @Column('simple-json', { nullable: true })
   additional?: object;
-
-  fullFilename(): string {
-    return `${this.filename}.${this.extension}`;
-  }
 }

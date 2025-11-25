@@ -19,7 +19,7 @@
     "format:check:frontend": "prettier --check \"client/src/**/*.{ts,vue}\""
   },
   "devDependencies": {
-    "@eslint/js": "^9.38.0",
+    "@eslint/js": "^9.39.1",
     "cross-env": "^7.0.3",
     "eslint": "^9.23.0",
     "eslint-config-prettier": "^10.1.1",

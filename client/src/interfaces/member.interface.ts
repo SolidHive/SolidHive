@@ -1,5 +1,6 @@
-export interface Member {
-  id: string;
+import type { HasId } from './has_id.interface';
+
+export interface Member extends HasId {
   user: {
     id: string;
     name: string;

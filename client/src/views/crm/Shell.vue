@@ -2,7 +2,7 @@
   <div v-if="!isLoading" class="w-full grow">
     <div class="flex h-full w-full">
       <Aside />
-      <main class="grow overflow-hidden bg-gray-50">
+      <main class="bg-background grow overflow-hidden">
         <router-view />
       </main>
     </div>
@@ -57,6 +57,7 @@
     }
 
     const hasAccess = await crmStore.hasAccessToAssociation(id);
+
     if (!hasAccess) {
       router.push('/unauthorized');
       return;

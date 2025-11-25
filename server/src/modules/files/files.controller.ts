@@ -12,6 +12,7 @@ import {
   UploadedFile,
   StreamableFile,
   UseFilters,
+  NotFoundException,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
 import { CreateFileDto } from './dto/create-file.dto';
@@ -71,11 +72,17 @@ export class FilesController {
   }
 
   @Get(':relatedTo/:relatedBy')
-  getFileStream(
+  async getFileStream(
     @Param('relatedTo') relatedTo: string,
     @Param('relatedBy') relatedBy: string,
     @Query('index') index: number
   ): Promise<StreamableFile | null> {
-    return this.filesService.getFileStream(relatedTo, relatedBy, index);
+    const file = await this.filesService.getFileStream(relatedTo, relatedBy, index);
+
+    if (!file) {
+      throw new NotFoundException('File not found');
+    }
+
+    return file;
   }
 }

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateFileDto {
   @ApiProperty({
@@ -28,16 +28,6 @@ export class CreateFileDto {
   @IsNotEmpty()
   @IsUUID()
   relatedBy: string;
-
-  @ApiProperty({
-    example: true,
-    description: 'Indique si le fichier est privé ou non',
-    type: Boolean,
-  })
-  @IsBoolean()
-  @IsOptional()
-  @Transform(({ value }) => ((value as string) === 'true' ? true : false))
-  isPrivate?: boolean;
 
   @ApiProperty({
     format: 'binary',

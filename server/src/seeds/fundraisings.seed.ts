@@ -56,7 +56,7 @@ async function downloadImage(
 }
 
 /**
- * Seed fundraisings (campaigns) for associations
+ * Seed fundraisings (cagnottes) for associations
  */
 export async function seedFundraisings(
   dataSource: DataSource,
@@ -110,7 +110,7 @@ export async function seedFundraisings(
 
         const imageUrl = `https://picsum.photos/id/${imageId}/${width}/${height}`;
         const filename = `fundraising_${fundraising.id}_image`;
-        const filepath = path.join(userDir, `${filename}.jpg`);
+        const filepath = path.join(userDir, filename);
 
         try {
           // Download the image
@@ -124,7 +124,7 @@ export async function seedFundraisings(
             purpose: 'image',
             index: 0,
             userId: fundraising.createdBy.userId,
-            oldFilename: `fundraising_image.jpg`,
+            oldFilename: `fundraising_image`,
             mimetype: mimetype,
             extension: 'jpg',
             size: size,
@@ -132,7 +132,7 @@ export async function seedFundraisings(
 
           await fileRepository.save(file);
 
-          console.log(`📸 Added image for existing fundraising: ${filename}.jpg`);
+          console.log(`📸 Added image for existing fundraising: ${filename}`);
         } catch (error) {
           console.error(
             `❌ Failed to add image for existing fundraising ${fundraising.id}:`,
@@ -193,7 +193,7 @@ export async function seedFundraisings(
 
       const imageUrl = `https://picsum.photos/id/${imageId}/${width}/${height}`;
       const filename = `fundraising_${savedFundraising.id}_image`;
-      const filepath = path.join(userDir, `${filename}.jpg`);
+      const filepath = path.join(userDir, filename);
 
       try {
         // Download the image
@@ -207,7 +207,7 @@ export async function seedFundraisings(
           purpose: 'image',
           index: 0,
           userId: randomUser.userId,
-          oldFilename: `fundraising_image.jpg`,
+          oldFilename: `fundraising_image`,
           mimetype: mimetype,
           extension: 'jpg',
           size: size,
@@ -215,7 +215,7 @@ export async function seedFundraisings(
 
         await fileRepository.save(file);
 
-        console.log(`📸 Downloaded and saved image for fundraising: ${filename}.jpg`);
+        console.log(`📸 Downloaded and saved image for fundraising: ${filename}`);
       } catch (error) {
         console.error(`❌ Failed to download image for fundraising ${savedFundraising.id}:`, error);
       }
