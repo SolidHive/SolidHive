@@ -4,5 +4,6 @@ export * from './event.interface';
 export * from './event-pricing.interface';
 export * from './file.interface';
 export * from './fundraising.interface';
+export * from './registration.interface';
 export * from './transaction.interface';
 export * from './user.interface';

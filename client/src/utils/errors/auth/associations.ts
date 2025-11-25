@@ -1,15 +1,17 @@
+import { validationPatterns, commonErrorMessages } from '../common/validation';
+
 export const associationErrorMessages = {
   required: {
     name: "Le nom de l'association est requis",
     description: 'La description est requise',
-    contact: "L'email de contact est requis",
-    siret: 'Le numéro SIRET est requis',
+    contact: commonErrorMessages.email.required,
+    siret: commonErrorMessages.siret.required,
     logo: 'Le logo est requis',
     background: 'La bannière est requise',
   },
   format: {
-    contact: "L'email de contact doit être valide",
-    siret: 'Le SIRET doit contenir exactement 14 chiffres',
+    contact: commonErrorMessages.email.invalid,
+    siret: commonErrorMessages.siret.invalid,
     logo: 'Le fichier doit être une image (JPEG, PNG, GIF, WebP)',
     background: 'Le fichier doit être une image (JPEG, PNG, GIF, WebP)',
   },
@@ -17,14 +19,14 @@ export const associationErrorMessages = {
     name: "Le nom de l'association doit contenir entre 3 et 100 caractères",
     description: 'La description doit contenir entre 5 et 1000 caractères',
     contact: "L'email de contact doit contenir entre 5 et 100 caractères",
-    siret: 'Le SIRET doit contenir exactement 14 chiffres',
+    siret: commonErrorMessages.siret.invalid,
   },
   size: {
     logo: 'Le logo ne doit pas dépasser 5 Mo',
     background: 'La bannière ne doit pas dépasser 10 Mo',
   },
   patterns: {
-    siret: /^\d{14}$/,
+    siret: validationPatterns.siret,
   },
   apiErrors: {
     400: 'Données invalides, veuillez vérifier le formulaire.',

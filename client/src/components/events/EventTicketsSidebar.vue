@@ -54,6 +54,7 @@
 
 <script setup lang="ts">
   import { ref } from 'vue';
+  import { useRouter, useRoute } from 'vue-router';
   import { Check, HandHeart } from 'lucide-vue-next';
   import { Button } from '@/components/ui/button';
   import type { EventPricing } from '@/interfaces';
@@ -62,6 +63,8 @@
     pricings?: EventPricing[];
   }>();
 
+  const router = useRouter();
+  const route = useRoute();
   const shareButtonText = ref<string>('Partager');
 
   const formatCurrency = (amount: number) => {
@@ -78,8 +81,13 @@
   };
 
   const participer = () => {
-    // TODO: Implémenter la logique de participation
-    console.log("Participer à l'événement");
+    router.push({
+      name: 'EventRegistration',
+      params: {
+        id: route.params.associationId,
+        eventId: route.params.id,
+      },
+    });
   };
 
   const partagerEvent = async () => {
