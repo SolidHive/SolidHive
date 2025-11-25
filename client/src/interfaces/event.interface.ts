@@ -1,3 +1,5 @@
+import type { EventPricing } from './event-pricing.interface';
+
 export interface Event {
   id: string;
   title: string;
@@ -6,6 +8,7 @@ export interface Event {
   startDate: string;
   endDate: string;
   amount?: number;
+  pricings?: EventPricing[];
   association?: {
     id: string;
     name: string;

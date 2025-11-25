@@ -1,6 +1,7 @@
 export * from './announcement.interface';
 export * from './association.interface';
 export * from './event.interface';
+export * from './event-pricing.interface';
 export * from './file.interface';
 export * from './fundraising.interface';
 export * from './transaction.interface';

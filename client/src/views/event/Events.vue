@@ -220,7 +220,11 @@
    * Gère le clic sur "Voir l'événement"
    */
   const handleViewDetails = (event: Event) => {
-    router.push(`/event/${event.id}`);
+    if (!event.association?.id) {
+      console.error('Association ID missing for event:', event);
+      return;
+    }
+    router.push(`/association/${event.association.id}/event/${event.id}`);
   };
 
   // Lifecycle

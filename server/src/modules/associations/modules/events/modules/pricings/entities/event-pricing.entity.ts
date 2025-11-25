@@ -27,11 +27,18 @@ export class EventPricing {
   description?: string;
 
   @ApiProperty({
-    example: 49.99,
-    description: 'Montant du tarif',
+    example: 50.0,
+    description: 'Prix du tarif en euros',
   })
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   amount: number;
+
+  @ApiProperty({
+    example: 100,
+    description: 'Nombre maximum de places disponibles pour ce tarif',
+  })
+  @Column({ type: 'int', nullable: true })
+  maxCapacity?: number;
 
   @ApiProperty({
     type: Event,

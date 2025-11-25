@@ -117,7 +117,7 @@ export class EventsService {
     const event = await this.eventsRepository.findOne({
       ...options,
       where: { id, association: { id: associationId } },
-      relations: ['association', 'createdBy'],
+      relations: ['association', 'createdBy', 'pricings', 'pricings.registers'],
     });
 
     if (!event) {
@@ -136,8 +136,22 @@ export class EventsService {
 
     const imageUrl = imageFile ? `/files/Event/${event.id}?index=${imageFile.index}` : null;
 
+    // Calculate available capacity for each pricing
+    const enrichedPricings = event.pricings?.map((pricing) => {
+      const registeredCount = pricing.registers?.length || 0;
+      const availableCapacity = pricing.maxCapacity ? pricing.maxCapacity - registeredCount : null;
+
+      // Return pricing with calculated available capacity, without the registers array
+      const { registers: _registers, ...pricingData } = pricing;
+      return {
+        ...pricingData,
+        availableCapacity,
+      };
+    });
+
     return {
       ...event,
+      pricings: enrichedPricings,
       image: imageUrl,
     };
   }
