@@ -1,5 +1,5 @@
 <template>
-  <aside class="bg-accent flex min-h-screen min-w-16 flex-col lg:w-45 xl:w-55 2xl:w-65">
+  <aside class="bg-accent flex min-h-screen min-w-16 flex-none flex-col lg:w-45 xl:w-55 2xl:w-65">
     <div
       id="crm-aside-header"
       class="flex h-16 w-full items-center justify-center border-b border-gray-200 sm:h-24"
@@ -55,6 +55,15 @@
             <Heart :size="20" />
             <span class="hidden lg:block">Cagnottes</span>
           </RouterLink>
+          <RouterLink
+            v-if="crmAccess.canCreateEvent"
+            :to="{ name: 'CRMEvents', params: { locale: $route.params.locale } }"
+            class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
+            active-class="bg-secondary rounded-lg font-semibold"
+          >
+            <Calendar :size="20" />
+            <span class="hidden lg:block">Événements</span>
+          </RouterLink>
         </div>
       </div>
       <div id="crm-aside-footer" class="border-accent-foreground border-t px-2 py-4 lg:px-4">
@@ -68,7 +77,7 @@
 </template>
 <script setup lang="ts">
   import logo from '@/assets/images/logo-small-solidhive.svg';
-  import { Home, Users, ShieldCheck, Megaphone, Heart } from 'lucide-vue-next';
+  import { Home, Users, ShieldCheck, Megaphone, Heart, Calendar } from 'lucide-vue-next';
   import { useWindowSize } from '@vueuse/core';
   import { useCrmStore } from '@/stores/crm';
   import { useCrmAccess } from '@/composables/crm-access';

@@ -81,7 +81,10 @@
 
   function returnToView() {
     try {
-      router.push({ name: (route.name as string).replace('Create', '') });
+      router.push({
+        name: (route.name as string).replace('Create', ''),
+        params: route.params, // Conserver les params de la route parente
+      });
     } catch (error) {
       console.error('Erreur lors de la navigation:', error);
       router.back();
