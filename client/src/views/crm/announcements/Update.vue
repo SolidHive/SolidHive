@@ -4,10 +4,20 @@
     :fetch-item="`association/${associationId}/announcement/${id}`"
     :update-endpoint="`association/${associationId}/announcement/${id}`"
     :form-data="form"
+    @after-update="handleAfterUpdate"
   >
     <template #title>Modifier l'annonce</template>
     <template #form>
       <div class="space-y-4 p-4">
+        <ImageUpload
+          v-model="imageFile"
+          v-model:preview="imagePreview"
+          label="Image de l'annonce"
+          :button-text="imagePreview ? 'Changer l\'image' : 'Choisir une image'"
+          help-text="Format recommandé : PNG ou JPG (max 5 Mo)"
+          height="md"
+        />
+
         <div class="space-y-2">
           <label class="text-sm font-medium">Titre *</label>
           <input
@@ -49,6 +59,7 @@
   import Database from '@/utils/database.utils';
   import { onMounted, ref } from 'vue';
   import { useRoute } from 'vue-router';
+  import ImageUpload from '@/components/form/ImageUpload.vue';
 
   const Update = UpdateRaw<Announcement>;
   const crmStore = useCrmStore();
@@ -68,6 +79,33 @@
     isActive: true,
   });
 
+  const imageFile = ref<File | null>(null);
+  const imagePreview = ref<string>('');
+
+  async function handleAfterUpdate() {
+    console.log('handleAfterUpdate called');
+
+    if (imageFile.value && id && typeof id === 'string') {
+      try {
+        console.log('Updating image for announcement:', id);
+        await Database.updateFile(imageFile.value, {
+          relatedTo: 'Announcement',
+          relatedBy: id,
+          purpose: 'image',
+          index: 0,
+        });
+        console.log('Image updated successfully');
+      } catch (error) {
+        console.error("Erreur lors de la mise à jour de l'image:", error);
+      }
+    } else {
+      console.log('No image to update', {
+        hasImage: !!imageFile.value,
+        id,
+      });
+    }
+  }
+
   async function fetchAnnouncement(): Promise<void> {
     try {
       const response = await Database.getAll(`association/${associationId}/announcement/${id}`);
@@ -75,6 +113,11 @@
         form.value.title = response.title || '';
         form.value.content = response.content || '';
         form.value.isActive = response.isActive ?? true;
+
+        // Charger l'image existante si elle existe
+        if (response.image) {
+          imagePreview.value = response.image;
+        }
       }
     } catch (err) {
       console.error("Erreur lors du chargement de l'annonce:", err);

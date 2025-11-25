@@ -39,6 +39,7 @@ export class FilesController {
     @User('id') userId: string,
     @UploadedFile() file: Express.Multer.File
   ) {
+    console.log('FilesController.create called');
     return this.filesService.create(createFileDto, file, userId);
   }
 

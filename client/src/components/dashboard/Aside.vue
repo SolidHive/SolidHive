@@ -47,6 +47,14 @@
             <Megaphone :size="20" />
             <span class="hidden lg:block">Annonces</span>
           </RouterLink>
+          <RouterLink
+            :to="{ name: 'CRMFundraisings', params: { locale: $route.params.locale } }"
+            class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
+            active-class="bg-secondary rounded-lg font-semibold"
+          >
+            <Heart :size="20" />
+            <span class="hidden lg:block">Cagnottes</span>
+          </RouterLink>
         </div>
       </div>
       <div id="crm-aside-footer" class="border-accent-foreground border-t px-2 py-4 lg:px-4">
@@ -60,7 +68,7 @@
 </template>
 <script setup lang="ts">
   import logo from '@/assets/images/logo-small-solidhive.svg';
-  import { Home, Users, ShieldCheck, Megaphone } from 'lucide-vue-next';
+  import { Home, Users, ShieldCheck, Megaphone, Heart } from 'lucide-vue-next';
   import { useWindowSize } from '@vueuse/core';
   import { useCrmStore } from '@/stores/crm';
   import { useCrmAccess } from '@/composables/crm-access';

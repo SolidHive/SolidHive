@@ -6,6 +6,9 @@
     :can-update-items="crmAccess.canUpdateAnnouncement"
     :can-delete-items="crmAccess.canRemoveAnnouncement"
     :can-modify-specific-item="() => true"
+    create-route-name="CRMAnnouncementsCreate"
+    update-route-name="CRMAnnouncementsUpdate"
+    delete-route-name="CRMAnnouncementsDelete"
   >
     <template #header>Annonces</template>
     <template #add-button>Créer une annonce</template>

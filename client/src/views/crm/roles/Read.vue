@@ -6,6 +6,9 @@
     :can-update-items="crmAccess.canUpdateRole"
     :can-delete-items="crmAccess.canRemoveRole"
     :can-modify-specific-item="(item: Role) => item.name !== 'owner'"
+    create-route-name="CRMRolesCreate"
+    update-route-name="CRMRolesUpdate"
+    delete-route-name="CRMRolesDelete"
   >
     <template #header>Rôles</template>
     <template #add-button>Créer un rôle</template>

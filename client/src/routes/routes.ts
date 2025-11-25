@@ -221,6 +221,32 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: 'fundraisings',
+        name: 'CRMFundraisings',
+        component: () => import('../views/crm/fundraisings/Read.vue'),
+        meta: { title: 'Cagnottes - CRM', header: 'Cagnottes' },
+        children: [
+          {
+            path: 'create',
+            name: 'CRMFundraisingsCreate',
+            component: () => import('../views/crm/fundraisings/Create.vue'),
+            meta: { title: 'Créer une cagnotte - CRM' },
+          },
+          {
+            path: 'update/:itemId',
+            name: 'CRMFundraisingsUpdate',
+            component: () => import('../views/crm/fundraisings/Update.vue'),
+            meta: { title: 'Modifier une cagnotte - CRM' },
+          },
+          {
+            path: 'delete/:itemId',
+            name: 'CRMFundraisingsDelete',
+            component: () => import('../views/crm/fundraisings/Delete.vue'),
+            meta: { title: 'Supprimer une cagnotte - CRM' },
+          },
+        ],
+      },
     ],
   },
   {

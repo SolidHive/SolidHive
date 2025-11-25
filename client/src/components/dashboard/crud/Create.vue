@@ -49,13 +49,21 @@
     createEndpoint: string;
     formData?: Record<string, any>;
   }>();
+
+  const emit = defineEmits<{
+    afterCreate: [createdItem: any];
+  }>();
+
   const isLoading = ref(false);
 
   const handleCreate = async () => {
     try {
       isLoading.value = true;
 
-      await Database.create(props.createEndpoint, props.formData || {});
+      const createdItem = await Database.create(props.createEndpoint, props.formData || {});
+
+      // Émettre l'événement après création
+      emit('afterCreate', createdItem);
 
       returnToView();
     } catch (error) {

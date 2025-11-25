@@ -3,10 +3,20 @@
     :can-create-item="crmAccess.canCreateAnnouncement"
     :create-endpoint="`association/${associationId}/announcement`"
     :form-data="form"
+    @after-create="handleAfterCreate"
   >
     <template #title>Créer une nouvelle annonce</template>
     <template #form>
       <div class="space-y-4 p-4">
+        <ImageUpload
+          v-model="imageFile"
+          v-model:preview="imagePreview"
+          label="Image de l'annonce"
+          button-text="Choisir une image"
+          help-text="Format recommandé : PNG ou JPG (max 5 Mo)"
+          height="md"
+        />
+
         <div class="space-y-2">
           <label class="text-sm font-medium">Titre *</label>
           <input
@@ -48,6 +58,8 @@
   import { useCrmStore } from '@/stores/crm';
   import { ref } from 'vue';
   import { useRoute } from 'vue-router';
+  import ImageUpload from '@/components/form/ImageUpload.vue';
+  import Database from '@/utils/database.utils';
 
   const crmStore = useCrmStore();
   const member = crmStore.getMember();
@@ -60,4 +72,31 @@
     content: '',
     isActive: true,
   });
+
+  const imageFile = ref<File | null>(null);
+  const imagePreview = ref<string>('');
+
+  async function handleAfterCreate(createdItem: any) {
+    console.log('handleAfterCreate called with:', createdItem);
+
+    if (imageFile.value && createdItem?.data?.id) {
+      try {
+        console.log('Uploading image for announcement:', createdItem.data.id);
+        await Database.uploadFile(imageFile.value, {
+          relatedTo: 'AssociationAnnouncement',
+          relatedBy: createdItem.data.id,
+          purpose: 'image',
+          index: 0,
+        });
+        console.log('Image uploaded successfully');
+      } catch (error) {
+        console.error("Erreur lors de l'upload de l'image:", error);
+      }
+    } else {
+      console.log('No image to upload or missing announcement id', {
+        hasImage: !!imageFile.value,
+        createdItem,
+      });
+    }
+  }
 </script>
