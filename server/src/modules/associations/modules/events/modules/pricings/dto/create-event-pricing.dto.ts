@@ -33,4 +33,11 @@ export class CreateEventPricingDto {
   @IsNumber({}, { message: 'Le nombre maximum de places doit être un nombre' })
   @IsOptional()
   maxCapacity?: number;
+
+  @ApiProperty({
+    example: 50.0,
+    description: 'Montant du tarif en euros',
+  })
+  @IsNumber({}, { message: 'Le montant du tarif doit être un nombre' })
+  amount: number;
 }

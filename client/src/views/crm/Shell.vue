@@ -2,7 +2,7 @@
   <div v-if="!isLoading" class="w-full grow">
     <div class="flex h-full w-full">
       <Aside />
-      <main class="bg-background grow overflow-hidden">
+      <main class="bg-background flex-1 overflow-hidden">
         <router-view />
       </main>
     </div>

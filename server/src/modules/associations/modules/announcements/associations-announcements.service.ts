@@ -63,11 +63,34 @@ export class AssociationsAnnouncementsService {
     return enrichedAnnouncements;
   }
 
-  findOne(id: string, associationId: string, options?: FindOptionsDto) {
-    return this.associationsAnnouncementsRepository.findOne({
+  async findOne(id: string, associationId: string, options?: FindOptionsDto) {
+    const announcement = await this.associationsAnnouncementsRepository.findOne({
       ...options,
       where: { id, association: { id: associationId } },
     });
+
+    if (!announcement) {
+      return null;
+    }
+
+    // Enrichir avec l'image
+    const imageFile = await this.fileRepository.findOne({
+      where: {
+        relatedTo: 'AssociationAnnouncement',
+        relatedBy: announcement.id,
+        purpose: 'image',
+        index: 0,
+      },
+    });
+
+    const imageUrl = imageFile
+      ? `/files/AssociationAnnouncement/${announcement.id}?index=${imageFile.index}`
+      : null;
+
+    return {
+      ...announcement,
+      image: imageUrl,
+    };
   }
 
   async update(

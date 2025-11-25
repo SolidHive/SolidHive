@@ -69,6 +69,18 @@ export function useCrmAccess(member: Member) {
     (permission) => permission === Permissions.ALL || permission === Permissions.ASSOCIATION_REMOVE
   );
 
+  const canCreateEvent = member.role.permissions.some(
+    (permission) => permission === Permissions.ALL || permission === Permissions.EVENTS_CREATE
+  );
+
+  const canUpdateEvent = member.role.permissions.some(
+    (permission) => permission === Permissions.ALL || permission === Permissions.EVENTS_UPDATE
+  );
+
+  const canDeleteEvent = member.role.permissions.some(
+    (permission) => permission === Permissions.ALL || permission === Permissions.EVENTS_DELETE
+  );
+
   return {
     canAccessToMembers,
     canCreateMember,
@@ -86,5 +98,8 @@ export function useCrmAccess(member: Member) {
     canRemoveFundraising,
     canUpdateAssociation,
     canRemoveAssociation,
+    canCreateEvent,
+    canUpdateEvent,
+    canDeleteEvent,
   };
 }

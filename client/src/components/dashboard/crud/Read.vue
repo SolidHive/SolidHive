@@ -133,6 +133,7 @@
   import { Ellipsis, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-vue-next';
   import { TableCell, TableHead, TableRow } from '../../ui/table';
   import router from '@/routes';
+  import { useRoute } from 'vue-router';
   import type { TableHeader } from '@/interfaces/table-header.interface';
   import { sortKeyToNested } from '@/utils/sort.utils';
   import type { NestedKeyOf } from '@/types/nested-key-of.type';
@@ -149,6 +150,7 @@
     canModifySpecificItem: (item: T) => boolean;
   }>();
 
+  const route = useRoute();
   const items = ref<T[]>([]) as Ref<T[]>;
   const searchQuery = ref('');
   const isLoading = ref(false);
@@ -253,6 +255,12 @@
   };
 
   function goTo(name: string, params: Record<string, any> = {}) {
-    router.push({ name, params });
+    router.push({
+      name,
+      params: {
+        ...route.params, // Conserver les params de la route parente (comme id de l'association)
+        ...params,
+      },
+    });
   }
 </script>

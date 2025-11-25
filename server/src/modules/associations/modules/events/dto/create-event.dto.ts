@@ -1,13 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsDate,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Length,
-  ValidateNested,
-} from 'class-validator';
+import { IsDate, IsNotEmpty, IsOptional, IsString, Length, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateAddressDto } from '../../../../../common/dto/create-address.dto';
 
@@ -38,14 +30,6 @@ export class CreateEventDto {
     message: "La description de l'événement doit contenir entre 5 et 500 caractères",
   })
   description?: string;
-
-  @ApiProperty({
-    example: 100,
-    description: "Montant de l'événement",
-  })
-  @IsNotEmpty({ message: "Le montant de l'événement est requis" })
-  @IsNumber({}, { message: "Le montant de l'événement doit être un nombre" })
-  amount: number;
 
   @ApiProperty({
     example: '2023-03-15T12:00:00Z',

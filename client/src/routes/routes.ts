@@ -247,6 +247,32 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: 'events',
+        name: 'CRMEvents',
+        component: () => import('../views/crm/events/Read.vue'),
+        meta: { title: 'Événements - CRM', header: 'Événements' },
+        children: [
+          {
+            path: 'create',
+            name: 'CRMEventsCreate',
+            component: () => import('../views/crm/events/Create.vue'),
+            meta: { title: 'Créer un événement - CRM' },
+          },
+          {
+            path: ':eventId',
+            name: 'CRMEventDetail',
+            component: () => import('../views/crm/events/Detail.vue'),
+            meta: { title: 'Détail événement - CRM' },
+          },
+          {
+            path: ':eventId/edit',
+            name: 'CRMEventEdit',
+            component: () => import('../views/crm/events/Edit.vue'),
+            meta: { title: 'Modifier un événement - CRM' },
+          },
+        ],
+      },
     ],
   },
   {
