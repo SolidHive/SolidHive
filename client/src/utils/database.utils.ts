@@ -131,8 +131,10 @@ export default class Database {
   ) {
     // Pour mettre à jour, on supprime d'abord l'ancien fichier puis on crée le nouveau
     try {
-      // Supprimer l'ancien fichier s'il existe
-      await api.delete(`files/${data.relatedTo}/${data.relatedBy}?index=${data.index ?? 0}`);
+      // Supprimer l'ancien fichier s'il existe (en spécifiant le purpose pour ne supprimer que le bon fichier)
+      await api.delete(
+        `files/${data.relatedTo}/${data.relatedBy}?index=${data.index ?? 0}&purpose=${data.purpose}`
+      );
     } catch (err) {
       // Ignorer l'erreur si le fichier n'existe pas
       console.log('No existing file to delete or error deleting:', err);

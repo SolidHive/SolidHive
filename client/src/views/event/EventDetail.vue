@@ -76,7 +76,7 @@
         eventData.association = {
           ...eventData.association,
           logo: getFileUrl('logo', files, eventData.association.id),
-          image: getFileUrl('main_image', files, eventData.association.id),
+          image: getFileUrl('banner', files, eventData.association.id),
           aboutImage: getFileUrl('about_image', files, eventData.association.id),
           images: files
             .filter((f) => f.purpose === 'gallery')

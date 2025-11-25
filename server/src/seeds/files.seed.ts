@@ -55,7 +55,7 @@ async function downloadImage(
 
 /**
  * Seed files/images for associations
- * Creates logo, main_image, about_image, and gallery images for each association
+ * Creates logo, banner, about_image, and gallery images for each association
  */
 export async function seedFiles(
   dataSource: DataSource,
@@ -83,11 +83,11 @@ export async function seedFiles(
     // Create images for this association
     const imageTypes = [
       { purpose: 'logo', index: 0 },
-      { purpose: 'main_image', index: 1 },
+      { purpose: 'banner', index: 1 },
       { purpose: 'about_image', index: 2 },
     ];
 
-    // Add logo, main_image, and about_image
+    // Add logo, banner, and about_image
     for (const imageType of imageTypes) {
       const width = faker.number.int({ min: 800, max: 1200 });
       const height = faker.number.int({ min: 600, max: 900 });
@@ -149,7 +149,7 @@ export async function seedFiles(
           relatedTo: 'Association',
           relatedBy: association.id,
           purpose: 'gallery',
-          index: i + 3, // Start from index 3 (after logo:0, main_image:1, about_image:2)
+          index: i + 3, // Start from index 3 (after logo:0, banner:1, about_image:2)
           userId: association.createdBy.id,
           oldFilename: `gallery_${i + 1}`,
           mimetype: mimetype,

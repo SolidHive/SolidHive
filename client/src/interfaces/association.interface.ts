@@ -5,8 +5,10 @@ export interface Association {
   primaryColor?: string;
   secondaryColor?: string;
   contact?: string;
+  siret: string;
   status: string;
   aboutText?: string;
+  additionalRequest?: string;
   logo?: string;
   image?: string;
   aboutImage?: string;

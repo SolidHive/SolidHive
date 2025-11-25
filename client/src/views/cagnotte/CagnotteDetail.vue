@@ -94,7 +94,7 @@
         fundraisingData.association = {
           ...fundraisingData.association,
           logo: getFileUrl('logo', files, fundraisingData.association.id),
-          image: getFileUrl('main_image', files, fundraisingData.association.id),
+          image: getFileUrl('banner', files, fundraisingData.association.id),
           aboutImage: getFileUrl('about_image', files, fundraisingData.association.id),
           images: files
             .filter((f) => f.purpose === 'gallery')
