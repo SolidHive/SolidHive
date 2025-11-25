@@ -206,7 +206,7 @@
       association.value = {
         ...associationData,
         logo: getFileUrl('logo', files, id),
-        image: getFileUrl('main_image', files, id),
+        image: getFileUrl('banner', files, id),
         aboutImage: getFileUrl('about_image', files, id),
         images: files
           .filter((f) => f.purpose === 'gallery')

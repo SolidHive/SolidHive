@@ -48,9 +48,10 @@ export class FilesController {
     @Param('relatedTo') relatedTo: string,
     @Param('relatedBy') relatedBy: string,
     @Query('index') index: number,
+    @Query('purpose') purpose?: string,
     @User('id') userId?: string
   ) {
-    return this.filesService.findOne(relatedTo, relatedBy, index, userId);
+    return this.filesService.findOne(relatedTo, relatedBy, index, userId, purpose);
   }
 
   @Patch(':relatedTo/:relatedBy')
@@ -67,18 +68,20 @@ export class FilesController {
   remove(
     @Param('relatedTo') relatedTo: string,
     @Param('relatedBy') relatedBy: string,
-    @Query('index') index?: number
+    @Query('index') index?: number,
+    @Query('purpose') purpose?: string
   ) {
-    return this.filesService.remove(relatedTo, relatedBy, index);
+    return this.filesService.remove(relatedTo, relatedBy, index, purpose);
   }
 
   @Get(':relatedTo/:relatedBy')
   async getFileStream(
     @Param('relatedTo') relatedTo: string,
     @Param('relatedBy') relatedBy: string,
-    @Query('index') index: number
+    @Query('index') index: number,
+    @Query('purpose') purpose?: string
   ): Promise<StreamableFile | null> {
-    const file = await this.filesService.getFileStream(relatedTo, relatedBy, index);
+    const file = await this.filesService.getFileStream(relatedTo, relatedBy, index, purpose);
 
     if (!file) {
       throw new NotFoundException('File not found');

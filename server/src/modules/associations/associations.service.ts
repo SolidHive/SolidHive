@@ -92,7 +92,7 @@ export class AssociationsService {
   findOne(id: string, options?: FindOptionsDto) {
     return this.associationsRepository.findOne({
       ...options,
-      where: { id, status: Status.ACCEPTED },
+      where: { id },
     });
   }
 

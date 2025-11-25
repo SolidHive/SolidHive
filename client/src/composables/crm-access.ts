@@ -61,6 +61,14 @@ export function useCrmAccess(member: Member) {
     (permission) => permission === Permissions.ALL || permission === Permissions.FUNDRAISINGS_DELETE
   );
 
+  const canUpdateAssociation = member.role.permissions.some(
+    (permission) => permission === Permissions.ALL || permission === Permissions.ASSOCIATION_UPDATE
+  );
+
+  const canRemoveAssociation = member.role.permissions.some(
+    (permission) => permission === Permissions.ALL || permission === Permissions.ASSOCIATION_REMOVE
+  );
+
   return {
     canAccessToMembers,
     canCreateMember,
@@ -76,5 +84,7 @@ export function useCrmAccess(member: Member) {
     canCreateFundraising,
     canUpdateFundraising,
     canRemoveFundraising,
+    canUpdateAssociation,
+    canRemoveAssociation,
   };
 }

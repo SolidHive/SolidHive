@@ -73,9 +73,20 @@ export class FilesService {
     return this.filesRepository.save(addFile);
   }
 
-  async findOne(relatedTo: string, relatedBy: string, index: number = 0, userId?: string) {
+  async findOne(
+    relatedTo: string,
+    relatedBy: string,
+    index: number = 0,
+    userId?: string,
+    purpose?: string
+  ) {
+    const whereClause: any = { relatedTo, relatedBy, index };
+    if (purpose) {
+      whereClause.purpose = purpose;
+    }
+
     const file = await this.filesRepository.findOne({
-      where: { relatedTo, relatedBy, index },
+      where: whereClause,
       relations: ['allowedSystemRoles', 'allowedAssociationRoles'],
     });
 
@@ -155,10 +166,11 @@ export class FilesService {
   async getFileStream(
     relatedTo: string,
     relatedBy: string,
-    index: number = 0
+    index: number = 0,
+    purpose?: string
   ): Promise<StreamableFile | null> {
     try {
-      const file = await this.findOne(relatedTo, relatedBy, index);
+      const file = await this.findOne(relatedTo, relatedBy, index, undefined, purpose);
 
       if (!file) {
         return null;
@@ -178,7 +190,11 @@ export class FilesService {
     }
   }
 
-  remove(relatedTo: string, relatedBy: string, index: number = 0) {
-    return this.filesRepository.delete({ relatedTo, relatedBy, index });
+  remove(relatedTo: string, relatedBy: string, index: number = 0, purpose?: string) {
+    const whereClause: any = { relatedTo, relatedBy, index };
+    if (purpose) {
+      whereClause.purpose = purpose;
+    }
+    return this.filesRepository.delete(whereClause);
   }
 }
