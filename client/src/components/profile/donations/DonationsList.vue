@@ -97,9 +97,28 @@
               </span>
             </div>
 
-            <Button variant="ghost" size="sm" class="h-8 text-xs">
-              <Receipt class="mr-1.5 h-3 w-3" />
-              Facture (bientôt)
+            <Button
+              variant="ghost"
+              size="sm"
+              :class="[
+                'h-8 text-xs',
+                donation.relatedTo === 'Fundraising'
+                  ? 'text-secondary hover:text-secondary hover:bg-secondary/10'
+                  : donation.relatedTo === 'Event'
+                    ? 'text-accent hover:text-accent hover:bg-accent/10'
+                    : 'text-primary hover:text-primary hover:bg-primary/10',
+              ]"
+              :disabled="downloadingInvoices.has(donation.id)"
+              @click="downloadInvoice(donation.id)"
+            >
+              <Loader2
+                v-if="downloadingInvoices.has(donation.id)"
+                class="mr-1.5 h-3 w-3 animate-spin"
+              />
+              <Receipt v-else class="mr-1.5 h-3 w-3" />
+              {{
+                downloadingInvoices.has(donation.id) ? 'Téléchargement...' : 'Télécharger facture'
+              }}
             </Button>
           </div>
         </div>
@@ -122,11 +141,14 @@
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue';
+  import { computed, ref } from 'vue';
   import { Button } from '@/components/ui/button';
   import type { Transaction } from '@/interfaces';
-  import { Heart, Receipt } from 'lucide-vue-next';
+  import { Heart, Receipt, Loader2 } from 'lucide-vue-next';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
+  import Database from '@/utils/database.utils';
+
+  const downloadingInvoices = ref<Set<string>>(new Set());
 
   interface Props {
     donations: Transaction[];
@@ -172,5 +194,26 @@
     if (transaction.relatedTo === 'Fundraising') return 'Cagnotte';
     if (transaction.relatedTo === 'Event') return 'Inscription événement';
     return 'Association';
+  };
+
+  const downloadInvoice = async (transactionId: string) => {
+    if (downloadingInvoices.value.has(transactionId)) return;
+
+    downloadingInvoices.value.add(transactionId);
+    try {
+      const blob = await Database.downloadFile(`invoices/transaction/${transactionId}`);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `facture-${transactionId.slice(-8)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement de la facture:', error);
+    } finally {
+      downloadingInvoices.value.delete(transactionId);
+    }
   };
 </script>

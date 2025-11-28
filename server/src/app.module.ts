@@ -14,6 +14,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
 import { AnnouncementsModule } from './modules/announcements/announcements.module';
 import { FilesModule } from './modules/files/files.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { InvoicesModule } from './modules/invoices/invoices.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
     AnnouncementsModule,
     FilesModule,
     PaymentsModule,
+    InvoicesModule,
   ],
   controllers: [],
   providers: [

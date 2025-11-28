@@ -53,6 +53,23 @@
             </div>
           </div>
         </div>
+
+        <div class="mt-3 border-t border-gray-100 pt-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="text-primary hover:text-primary hover:bg-primary/10 h-8 w-full text-xs sm:w-auto"
+            :disabled="downloadingInvoices.has(donation.id)"
+            @click="downloadInvoice(donation.id)"
+          >
+            <Loader2
+              v-if="downloadingInvoices.has(donation.id)"
+              class="mr-1.5 h-3 w-3 animate-spin"
+            />
+            <Receipt v-else class="mr-1.5 h-3 w-3" />
+            {{ downloadingInvoices.has(donation.id) ? 'Téléchargement...' : 'Télécharger facture' }}
+          </Button>
+        </div>
       </div>
     </div>
 
@@ -120,6 +137,23 @@
             </div>
           </div>
         </div>
+
+        <div class="mt-3 border-t border-gray-100 pt-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="text-secondary hover:text-secondary hover:bg-secondary/10 h-8 w-full text-xs sm:w-auto"
+            :disabled="downloadingInvoices.has(donation.id)"
+            @click="downloadInvoice(donation.id)"
+          >
+            <Loader2
+              v-if="downloadingInvoices.has(donation.id)"
+              class="mr-1.5 h-3 w-3 animate-spin"
+            />
+            <Receipt v-else class="mr-1.5 h-3 w-3" />
+            {{ downloadingInvoices.has(donation.id) ? 'Téléchargement...' : 'Télécharger facture' }}
+          </Button>
+        </div>
       </div>
     </div>
 
@@ -182,6 +216,25 @@
             </p>
           </div>
         </div>
+
+        <div class="mt-3 border-t border-gray-100 pt-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            class="text-accent hover:text-accent hover:bg-accent/10 h-8 w-full text-xs sm:w-auto"
+            :disabled="downloadingInvoices.has(registration.id)"
+            @click="downloadInvoice(registration.id)"
+          >
+            <Loader2
+              v-if="downloadingInvoices.has(registration.id)"
+              class="mr-1.5 h-3 w-3 animate-spin"
+            />
+            <Receipt v-else class="mr-1.5 h-3 w-3" />
+            {{
+              downloadingInvoices.has(registration.id) ? 'Téléchargement...' : 'Télécharger facture'
+            }}
+          </Button>
+        </div>
       </div>
     </div>
 
@@ -199,10 +252,12 @@
 </template>
 
 <script setup lang="ts">
+  import { ref } from 'vue';
   import { Button } from '@/components/ui/button';
-  import { Heart } from 'lucide-vue-next';
+  import { Heart, Receipt, Loader2 } from 'lucide-vue-next';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import type { Transaction } from '@/interfaces';
+  import Database from '@/utils/database.utils';
 
   interface Props {
     recentDonations: Transaction[];
@@ -210,6 +265,8 @@
     recentEventRegistrations: Transaction[];
     isLoading: boolean;
   }
+
+  const downloadingInvoices = ref<Set<string>>(new Set());
 
   defineProps<Props>();
 
@@ -244,5 +301,26 @@
   function getEventName(eventId: string): string {
     // Pour l'instant, on affiche juste l'ID jusqu'à ce que les transactions contiennent les noms
     return `Événement ${eventId.slice(-8)}`;
+  }
+
+  async function downloadInvoice(transactionId: string): Promise<void> {
+    if (downloadingInvoices.value.has(transactionId)) return;
+
+    downloadingInvoices.value.add(transactionId);
+    try {
+      const blob = await Database.downloadFile(`invoices/transaction/${transactionId}`);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `facture-${transactionId.slice(-8)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement de la facture:', error);
+    } finally {
+      downloadingInvoices.value.delete(transactionId);
+    }
   }
 </script>
