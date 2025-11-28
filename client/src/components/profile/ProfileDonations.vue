@@ -1,7 +1,7 @@
 <template>
   <!-- Mes dons aux associations -->
-  <div class="bg-card border-border rounded-3xl border p-6 shadow-sm">
-    <div class="mb-5 flex items-center justify-between">
+  <div class="bg-card border-border rounded-3xl border p-4 shadow-sm sm:p-6">
+    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h2 class="font-subtitle text-foreground text-lg">Mes dons aux associations</h2>
       <Button variant="outline" size="sm" as-child>
         <router-link to="/profile/donations">
@@ -18,18 +18,18 @@
       <div
         v-for="donation in recentDonations"
         :key="donation.id"
-        class="border-border hover:border-primary/30 bg-muted/20 group rounded-2xl border p-4 transition-all hover:shadow-sm"
+        class="border-border hover:border-primary/30 bg-muted/20 group rounded-2xl border p-3 transition-all hover:shadow-sm sm:p-4"
       >
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <div
-              class="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-xl"
+              class="bg-primary/10 text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10"
             >
-              <Heart class="h-5 w-5" />
+              <Heart class="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
+            <div class="min-w-0 flex-1">
               <h3
-                class="font-subtitle text-foreground group-hover:text-primary text-base transition-colors"
+                class="font-subtitle text-foreground group-hover:text-primary truncate text-sm transition-colors sm:text-base"
               >
                 {{ getAssociationName(donation.relatedBy) }}
               </h3>
@@ -67,8 +67,8 @@
   </div>
 
   <!-- Mes dons aux cagnottes -->
-  <div class="bg-card border-border rounded-3xl border p-6 shadow-sm">
-    <div class="mb-5 flex items-center justify-between">
+  <div class="bg-card border-border rounded-3xl border p-4 shadow-sm sm:p-6">
+    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h2 class="font-subtitle text-foreground text-lg">Mes dons aux cagnottes</h2>
       <Button variant="outline" size="sm" as-child>
         <router-link to="/profile/donations">
@@ -85,18 +85,18 @@
       <div
         v-for="donation in recentFundraisingDonations"
         :key="donation.id"
-        class="border-border hover:border-secondary/30 bg-muted/20 group rounded-2xl border p-4 transition-all hover:shadow-sm"
+        class="border-border hover:border-secondary/30 bg-muted/20 group rounded-2xl border p-3 transition-all hover:shadow-sm sm:p-4"
       >
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <div
-              class="bg-secondary/10 text-secondary flex h-10 w-10 items-center justify-center rounded-xl"
+              class="bg-secondary/10 text-secondary flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10"
             >
-              <Heart class="h-5 w-5" />
+              <Heart class="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
-            <div>
+            <div class="min-w-0 flex-1">
               <h3
-                class="font-subtitle text-foreground group-hover:text-secondary text-base transition-colors"
+                class="font-subtitle text-foreground group-hover:text-secondary truncate text-sm transition-colors sm:text-base"
               >
                 {{ getFundraisingName(donation.relatedBy) }}
               </h3>
@@ -132,6 +132,70 @@
       </p>
     </div>
   </div>
+
+  <!-- Mes inscriptions aux événements -->
+  <div class="bg-card border-border rounded-3xl border p-4 shadow-sm sm:p-6">
+    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <h2 class="font-subtitle text-foreground text-lg">Mes inscriptions aux événements</h2>
+      <Button variant="outline" size="sm" as-child>
+        <router-link to="/profile/donations?type=evenements">
+          <Heart class="mr-1.5 h-4 w-4" />
+          Voir tout
+        </router-link>
+      </Button>
+    </div>
+
+    <!-- Liste des inscriptions aux événements -->
+    <LoadingOverlay v-if="isLoading" :show="true" message="Chargement de vos inscriptions..." />
+
+    <div v-else-if="recentEventRegistrations.length > 0" class="space-y-3">
+      <div
+        v-for="registration in recentEventRegistrations"
+        :key="registration.id"
+        class="border-border hover:border-accent/30 bg-muted/20 group rounded-2xl border p-3 transition-all hover:shadow-sm sm:p-4"
+      >
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+            <div
+              class="bg-accent/10 text-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10"
+            >
+              <Heart class="h-4 w-4 sm:h-5 sm:w-5" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3
+                class="font-subtitle text-foreground group-hover:text-accent truncate text-sm transition-colors sm:text-base"
+              >
+                {{ getEventName(registration.relatedBy) }}
+              </h3>
+              <p class="font-paragraph text-muted-foreground text-sm">
+                {{ formatDate(registration.timestamps.createdAt) }}
+              </p>
+            </div>
+          </div>
+
+          <div class="shrink-0 text-right">
+            <p class="font-title text-foreground text-base font-bold sm:text-lg">
+              {{ formatCurrency(registration.amount) }}
+            </p>
+            <p class="font-paragraph text-muted-foreground truncate text-xs">
+              Événement • ID: {{ registration.relatedBy.slice(-8) }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Placeholder si aucune inscription -->
+    <div v-else class="bg-muted/20 rounded-2xl py-8 text-center">
+      <Heart class="text-muted-foreground mx-auto mb-3 h-8 w-8" :stroke-width="1.5" />
+      <p class="font-paragraph text-muted-foreground mb-2 text-sm">
+        Aucune inscription aux événements
+      </p>
+      <p class="font-paragraph text-muted-foreground text-xs">
+        Vos inscriptions aux événements apparaîtront ici
+      </p>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -143,6 +207,7 @@
   interface Props {
     recentDonations: Transaction[];
     recentFundraisingDonations: Transaction[];
+    recentEventRegistrations: Transaction[];
     isLoading: boolean;
   }
 
@@ -174,5 +239,10 @@
   function getFundraisingName(fundraisingId: string): string {
     // Pour l'instant, on affiche juste l'ID jusqu'à ce que les transactions contiennent les noms
     return `Cagnotte ${fundraisingId.slice(-8)}`;
+  }
+
+  function getEventName(eventId: string): string {
+    // Pour l'instant, on affiche juste l'ID jusqu'à ce que les transactions contiennent les noms
+    return `Événement ${eventId.slice(-8)}`;
   }
 </script>

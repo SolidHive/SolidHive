@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import Stripe from 'stripe';
 import { PaymentsService } from './payments.service';
 import { StripeService } from './stripe.service';
@@ -9,16 +10,32 @@ import { StripeAccountController } from './stripe-account.controller';
 import { AssociationsModule } from '../associations/associations.module';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { FundraisingsModule } from '../associations/modules/fundraisings/fundraisings.module';
+import { Event } from '../associations/modules/events/entities/event.entity';
+import { EventPricing } from '../associations/modules/events/modules/pricings/entities/event-pricing.entity';
+import { EventRegister } from '../associations/modules/events/modules/registers/entities/event-register.entity';
+import { Fundraising } from '../associations/modules/fundraisings/entities/fundraising.entity';
+import { PaymentValidationService } from './services/payment-validation.service';
+import { DonationPaymentService } from './services/donation-payment.service';
+import { EventPaymentService } from './services/event-payment.service';
 
 /**
  * Module pour la gestion des paiements et des comptes Stripe Connect
  */
 @Module({
-  imports: [ConfigModule, AssociationsModule, TransactionsModule, FundraisingsModule],
+  imports: [
+    ConfigModule,
+    AssociationsModule,
+    TransactionsModule,
+    FundraisingsModule,
+    TypeOrmModule.forFeature([Event, EventPricing, EventRegister, Fundraising]),
+  ],
   providers: [
     PaymentsService,
     StripeService,
     StripeAccountService,
+    PaymentValidationService,
+    DonationPaymentService,
+    EventPaymentService,
     {
       provide: 'STRIPE_CLIENT',
       useFactory: (configService: ConfigService) => {

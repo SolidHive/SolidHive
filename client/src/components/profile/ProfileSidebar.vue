@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <!-- Compte -->
-    <div class="bg-card border-border rounded-3xl border p-6 shadow-sm">
+    <div class="bg-card border-border rounded-3xl border p-4 shadow-sm sm:p-6">
       <h2 class="font-subtitle text-foreground mb-5 text-lg">Compte</h2>
 
       <div v-if="profile" class="space-y-4">
@@ -30,8 +30,8 @@
     </div>
 
     <!-- Actions dangereuses -->
-    <div class="bg-card border-border rounded-3xl border p-6 shadow-sm">
-      <h2 class="font-subtitle text-foreground mb-4 text-lg">Actions</h2>
+    <div class="bg-card border-border rounded-3xl border p-4 shadow-sm sm:p-6">
+      <h2 class="font-subtitle text-foreground mb-4 text-base sm:text-lg">Actions</h2>
 
       <div class="space-y-2">
         <Button

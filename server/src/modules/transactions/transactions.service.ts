@@ -40,7 +40,7 @@ export class TransactionsService {
     return this.transactionsRepository.save(transaction);
   }
 
-  findAll(userId: string, options?: FindOptionsDto) {
+  async findAll(userId: string, options?: FindOptionsDto) {
     // Traiter les opérateurs spéciaux dans where
     let whereCondition: any = {
       user: { id: userId },
@@ -55,10 +55,60 @@ export class TransactionsService {
       };
     }
 
-    return this.transactionsRepository.find({
-      ...options,
+    // Extraire les options valides pour TypeORM (sans relations)
+    const findOptions: any = {
       where: whereCondition,
-    });
+    };
+
+    if (options?.order) findOptions.order = options.order;
+    if (options?.skip) findOptions.skip = options.skip;
+    if (options?.take) findOptions.take = options.take;
+
+    const transactions = await this.transactionsRepository.find(findOptions);
+
+    // Charger les entités liées si demandé
+    if (options?.relations && options.relations.length > 0) {
+      return this.loadRelatedEntities(transactions, options.relations);
+    }
+
+    return transactions;
+  }
+
+  private async loadRelatedEntities(transactions: Transaction[], relations: string[]) {
+    const result = await Promise.all(
+      transactions.map(async (transaction) => {
+        const transactionWithRelations: any = { ...transaction };
+
+        // Charger l'entité liée selon relatedTo
+        if (relations.includes('association') && transaction.relatedTo === 'Association') {
+          const repo = this.dataSource.getRepository('Association');
+          transactionWithRelations.association = await repo.findOne({
+            where: { id: transaction.relatedBy },
+            select: ['id', 'name'],
+          });
+        }
+
+        if (relations.includes('fundraising') && transaction.relatedTo === 'Fundraising') {
+          const repo = this.dataSource.getRepository('Fundraising');
+          transactionWithRelations.fundraising = await repo.findOne({
+            where: { id: transaction.relatedBy },
+            select: ['id', 'title'],
+          });
+        }
+
+        if (relations.includes('event') && transaction.relatedTo === 'Event') {
+          const repo = this.dataSource.getRepository('Event');
+          transactionWithRelations.event = await repo.findOne({
+            where: { id: transaction.relatedBy },
+            select: ['id', 'title'],
+          });
+        }
+
+        return transactionWithRelations;
+      })
+    );
+
+    return result;
   }
 
   private processWhereCondition(where: Record<string, any>): Record<string, any> {
@@ -87,7 +137,7 @@ export class TransactionsService {
     });
   }
 
-  findFiltered(userId: string, type: 'associations' | 'cagnottes', options?: FindOptionsDto) {
+  async findFiltered(userId: string, type: 'associations' | 'cagnottes', options?: FindOptionsDto) {
     // Construire la condition where de base
     let whereCondition: any = {
       user: { id: userId },
@@ -109,10 +159,23 @@ export class TransactionsService {
       };
     }
 
-    return this.transactionsRepository.find({
-      ...options,
+    // Extraire les options valides pour TypeORM (sans relations)
+    const findOptions: any = {
       where: whereCondition,
-    });
+    };
+
+    if (options?.order) findOptions.order = options.order;
+    if (options?.skip) findOptions.skip = options.skip;
+    if (options?.take) findOptions.take = options.take;
+
+    const transactions = await this.transactionsRepository.find(findOptions);
+
+    // Charger les entités liées si demandé
+    if (options?.relations && options.relations.length > 0) {
+      return this.loadRelatedEntities(transactions, options.relations);
+    }
+
+    return transactions;
   }
 
   async remove(id: string) {

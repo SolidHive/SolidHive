@@ -68,4 +68,17 @@ export class FindOptionsDto {
   @IsOptional()
   @IsEnum(['ASC', 'DESC'])
   orderBy?: 'ASC' | 'DESC';
+
+  @ApiPropertyOptional({
+    description: 'Relations à charger (ex: ["association", "fundraising"])',
+    type: 'string',
+  })
+  @IsOptional()
+  @Transform(({ value }): string[] => {
+    if (typeof value === 'string') {
+      return JSON.parse(value);
+    }
+    return value;
+  })
+  relations?: string[];
 }

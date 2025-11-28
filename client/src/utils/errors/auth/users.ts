@@ -1,27 +1,29 @@
+import { validationPatterns, commonErrorMessages } from '../common/validation';
+
 export const userErrorMessages = {
   required: {
-    email: "L'adresse email est requise",
+    email: commonErrorMessages.email.required,
     password: 'Le mot de passe est requis',
-    name: 'Le nom est requis',
-    firstname: 'Le prénom est requis',
+    name: commonErrorMessages.lastName.required,
+    firstname: commonErrorMessages.firstName.required,
     confirmPassword: 'La confirmation du mot de passe est requise',
-    siret: 'Le numéro SIRET est requis',
+    siret: commonErrorMessages.siret.required,
   },
   format: {
-    email: 'Veuillez fournir une adresse email valide',
+    email: commonErrorMessages.email.invalid,
     confirmPassword: 'Les mots de passe ne correspondent pas',
     phone: 'Format de téléphone français invalide (10 chiffres commençant par 0)',
-    siret: 'Le SIRET doit contenir exactement 14 chiffres',
+    siret: commonErrorMessages.siret.invalid,
   },
   password: {
     invalid:
       'Le mot de passe doit contenir au moins 10 caractères, une minuscule, une majuscule, un chiffre et un symbole',
   },
   patterns: {
-    email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-    password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{10,}$/,
-    phone: /^0[1-9][0-9]{8}$/,
-    siret: /^\d{14}$/,
+    email: validationPatterns.email,
+    password: validationPatterns.password,
+    phone: validationPatterns.phoneStrict,
+    siret: validationPatterns.siret,
   },
   auth: {
     invalidCredentials: 'Échec de la connexion. Vérifiez vos identifiants.',

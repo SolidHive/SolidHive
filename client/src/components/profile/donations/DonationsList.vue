@@ -1,10 +1,10 @@
 <template>
-  <div class="bg-card border-border rounded-3xl border p-6 shadow-sm">
+  <div class="bg-card border-border rounded-3xl border p-4 shadow-sm sm:p-6">
     <LoadingOverlay v-if="isLoading" :show="true" message="Chargement de vos dons..." />
 
     <div v-else-if="donations.length > 0" class="space-y-4">
-      <div class="mb-6 flex items-center justify-between">
-        <h2 class="font-subtitle text-foreground text-lg">
+      <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="font-subtitle text-foreground text-base sm:text-lg">
           {{ donations.length }} don{{ donations.length > 1 ? 's' : '' }}
         </h2>
         <div class="text-right">
@@ -20,31 +20,39 @@
         <div
           v-for="donation in donations"
           :key="donation.id"
-          :class="
+          :class="[
+            'border-border bg-muted/20 group rounded-2xl border p-3 transition-all hover:shadow-sm sm:p-4',
             donation.relatedTo === 'Fundraising'
-              ? 'border-border hover:border-secondary/30 bg-muted/20 group rounded-2xl border p-4 transition-all hover:shadow-sm'
-              : 'border-border hover:border-primary/30 bg-muted/20 group rounded-2xl border p-4 transition-all hover:shadow-sm'
-          "
+              ? 'hover:border-secondary/30'
+              : donation.relatedTo === 'Event'
+                ? 'hover:border-accent/30'
+                : 'hover:border-primary/30',
+          ]"
         >
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
               <div
-                :class="
+                :class="[
+                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10',
                   donation.relatedTo === 'Fundraising'
                     ? 'bg-secondary/10 text-secondary'
-                    : 'bg-primary/10 text-primary'
-                "
-                class="flex h-10 w-10 items-center justify-center rounded-xl"
+                    : donation.relatedTo === 'Event'
+                      ? 'bg-accent/10 text-accent'
+                      : 'bg-primary/10 text-primary',
+                ]"
               >
-                <Heart class="h-5 w-5" />
+                <Heart class="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <div>
+              <div class="min-w-0 flex-1">
                 <h3
-                  :class="
+                  :class="[
+                    'font-subtitle text-foreground truncate text-sm transition-colors sm:text-base',
                     donation.relatedTo === 'Fundraising'
-                      ? 'font-subtitle text-foreground group-hover:text-secondary text-base transition-colors'
-                      : 'font-subtitle text-foreground group-hover:text-primary text-base transition-colors'
-                  "
+                      ? 'group-hover:text-secondary'
+                      : donation.relatedTo === 'Event'
+                        ? 'group-hover:text-accent'
+                        : 'group-hover:text-primary',
+                  ]"
                 >
                   {{ getEntityName(donation) }}
                 </h3>
@@ -54,8 +62,8 @@
               </div>
             </div>
 
-            <div class="text-right">
-              <p class="font-title text-foreground text-lg font-bold">
+            <div class="shrink-0 text-right">
+              <p class="font-title text-foreground text-base font-bold sm:text-lg">
                 {{ formatCurrency(donation.amount) }}
               </p>
               <p class="font-paragraph text-muted-foreground text-xs">
@@ -63,11 +71,14 @@
               </p>
               <div v-if="donation.solidHiveAmount && donation.solidHiveAmount > 0" class="mt-1">
                 <p
-                  :class="
+                  :class="[
+                    'font-paragraph text-xs',
                     donation.relatedTo === 'Fundraising'
-                      ? 'font-paragraph text-secondary text-xs'
-                      : 'font-paragraph text-primary text-xs'
-                  "
+                      ? 'text-secondary'
+                      : donation.relatedTo === 'Event'
+                        ? 'text-accent'
+                        : 'text-primary',
+                  ]"
                 >
                   Inclut {{ formatCurrency(donation.solidHiveAmount) }} pour SolidHive
                 </p>
@@ -76,8 +87,8 @@
           </div>
 
           <!-- Informations supplémentaires -->
-          <div class="mt-3 flex items-center justify-between">
-            <div class="flex items-center gap-2">
+          <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-wrap items-center gap-2">
               <div class="rounded-lg bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800">
                 Confirmé
               </div>
@@ -119,15 +130,13 @@
 
   interface Props {
     donations: Transaction[];
-    associations: any[];
-    fundraisings: any[];
     isLoading: boolean;
   }
 
   const props = defineProps<Props>();
 
   const totalAmount = computed(() =>
-    props.donations.reduce((total, donation) => total + donation.amount, 0)
+    props.donations.reduce((total: number, donation: Transaction) => total + donation.amount, 0)
   );
 
   const formatCurrency = (amount: number): string => {
@@ -147,19 +156,21 @@
     });
   };
 
-  // Fonction pour obtenir le nom de l'entité (association ou cagnotte)
+  // Fonction pour obtenir le nom de l'entité (association, cagnotte ou événement)
   const getEntityName = (transaction: Transaction): string => {
     if (transaction.relatedTo === 'Fundraising') {
-      const fundraising = props.fundraisings.find((f) => f.id === transaction.relatedBy);
-      return fundraising ? fundraising.title : 'Cagnotte inconnue';
+      return transaction.fundraising?.title || 'Cagnotte inconnue';
+    } else if (transaction.relatedTo === 'Event') {
+      return transaction.event?.title || 'Événement inconnu';
     } else {
-      const association = props.associations.find((a) => a.id === transaction.relatedBy);
-      return association ? association.name : 'Association inconnue';
+      return transaction.association?.name || 'Association inconnue';
     }
   };
 
   // Fonction pour obtenir le type d'entité
   const getEntityType = (transaction: Transaction): string => {
-    return transaction.relatedTo === 'Fundraising' ? 'Cagnotte' : 'Association';
+    if (transaction.relatedTo === 'Fundraising') return 'Cagnotte';
+    if (transaction.relatedTo === 'Event') return 'Inscription événement';
+    return 'Association';
   };
 </script>
