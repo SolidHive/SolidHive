@@ -143,4 +143,21 @@ export default class Database {
     // Créer le nouveau fichier
     return this.uploadFile(file, data);
   }
+
+  /**
+   * Télécharge un fichier depuis une URL de l'API
+   * @param path Le chemin de l'API (ex: 'invoices/transaction/123')
+   * @returns Un Blob du fichier téléchargé
+   */
+  static async downloadFile(path: string): Promise<Blob> {
+    try {
+      const response = await api.get(path, {
+        responseType: 'blob',
+      });
+      return response.data;
+    } catch (err: unknown) {
+      console.error('API Error in Database.downloadFile:', err);
+      throw err;
+    }
+  }
 }

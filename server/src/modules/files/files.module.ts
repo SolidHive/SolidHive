@@ -18,5 +18,6 @@ import { Role } from '../users/entities/role.entity';
   ],
   controllers: [FilesController],
   providers: [FilesService],
+  exports: [FilesService],
 })
 export class FilesModule {}
