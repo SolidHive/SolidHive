@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-card border-border rounded-3xl border p-6 shadow-sm">
-    <div class="mb-5 flex items-center justify-between">
+  <div class="bg-card border-border rounded-3xl border p-4 shadow-sm sm:p-6">
+    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h2 class="font-subtitle text-foreground text-lg">Mes Associations</h2>
       <Button
         v-if="hasNoAssociations"
@@ -20,11 +20,11 @@
       <div
         v-for="userAssoc in associations"
         :key="userAssoc.id"
-        class="border-border hover:border-primary/30 bg-muted/20 group rounded-2xl border p-4 transition-all hover:shadow-sm"
+        class="border-border hover:border-primary/30 bg-muted/20 group rounded-2xl border p-3 transition-all hover:shadow-sm sm:p-4"
       >
-        <div class="mb-2 flex items-start justify-between gap-3">
+        <div class="mb-2 flex items-start justify-between gap-2">
           <h3
-            class="font-subtitle text-foreground group-hover:text-primary text-base transition-colors"
+            class="font-subtitle text-foreground group-hover:text-primary min-w-0 flex-1 truncate text-sm transition-colors sm:text-base"
           >
             {{ userAssoc.association.name }}
           </h3>

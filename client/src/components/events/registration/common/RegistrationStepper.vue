@@ -1,38 +1,55 @@
 <template>
   <!-- Mobile stepper -->
-  <div class="relative flex w-full items-center justify-between px-2 lg:hidden">
-    <!-- Connection line -->
-    <div class="absolute top-4 right-8 left-8 -z-10 h-0.5 bg-gray-300"></div>
-    <div
-      v-if="currentStep > 0"
-      class="bg-secondary absolute top-4 left-8 -z-10 h-0.5 transition-all duration-300"
-      :style="{ width: `calc(${(currentStep / (steps.length - 1)) * 100}% - 0.5rem)` }"
-    ></div>
-
-    <div v-for="(step, index) in steps" :key="index" class="flex flex-1 flex-col items-center">
-      <!-- Mobile: Circle with number -->
+  <div class="relative flex w-full items-center lg:hidden">
+    <div class="relative flex w-full items-center justify-between">
+      <!-- Background line -->
       <div
-        class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 text-sm font-bold transition-colors"
-        :class="getMobileStepClasses(index)"
-        @click="handleStepClick(index)"
+        class="absolute top-4 left-1/2 -z-10 h-0.5 bg-gray-300"
+        :style="{
+          width: `calc(100% - ${100 / steps.length}%)`,
+          transform: 'translateX(-50%)',
+        }"
+      ></div>
+
+      <!-- Progress line -->
+      <div
+        v-if="currentStep > 0"
+        class="bg-secondary absolute top-4 left-0 -z-10 h-0.5 transition-all duration-300"
+        :style="{
+          width: `${(currentStep / (steps.length - 1)) * (100 - 100 / steps.length)}%`,
+          marginLeft: `${50 / steps.length}%`,
+        }"
+      ></div>
+
+      <div
+        v-for="(step, index) in steps"
+        :key="index"
+        class="relative z-10 flex flex-1 flex-col items-center"
       >
-        {{ index + 1 }}
+        <!-- Mobile: Circle with icon -->
+        <div
+          class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 transition-colors"
+          :class="getMobileStepClasses(index)"
+          @click="handleStepClick(index)"
+        >
+          <component :is="step.icon" class="h-4 w-4" />
+        </div>
+        <span
+          class="font-paragraph mt-1 text-center text-xs leading-tight font-medium"
+          :class="index <= currentStep ? 'text-secondary' : 'text-gray-400'"
+        >
+          {{ step.mobileLabel }}
+        </span>
       </div>
-      <span
-        class="font-paragraph mt-1 text-center text-xs leading-tight font-medium"
-        :class="index <= currentStep ? 'text-secondary' : 'text-gray-400'"
-      >
-        {{ step.mobileLabel }}
-      </span>
     </div>
   </div>
 
   <!-- Desktop stepper -->
-  <div class="hidden w-full items-center justify-center gap-3 lg:flex">
-    <div v-for="(step, index) in steps" :key="index" class="flex items-center">
+  <div class="hidden w-full items-center justify-between lg:flex">
+    <div v-for="(step, index) in steps" :key="index" class="flex flex-1 items-center">
       <!-- Step box -->
       <div
-        class="flex cursor-pointer items-center gap-3 rounded-lg border-2 px-6 py-4 transition-colors"
+        class="flex w-full cursor-pointer items-center justify-center gap-3 rounded-lg border-2 px-6 py-3 transition-colors"
         :class="getStepClasses(index)"
         @click="handleStepClick(index)"
       >
@@ -43,7 +60,7 @@
       </div>
 
       <!-- Arrow connector -->
-      <ArrowBigRight v-if="index < steps.length - 1" class="text-secondary ml-2 h-6 w-6 shrink-0" />
+      <ArrowBigRight v-if="index < steps.length - 1" class="text-secondary mx-3 h-6 w-6 shrink-0" />
     </div>
   </div>
 </template>

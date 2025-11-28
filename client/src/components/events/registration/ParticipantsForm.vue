@@ -6,8 +6,8 @@
       <FormSection v-for="(participant, index) in participants" :key="index">
         <template #title>Participant {{ index + 1 }}</template>
 
-        <div class="mb-4 rounded-lg bg-gray-50 p-3">
-          <div class="flex items-center gap-2">
+        <div class="mb-4 rounded-lg bg-gray-50">
+          <div class="flex flex-wrap items-center gap-2">
             <span class="text-sm font-medium text-gray-600">Type de billet :</span>
             <span class="text-accent font-semibold">
               {{ pricingInfo(participant.pricingId).title }}
@@ -18,7 +18,7 @@
           </div>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <InputForm
             label-value="Prénom *"
             :input-name="`participant-${index}-firstName`"

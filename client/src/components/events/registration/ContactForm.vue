@@ -4,7 +4,7 @@
 
     <FormSection>
       <div class="space-y-4">
-        <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <InputForm
             v-model="form.firstName.$value"
             label-value="Prénom *"
@@ -66,7 +66,7 @@
           @blur="handleBlur('address')"
         />
 
-        <div class="grid gap-4 md:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <InputForm
             v-model="form.postcode.$value"
             label-value="Code postal *"
@@ -79,7 +79,7 @@
             @blur="handleBlur('postcode')"
           />
 
-          <div class="md:col-span-2">
+          <div class="sm:col-span-2">
             <InputForm
               v-model="form.city.$value"
               label-value="Ville *"

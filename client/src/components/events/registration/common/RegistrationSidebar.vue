@@ -1,9 +1,7 @@
 <template>
   <div class="w-full space-y-6 rounded-xl p-4 shadow-lg">
     <!-- Total Header -->
-    <div class="bg-secondary rounded-lg p-3 text-center text-white sm:p-4">
-      <h3 class="font-title text-base font-bold sm:text-lg">Total</h3>
-    </div>
+    <SectionTitle>Total</SectionTitle>
 
     <!-- Selected Tickets -->
     <div class="space-y-3">
@@ -43,6 +41,14 @@
       </Button>
 
       <Button
+        v-else-if="!isAuthenticated"
+        class="bg-primary hover:bg-primary/90 w-full py-2 text-white transition-opacity sm:py-3"
+        @click="$emit('login')"
+      >
+        Se connecter pour payer
+      </Button>
+
+      <Button
         v-else
         class="w-full py-2 text-white transition-opacity sm:py-3"
         :class="
@@ -64,6 +70,7 @@
   import { computed } from 'vue';
   import { Loader2 } from 'lucide-vue-next';
   import { Button } from '@/components/ui/button';
+  import SectionTitle from './SectionTitle.vue';
   import { formatCurrency, getPricingInfo } from '@/utils/eventRegistration.utils';
   import type { EventPricing } from '@/interfaces';
 
@@ -73,11 +80,13 @@
     canProceed: boolean;
     currentStep: number;
     isSubmitting: boolean;
+    isAuthenticated?: boolean;
   }>();
 
   defineEmits<{
-    'next-step': [];
-    'submit-registration': [];
+    (e: 'next-step'): void;
+    (e: 'submit-registration'): void;
+    (e: 'login'): void;
   }>();
 
   const getPricingName = (pricingId: string) => {

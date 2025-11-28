@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-card border-border rounded-3xl border p-6 shadow-sm">
+  <div class="bg-card border-border rounded-3xl border p-4 shadow-sm sm:p-6">
     <h2 class="font-subtitle text-foreground mb-5 text-lg">Informations personnelles</h2>
 
     <div v-if="profile" class="grid gap-4 sm:grid-cols-2">

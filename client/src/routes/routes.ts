@@ -110,6 +110,14 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/event/:eventId/registration/success',
+    name: 'EventRegistrationSuccess',
+    component: () => import('../views/event/EventRegistrationSuccess.vue'),
+    meta: {
+      title: 'Inscription confirmée',
+    },
+  },
+  {
     path: '/association/:id',
     name: 'AssociationDetail',
     component: () => import('../views/association/AssociationDetail.vue'),

@@ -6,11 +6,12 @@
 
       <div class="flex flex-col gap-6 md:flex-row">
         <div class="order-1 flex-1 md:order-1">
-          <div class="rounded-2xl p-4 shadow-lg sm:p-6">
+          <div class="rounded-2xl p-4 shadow-lg">
             <TicketSelection
               v-if="currentStep === 0"
               :pricings="event?.pricings"
               :selected-tickets="selectedTickets"
+              :owned-pricing-ids="ownedPricingIds"
               :error-message="validation.ticketError.value"
               @update:selected-tickets="selectedTickets = $event"
             />
@@ -51,8 +52,10 @@
             :can-proceed="true"
             :current-step="currentStep"
             :is-submitting="isSubmitting"
+            :is-authenticated="authStore.isAuthenticated()"
             @next-step="nextStep"
             @submit-registration="submitRegistration"
+            @login="goToLogin"
           />
         </div>
       </div>
@@ -73,17 +76,20 @@
   import RegistrationSidebar from '@/components/events/registration/common/RegistrationSidebar.vue';
   import { useRegistrationCalculations } from '@/composables/event/useRegistrationCalculations';
   import { useRegistrationValidation } from '@/composables/event/useRegistrationValidation';
+  import { useAuthStore } from '@/stores/auth';
   import Database from '@/utils/database.utils';
   import type { Event, Participant, ContactInfo } from '@/interfaces';
   import { isValidForm } from 'vue-yup-form';
 
   const route = useRoute();
   const router = useRouter();
+  const authStore = useAuthStore();
 
   const event = ref<Event>();
   const currentStep = ref(0);
   const isSubmitting = ref(false);
   const selectedTickets = ref<Record<string, number>>({});
+  const ownedPricingIds = ref<string[]>([]);
   const participants = ref<Participant[]>([]);
   const contact = ref<ContactInfo>({
     firstName: '',
@@ -180,22 +186,34 @@
     }
   };
 
+  const goToLogin = () => {
+    router.push({ name: 'Login' });
+  };
+
   const submitRegistration = async () => {
+    // Vérifier l'authentification avant de soumettre
+    if (!authStore.isAuthenticated()) {
+      goToLogin();
+      return;
+    }
     isSubmitting.value = true;
     try {
-      const registrationData = {
+      const registrationPayload = {
         eventId: route.params.eventId as string,
-        associationId: route.params.id as string,
-        selectedTickets: selectedTickets.value,
-        participants: participants.value,
+        participants: participants.value.map((p: Participant) => ({
+          firstName: p.firstName,
+          lastName: p.lastName,
+          email: p.email,
+          phone: p.phone,
+          pricingId: p.pricingId,
+        })),
         contact: contact.value,
-        supportSolidHive: false,
-        solidHivePercentage: 5,
       };
 
-      const response = await Database.create('event-registration/create', registrationData);
+      const response = await Database.create('payments/event-registration', registrationPayload);
 
       if (response.data.url) {
+        // Rediriger vers la page de paiement Stripe
         window.location.href = response.data.url;
       } else {
         throw new Error('URL de paiement non reçue');
@@ -211,6 +229,18 @@
       const associationId = route.params.id as string;
       const eventId = route.params.eventId as string;
       event.value = await Database.getOne(`association/${associationId}/event`, eventId);
+
+      // Récupérer les billets déjà achetés par l'utilisateur connecté
+      if (authStore.isAuthenticated()) {
+        try {
+          const registers = await Database.getAll(
+            `association/${associationId}/event/${eventId}/my-registers`
+          );
+          ownedPricingIds.value = registers.map((register: any) => register.eventPricingId);
+        } catch (error) {
+          console.error('Erreur lors de la récupération des inscriptions:', error);
+        }
+      }
     } catch (error) {
       console.error("Échec du chargement de l'événement:", error);
       router.push({ name: 'events' });

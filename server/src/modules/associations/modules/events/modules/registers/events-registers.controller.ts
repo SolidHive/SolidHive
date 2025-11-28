@@ -27,6 +27,17 @@ export class EventsRegistersController {
     return this.eventsRegistersService.findAll(eventId, options);
   }
 
+  @Get('my-registers')
+  @UseGuards(AuthenticatedGuard)
+  @ApiCookieAuth()
+  @ApiResponse({ status: 200, description: "Inscriptions de l'utilisateur récupérées avec succès" })
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiParam({ name: 'associationId', type: 'string' })
+  @ApiParam({ name: 'eventId', type: 'string' })
+  findMyRegisters(@Param('eventId') eventId: string, @User('id') userId: string) {
+    return this.eventsRegistersService.findUserRegisters(eventId, userId);
+  }
+
   @Get('register/:id')
   @ApiParam({ name: 'associationId', type: 'string' })
   findOne(

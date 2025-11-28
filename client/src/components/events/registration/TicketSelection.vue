@@ -18,12 +18,18 @@
             {{ pricing.title }}
           </h3>
           <p class="text-secondary text-sm">{{ pricing.description }}</p>
-          <div class="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <div class="mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
             <span class="font-title text-secondary text-lg font-bold sm:text-xl">
               {{ formatCurrency(pricing.amount) }}
             </span>
             <span
-              v-if="pricing.availableCapacity !== undefined"
+              v-if="isPricingOwned(pricing.id)"
+              class="bg-accent inline-block w-fit rounded-full px-3 py-1 text-xs font-semibold text-white"
+            >
+              Déjà acheté
+            </span>
+            <span
+              v-else-if="pricing.availableCapacity !== undefined"
               class="text-sm font-medium"
               :class="getCapacityColor(pricing.availableCapacity ?? 0)"
             >
@@ -42,7 +48,7 @@
           <Button
             variant="outline"
             size="icon"
-            :disabled="getTicketQuantity(pricing.id) === 0"
+            :disabled="isPricingOwned(pricing.id) || getTicketQuantity(pricing.id) === 0"
             @click="decrementQuantity(pricing.id)"
           >
             <Minus class="h-4 w-4" />
@@ -54,6 +60,7 @@
             variant="outline"
             size="icon"
             :disabled="
+              isPricingOwned(pricing.id) ||
               (pricing.availableCapacity ?? 0) === 0 ||
               getTicketQuantity(pricing.id) >= (pricing.availableCapacity ?? 0)
             "
@@ -77,6 +84,7 @@
   const props = defineProps<{
     pricings?: EventPricing[];
     selectedTickets: Record<string, number>;
+    ownedPricingIds?: string[];
     errorMessage?: string;
   }>();
 
@@ -86,6 +94,10 @@
 
   const getTicketQuantity = (pricingId: string) => {
     return props.selectedTickets[pricingId] || 0;
+  };
+
+  const isPricingOwned = (pricingId: string) => {
+    return props.ownedPricingIds?.includes(pricingId) || false;
   };
 
   const incrementQuantity = (pricingId: string) => {

@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-muted/30 min-h-screen pt-6 pb-12">
-    <div class="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+  <PageContainer>
+    <div class="bg-muted/30 min-h-screen">
       <ProfileHeader :profile="profile" />
 
       <div class="grid gap-6 lg:grid-cols-3">
@@ -16,6 +16,7 @@
           <ProfileDonations
             :recent-donations="recentDonations"
             :recent-fundraising-donations="recentFundraisingDonations"
+            :recent-event-registrations="recentEventRegistrations"
             :is-loading="isLoadingDonations"
           />
         </div>
@@ -23,7 +24,7 @@
         <ProfileSidebar :profile="profile" :is-logging-out="isLoggingOut" @logout="handleLogout" />
       </div>
     </div>
-  </div>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">
@@ -34,6 +35,7 @@
   import Database from '@/utils/database.utils';
   import type { Transaction } from '@/interfaces';
 
+  import PageContainer from '@/components/PageContainer.vue';
   import ProfileHeader from '@/components/profile/ProfileHeader.vue';
   import ProfilePersonalInfo from '@/components/profile/ProfilePersonalInfo.vue';
   import ProfileAssociations from '@/components/profile/ProfileAssociations.vue';
@@ -50,6 +52,7 @@
   const associations = computed(() => authStore.associations);
   const recentDonations = ref<Transaction[]>([]);
   const recentFundraisingDonations = ref<Transaction[]>([]);
+  const recentEventRegistrations = ref<Transaction[]>([]);
   const isLoadingAssociations = ref(false);
   const isLoadingDonations = ref(true);
   const isLoggingOut = ref(false);
@@ -60,18 +63,20 @@
       isLoadingDonations.value = true;
       const transactions = await Database.getAll('transactions', {
         order: JSON.stringify({ 'timestamps.createdAt': 'DESC' }),
-        take: 6,
+        take: 9,
       });
 
       const classicDonations = transactions.filter(
-        (t: Transaction) => t.relatedTo !== 'Fundraising'
+        (t: Transaction) => t.relatedTo === 'Association'
       );
       const fundraisingDonations = transactions.filter(
         (t: Transaction) => t.relatedTo === 'Fundraising'
       );
+      const eventRegistrations = transactions.filter((t: Transaction) => t.relatedTo === 'Event');
 
       recentDonations.value = classicDonations.slice(0, 3);
       recentFundraisingDonations.value = fundraisingDonations.slice(0, 3);
+      recentEventRegistrations.value = eventRegistrations.slice(0, 3);
     } catch (error) {
       console.error('Erreur lors du chargement des dons récents:', error);
     } finally {

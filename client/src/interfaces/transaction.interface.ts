@@ -16,4 +16,16 @@ export interface Transaction extends HasId {
     firstname: string;
     email: string;
   };
+  association?: {
+    id: string;
+    name: string;
+  };
+  fundraising?: {
+    id: string;
+    title: string;
+  };
+  event?: {
+    id: string;
+    title: string;
+  };
 }

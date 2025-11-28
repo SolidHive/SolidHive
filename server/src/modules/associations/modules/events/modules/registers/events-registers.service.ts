@@ -44,6 +44,22 @@ export class EventsRegistersService {
     });
   }
 
+  async findUserRegisters(eventId: string, userId: string) {
+    const registers = await this.eventsRegisterRepository.find({
+      where: {
+        user: { id: userId },
+        eventPricing: { event: { id: eventId } },
+      },
+      relations: ['eventPricing'],
+    });
+
+    return registers.map((register) => ({
+      id: register.id,
+      eventPricingId: register.eventPricing.id,
+      registeredAt: register.registeredAt,
+    }));
+  }
+
   findOne(id: string, eventId: string, options?: FindOptionsDto) {
     return this.eventsRegisterRepository.findOne({
       ...options,

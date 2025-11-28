@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-card border-border mb-6 rounded-3xl border p-6 shadow-sm">
-    <div class="flex gap-2">
+  <div class="bg-card border-border mb-6 rounded-3xl border p-4 shadow-sm sm:p-6">
+    <div class="flex gap-2 overflow-x-auto pb-2">
       <Button
         :variant="donationType === 'all' ? 'default' : 'outline'"
         size="sm"
@@ -22,6 +22,13 @@
       >
         Dons aux cagnottes
       </Button>
+      <Button
+        :variant="donationType === 'evenements' ? 'default' : 'outline'"
+        size="sm"
+        @click="$emit('type-change', 'evenements')"
+      >
+        Inscriptions événements
+      </Button>
     </div>
   </div>
 </template>
@@ -30,12 +37,12 @@
   import { Button } from '@/components/ui/button';
 
   interface Props {
-    donationType: 'all' | 'associations' | 'cagnottes';
+    donationType: 'all' | 'associations' | 'cagnottes' | 'evenements';
   }
 
   defineProps<Props>();
 
   defineEmits<{
-    'type-change': [type: 'all' | 'associations' | 'cagnottes'];
+    'type-change': [type: 'all' | 'associations' | 'cagnottes' | 'evenements'];
   }>();
 </script>
