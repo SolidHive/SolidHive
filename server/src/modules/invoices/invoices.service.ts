@@ -103,13 +103,11 @@ export class InvoicesService {
       mkdirSync(uploadsDir, { recursive: true });
     }
 
-    // Générer un nom de fichier unique (comme le fait Multer)
     const { v4: uuidv4 } = await import('uuid');
-    const filename = uuidv4();
+    const filename = `${uuidv4()}.pdf`;
     const filePath = join(uploadsDir, filename);
     writeFileSync(filePath, pdfBuffer);
 
-    // Créer l'entrée de fichier directement en base de données
     const fileEntity = this.fileRepository.create({
       filename: filename,
       relatedTo: 'Transaction',
@@ -117,7 +115,7 @@ export class InvoicesService {
       purpose: 'invoice',
       index: 0,
       userId: userId,
-      oldFilename: `facture-${transactionId}.pdf`,
+      oldFilename: `facture-${transactionId.slice(-8)}.pdf`,
       mimetype: 'application/pdf',
       extension: 'pdf',
       size: pdfBuffer.length,

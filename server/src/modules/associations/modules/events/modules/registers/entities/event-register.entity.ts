@@ -33,4 +33,28 @@ export class EventRegister {
   })
   @ManyToOne(() => EventPricing, (eventPricing) => eventPricing.registers)
   eventPricing: EventPricing;
+
+  @ApiProperty({
+    example: 'Doe',
+    description: 'Nom du participant',
+    required: false,
+  })
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  participantLastName: string | null;
+
+  @ApiProperty({
+    example: 'John',
+    description: 'Prénom du participant',
+    required: false,
+  })
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  participantFirstName: string | null;
+
+  @ApiProperty({
+    example: 'john.doe@example.com',
+    description: 'Email du participant',
+    required: false,
+  })
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  participantEmail: string | null;
 }

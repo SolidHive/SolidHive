@@ -17,6 +17,8 @@ import { Fundraising } from '../associations/modules/fundraisings/entities/fundr
 import { PaymentValidationService } from './services/payment-validation.service';
 import { DonationPaymentService } from './services/donation-payment.service';
 import { EventPaymentService } from './services/event-payment.service';
+import { TicketsModule } from '../associations/modules/events/modules/tickets/tickets.module';
+import { InvoicesModule } from '../invoices/invoices.module';
 
 /**
  * Module pour la gestion des paiements et des comptes Stripe Connect
@@ -27,6 +29,8 @@ import { EventPaymentService } from './services/event-payment.service';
     AssociationsModule,
     TransactionsModule,
     FundraisingsModule,
+    TicketsModule,
+    InvoicesModule,
     TypeOrmModule.forFeature([Event, EventPricing, EventRegister, Fundraising]),
   ],
   providers: [
