@@ -12,6 +12,8 @@ import { Categories } from '../../../common/enums/categories';
 import { StripeAccountNotConfiguredException } from '../exceptions/payment.exceptions';
 import { StripeSessionBuilder } from '../helpers/stripe-session.builder';
 import { PaymentValidationService } from './payment-validation.service';
+import { TicketsService } from '../../associations/modules/events/modules/tickets/tickets.service';
+import { InvoicesService } from '../../invoices/invoices.service';
 
 export interface EventRegistrationSessionResult {
   sessionId: string;
@@ -31,6 +33,8 @@ export class EventPaymentService {
     private readonly configService: ConfigService,
     private readonly transactionsService: TransactionsService,
     private readonly validationService: PaymentValidationService,
+    private readonly ticketsService: TicketsService,
+    private readonly invoicesService: InvoicesService,
     @InjectRepository(Event)
     private eventsRepository: Repository<Event>,
     @InjectRepository(EventPricing)
@@ -134,17 +138,34 @@ export class EventPaymentService {
       throw new Error(`Événement non trouvé: ${eventId}`);
     }
 
-    // Créer les inscriptions pour chaque participant
-    await this.createRegistrations(event, participants, session.metadata?.userId);
-
-    // Créer une transaction de traçabilité si l'utilisateur est connecté
+    let transactionId: string | undefined;
     if (session.metadata?.userId) {
-      await this.createTransactionRecord(
+      transactionId = await this.createTransactionRecord(
         eventId,
         session.metadata.userId,
         Number(session.amount_total) / 100,
         sessionId
       );
+
+      await this.invoicesService.getInvoiceStream(transactionId, session.metadata.userId);
+    }
+
+    // Créer les inscriptions pour chaque participant
+    const registrationIds = await this.createRegistrations(
+      event,
+      participants,
+      session.metadata?.userId
+    );
+
+    if (registrationIds.length > 0 && session.metadata?.userId && transactionId) {
+      try {
+        await this.ticketsService.generateAndSendAllTickets(registrationIds, transactionId);
+        this.logger.log(
+          `Email envoyé avec ${registrationIds.length} billet(s) pour l'événement ${event.title}`
+        );
+      } catch (error) {
+        this.logger.error(`Erreur lors de l'envoi de l'email groupé`, error);
+      }
     }
 
     this.logger.log(
@@ -327,7 +348,9 @@ export class EventPaymentService {
     event: any,
     participants: any[],
     userId?: string
-  ): Promise<void> {
+  ): Promise<string[]> {
+    const registrationIds: string[] = [];
+
     for (const participant of participants) {
       const pricing = event.pricings?.find((p: any) => p.id === participant.pricingId);
 
@@ -349,19 +372,26 @@ export class EventPaymentService {
           }
         }
 
-        // Créer l'inscription
+        // Créer l'inscription avec les infos du participant
         const register = this.eventsRepository.manager.create(EventRegister, {
           eventPricing: { id: participant.pricingId },
           user: userId ? { id: userId } : null,
+          participantFirstName: participant.firstName,
+          participantLastName: participant.lastName,
+          participantEmail: participant.email,
         });
 
-        await this.eventsRepository.manager.save(EventRegister, register);
+        const savedRegister = await this.eventsRepository.manager.save(EventRegister, register);
+
+        registrationIds.push(savedRegister.id);
 
         this.logger.log(
           `Inscription créée pour ${participant.firstName} ${participant.lastName} à l'événement ${event.title}`
         );
       }
     }
+
+    return registrationIds;
   }
 
   /**
@@ -372,9 +402,9 @@ export class EventPaymentService {
     userId: string,
     totalAmount: number,
     sessionId: string
-  ): Promise<void> {
+  ): Promise<string> {
     try {
-      await this.transactionsService.create(
+      const transaction = await this.transactionsService.create(
         {
           amount: totalAmount,
           relatedTo: Categories.EVENT,
@@ -385,11 +415,13 @@ export class EventPaymentService {
       );
 
       this.logger.debug(`Transaction créée pour la session ${sessionId}`);
+      return transaction.id;
     } catch (error) {
       this.logger.error(
         `Erreur lors de la création de la transaction pour la session ${sessionId}`,
         error
       );
+      throw error;
     }
   }
 }
