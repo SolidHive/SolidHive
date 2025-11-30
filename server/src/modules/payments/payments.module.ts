@@ -19,6 +19,7 @@ import { DonationPaymentService } from './services/donation-payment.service';
 import { EventPaymentService } from './services/event-payment.service';
 import { TicketsModule } from '../associations/modules/events/modules/tickets/tickets.module';
 import { InvoicesModule } from '../invoices/invoices.module';
+import { EmailModule } from '../../common/utils/email/email.module';
 
 /**
  * Module pour la gestion des paiements et des comptes Stripe Connect
@@ -31,6 +32,7 @@ import { InvoicesModule } from '../invoices/invoices.module';
     FundraisingsModule,
     TicketsModule,
     InvoicesModule,
+    EmailModule,
     TypeOrmModule.forFeature([Event, EventPricing, EventRegister, Fundraising]),
   ],
   providers: [

@@ -8,11 +8,9 @@
     success-title="Inscription confirmée !"
     success-message="Votre paiement a été effectué avec succès et votre inscription à l'événement est confirmée."
     success-sub-message="Vous allez recevoir un email de confirmation avec tous les détails de votre inscription."
-    primary-button-text="Voir l'événement"
-    secondary-button-text="Retour aux événements"
+    primary-button-text="Voir mon profil"
     :retry-url="eventId ? `/event/${eventId}/registration` : ''"
-    @primary-action="goToEvent"
-    @secondary-action="goToEvents"
+    @primary-action="goToProfile"
     @retry="retryRegistration"
   />
 </template>
@@ -67,16 +65,8 @@
     }
   });
 
-  const goToEvent = () => {
-    if (eventId.value) {
-      router.push(`/event/${eventId.value}`);
-    } else {
-      goToEvents();
-    }
-  };
-
-  const goToEvents = () => {
-    router.push({ name: 'events' });
+  const goToProfile = () => {
+    router.push('/profile');
   };
 
   const retryRegistration = () => {

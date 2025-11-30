@@ -14,6 +14,11 @@ import {
 } from '../exceptions/payment.exceptions';
 import { StripeSessionBuilder } from '../helpers/stripe-session.builder';
 import { PaymentValidationService } from './payment-validation.service';
+import { InvoicesService } from '../../invoices/invoices.service';
+import { EmailService } from '../../../common/utils/email/email.service';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as handlebars from 'handlebars';
 
 export interface DonationSessionResult {
   sessionId: string;
@@ -27,6 +32,7 @@ export interface DonationSessionResult {
 export class DonationPaymentService {
   private readonly logger = new Logger(DonationPaymentService.name);
   private readonly isMockMode: boolean;
+  private donationReceiptTemplate: handlebars.TemplateDelegate;
 
   constructor(
     @Inject('STRIPE_CLIENT') private readonly stripe: Stripe,
@@ -34,10 +40,25 @@ export class DonationPaymentService {
     private readonly associationsService: AssociationsService,
     private readonly transactionsService: TransactionsService,
     private readonly validationService: PaymentValidationService,
+    private readonly invoicesService: InvoicesService,
+    private readonly emailService: EmailService,
     @InjectRepository(Fundraising)
     private fundraisingsRepository: Repository<Fundraising>
   ) {
     this.isMockMode = this.configService.get<string>('USE_STRIPE_MOCK') === 'true';
+
+    // Load donation receipt template
+    try {
+      const templatePath = path.join(
+        process.cwd(),
+        'src/common/utils/email/templates/donation-receipt.html'
+      );
+      const templateSource = fs.readFileSync(templatePath, 'utf8');
+      handlebars.registerHelper('gt', (a, b) => a > b);
+      this.donationReceiptTemplate = handlebars.compile(templateSource);
+    } catch (error) {
+      this.logger.error('Erreur lors du chargement du template donation-receipt.html', error);
+    }
   }
 
   /**
@@ -97,8 +118,7 @@ export class DonationPaymentService {
     // Créer la session
     const session = await this.stripe.checkout.sessions.create(sessionConfig);
 
-    // Créer la transaction de traçabilité
-    await this.createTransactionRecord(
+    const transactionId = await this.createTransactionRecord(
       createDonationDto,
       totalAmount,
       solidHiveAmount,
@@ -107,7 +127,18 @@ export class DonationPaymentService {
       userId
     );
 
-    // Mettre à jour le montant de la cagnotte si c'est un don pour une cagnotte
+    if (transactionId && userId) {
+      await this.invoicesService.getInvoiceStream(transactionId, userId);
+      await this.sendDonationReceiptEmail(
+        userId,
+        transactionId,
+        association,
+        createDonationDto,
+        totalAmount,
+        solidHiveAmount
+      );
+    }
+
     if (createDonationDto.fundraisingId) {
       await this.updateFundraisingAmount(createDonationDto.fundraisingId, associationAmount);
     }
@@ -172,9 +203,9 @@ export class DonationPaymentService {
     solidHivePercentage: number,
     sessionId: string,
     userId?: string
-  ): Promise<void> {
+  ): Promise<string | undefined> {
     if (!userId) {
-      return;
+      return undefined;
     }
 
     try {
@@ -186,20 +217,88 @@ export class DonationPaymentService {
         solidHiveAmount: solidHiveAmount > 0 ? solidHiveAmount : undefined,
       };
 
-      await this.transactionsService.create(transactionData, userId);
+      const transaction = await this.transactionsService.create(transactionData, userId);
       this.logger.debug(`Transaction enregistrée pour la session ${sessionId}`);
+      return transaction.id;
     } catch (error) {
       this.logger.error(
         `Erreur lors de la création de la transaction pour la session ${sessionId}`,
         error
       );
-      // Ne pas bloquer le don si la transaction ne peut pas être créée
+      return undefined;
     }
   }
 
-  /**
-   * Mettre à jour le montant récolté d'une cagnotte
-   */
+  private async sendDonationReceiptEmail(
+    userId: string,
+    transactionId: string,
+    association: any,
+    donationDto: CreateDonationDto,
+    totalAmount: number,
+    solidHiveAmount: number
+  ): Promise<void> {
+    try {
+      const user = await this.associationsService['usersRepository'].findOne({
+        where: { id: userId },
+      });
+
+      if (!user) return;
+
+      const invoiceFile = await this.invoicesService['fileRepository'].findOne({
+        where: { relatedTo: 'Transaction', relatedBy: transactionId },
+      });
+
+      if (!invoiceFile) {
+        this.logger.error(`Facture non trouvée pour la transaction ${transactionId}`);
+        return;
+      }
+
+      const { join } = await import('path');
+      const { existsSync } = await import('fs');
+
+      const invoicePath = join(process.cwd(), 'uploads', userId, invoiceFile.filename);
+
+      if (!existsSync(invoicePath)) {
+        this.logger.error(`Fichier facture introuvable: ${invoicePath}`);
+        return;
+      }
+
+      let recipientName = association.name;
+      if (donationDto.fundraisingId) {
+        const fundraising = await this.fundraisingsRepository.findOne({
+          where: { id: donationDto.fundraisingId },
+        });
+        if (fundraising) {
+          recipientName = `${fundraising.title} (${association.name})`;
+        }
+      }
+
+      const htmlContent = this.donationReceiptTemplate({
+        userName: user.name,
+        recipientName,
+        amount: totalAmount.toFixed(2),
+        supportedSolidHive: solidHiveAmount > 0,
+        solidHiveAmount: solidHiveAmount.toFixed(2),
+      });
+
+      await this.emailService.sendEmail({
+        to: user.email,
+        subject: `Facture pour votre don à ${recipientName}`,
+        html: htmlContent,
+        attachments: [
+          {
+            filename: invoiceFile.oldFilename || 'recu-fiscal.pdf',
+            path: invoicePath,
+          },
+        ],
+      });
+
+      this.logger.log(`Email de facture envoyé à ${user.email}`);
+    } catch (error) {
+      this.logger.error(`Erreur lors de l'envoi de l'email de facture`, error);
+    }
+  }
+
   private async updateFundraisingAmount(fundraisingId: string, amount: number): Promise<void> {
     try {
       const fundraising = await this.fundraisingsRepository.findOne({
@@ -211,7 +310,6 @@ export class DonationPaymentService {
         return;
       }
 
-      // Mettre à jour le montant actuel
       const newAmount = fundraising.amount + amount;
       await this.fundraisingsRepository.update(fundraisingId, { amount: newAmount });
 

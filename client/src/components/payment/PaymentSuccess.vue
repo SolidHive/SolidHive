@@ -18,32 +18,10 @@
           <p class="text-lg text-gray-700">{{ successMessage }}</p>
           <p v-if="successSubMessage" class="text-gray-600">{{ successSubMessage }}</p>
 
-          <!-- Payment Details -->
-          <div
-            v-if="paymentDetails"
-            class="mx-auto max-w-md space-y-4 rounded-lg bg-gray-50 p-4 text-left"
-          >
-            <div v-if="paymentDetails.amount" class="flex justify-between">
-              <span class="text-gray-600">Montant :</span>
-              <span class="font-semibold">{{ formatCurrency(paymentDetails.amount) }}</span>
-            </div>
-            <div v-if="paymentDetails.message" class="border-t pt-4">
-              <span class="text-gray-600">Votre message :</span>
-              <p class="mt-1 text-sm text-gray-700 italic">{{ paymentDetails.message }}</p>
-            </div>
-            <div v-if="paymentDetails.participants" class="border-t pt-4">
-              <span class="text-gray-600">Participants :</span>
-              <p class="mt-1 text-sm text-gray-700">{{ paymentDetails.participants }}</p>
-            </div>
-          </div>
-
           <!-- Action Buttons -->
           <div class="flex justify-center gap-4 pt-4">
             <Button class="bg-primary hover:bg-primary/90" @click="handlePrimaryAction">
               {{ primaryButtonText }}
-            </Button>
-            <Button variant="outline" @click="handleSecondaryAction">
-              {{ secondaryButtonText }}
             </Button>
           </div>
         </div>
@@ -62,9 +40,6 @@
             <Button v-if="retryUrl" class="bg-primary hover:bg-primary/90" @click="handleRetry">
               Réessayer
             </Button>
-            <Button variant="outline" @click="handleSecondaryAction">
-              {{ secondaryButtonText }}
-            </Button>
           </div>
         </div>
       </div>
@@ -77,13 +52,6 @@
   import PageContainer from '@/components/PageContainer.vue';
   import { Button } from '@/components/ui/button';
 
-  interface PaymentDetails {
-    amount?: number;
-    message?: string;
-    participants?: string;
-    [key: string]: any;
-  }
-
   interface Props {
     loading: boolean;
     success: boolean;
@@ -94,8 +62,6 @@
     successMessage?: string;
     successSubMessage?: string;
     primaryButtonText?: string;
-    secondaryButtonText?: string;
-    paymentDetails?: PaymentDetails | null;
     retryUrl?: string;
   }
 
@@ -106,30 +72,16 @@
     successMessage: 'Votre paiement a été effectué avec succès.',
     successSubMessage: 'Vous allez recevoir un email de confirmation.',
     primaryButtonText: 'Retour',
-    secondaryButtonText: 'Voir plus',
-    paymentDetails: null,
     retryUrl: '',
   });
 
   const emit = defineEmits<{
     primaryAction: [];
-    secondaryAction: [];
     retry: [];
   }>();
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'currency',
-      currency: 'EUR',
-    }).format(amount);
-  };
-
   const handlePrimaryAction = () => {
     emit('primaryAction');
-  };
-
-  const handleSecondaryAction = () => {
-    emit('secondaryAction');
   };
 
   const handleRetry = () => {

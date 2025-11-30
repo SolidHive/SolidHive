@@ -87,13 +87,18 @@
     </div>
 
     <!-- Boutons -->
-    <div class="mt-4 flex flex-col gap-3 sm:mt-6 sm:flex-row">
+    <div class="mt-4 flex flex-col gap-3 sm:mt-6 xl:flex-row">
       <Button
         class="bg-accent hover:bg-accent/90 flex-1 text-white"
-        :disabled="!authStore.isAuthenticated()"
+        :disabled="!authStore.isAuthenticated() || isLoading"
         @click="faireUnDon"
       >
-        {{ authStore.isAuthenticated() ? 'Faire un don' : 'Se connecter pour donner' }}
+        <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin sm:h-5 sm:w-5" />
+        <span v-if="isLoading" class="hidden sm:inline">Traitement en cours...</span>
+        <span v-if="isLoading" class="sm:hidden">Traitement...</span>
+        <span v-else>
+          {{ authStore.isAuthenticated() ? 'Faire un don' : 'Se connecter pour donner' }}
+        </span>
       </Button>
       <Button
         variant="outline"
@@ -111,7 +116,7 @@
 
 <script setup lang="ts">
   import { ref, computed } from 'vue';
-  import { HandHeart, Check } from 'lucide-vue-next';
+  import { HandHeart, Check, Loader2 } from 'lucide-vue-next';
   import { Button } from '@/components/ui/button';
   import { useAuthStore } from '@/stores/auth';
   import { useRouter } from 'vue-router';
@@ -145,6 +150,7 @@
   // Reactive data
   const solidHivePercentage = ref<number>(props.solidHivePercentage);
   const shareButtonText = ref<string>('Partagé');
+  const isLoading = ref<boolean>(false);
 
   // Computed
   const progressPercentage = computed(() => {
@@ -196,6 +202,8 @@
       return;
     }
 
+    isLoading.value = true;
+
     try {
       const response = await api.post('/payments/donate', {
         amount: props.donationAmount,
@@ -215,6 +223,8 @@
     } catch (err: any) {
       console.error('Error creating donation:', err);
       toast.error(err.response?.data?.message || 'Erreur lors de la création du paiement');
+    } finally {
+      isLoading.value = false;
     }
   };
 
