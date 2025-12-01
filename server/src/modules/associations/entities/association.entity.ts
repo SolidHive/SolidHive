@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AssociationAnnouncement } from '../modules/announcements/entities/association-announcement.entity';
 import { AssociationRole } from '../modules/roles/entities/association-role.entity';
-import { Colors } from '../../../common/enums/colors';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UserAssociation } from '../modules/users/entities/user-association.entity';
 import { Fundraising } from '../modules/fundraisings/entities/fundraising.entity';
@@ -44,15 +43,8 @@ export class Association {
     example: '#000000',
     description: "Couleur primaire de l'association",
   })
-  @Column({ length: 7, nullable: true, enum: Colors, default: Colors.BLACK })
-  primaryColor: Colors;
-
-  @ApiProperty({
-    example: '#FF0000',
-    description: "Couleur secondaire de l'association",
-  })
-  @Column({ length: 7, nullable: true, enum: Colors, default: Colors.BLACK })
-  secondaryColor: Colors;
+  @Column({ length: 7, nullable: true })
+  primaryColor?: string;
 
   @ApiProperty({
     example: 'contact@example.com',

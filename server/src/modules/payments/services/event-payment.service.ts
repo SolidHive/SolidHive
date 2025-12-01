@@ -147,7 +147,15 @@ export class EventPaymentService {
         sessionId
       );
 
-      await this.invoicesService.getInvoiceStream(transactionId, session.metadata.userId);
+      // Parser les données de contact et participants depuis les métadonnées
+      const { contact, participants: sessionParticipants } = this.parseSessionMetadata(session);
+
+      await this.invoicesService.getInvoiceStream(
+        transactionId,
+        session.metadata.userId,
+        contact,
+        sessionParticipants
+      );
     }
 
     // Créer les inscriptions pour chaque participant
@@ -178,8 +186,7 @@ export class EventPaymentService {
    */
   private async calculateAmountAndValidateCapacity(
     event: any,
-    participants: any[],
-    userId?: string
+    participants: any[]
   ): Promise<{ totalAmount: number; pricingCounts: Map<string, number> }> {
     let totalAmount = 0;
     const pricingCounts = new Map<string, number>();
@@ -194,26 +201,6 @@ export class EventPaymentService {
       pricingCounts.set(participant.pricingId, (pricingCounts.get(participant.pricingId) || 0) + 1);
     }
 
-    // Vérifier si l'utilisateur a déjà acheté ces billets
-    if (userId) {
-      for (const [pricingId] of pricingCounts.entries()) {
-        const existingRegistration = await this.eventsRepository.manager.findOne(EventRegister, {
-          where: {
-            user: { id: userId },
-            eventPricing: { id: pricingId },
-          },
-        });
-
-        if (existingRegistration) {
-          const pricing = event.pricings?.find((p: any) => p.id === pricingId);
-          throw new Error(
-            `Vous avez déjà acheté un billet pour le tarif "${pricing?.title || 'ce tarif'}". Vous ne pouvez pas acheter le même billet deux fois.`
-          );
-        }
-      }
-    }
-
-    // Vérifier les capacités disponibles
     for (const [pricingId, requestedCount] of pricingCounts.entries()) {
       const pricing = await this.eventPricingsRepository.findOne({
         where: { id: pricingId },

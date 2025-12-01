@@ -4,7 +4,6 @@ import { Association } from '../modules/associations/entities/association.entity
 import { User } from '../modules/users/entities/user.entity';
 import { UserAssociation } from '../modules/associations/modules/users/entities/user-association.entity';
 import { AssociationRole } from '../modules/associations/modules/roles/entities/association-role.entity';
-import { Colors } from '../common/enums/colors';
 import { Status } from '../common/enums/status';
 import { Permissions } from '../common/enums/permissions';
 
@@ -23,6 +22,17 @@ export async function seedAssociations(
 
   const associations: Association[] = [];
 
+  // Helper function to generate random hex color
+  const generateRandomHexColor = (): string => {
+    return (
+      '#' +
+      Math.floor(Math.random() * 16777215)
+        .toString(16)
+        .padStart(6, '0')
+        .toUpperCase()
+    );
+  };
+
   for (let i = 0; i < 10; i++) {
     const randomUser = faker.helpers.arrayElement(users);
 
@@ -33,8 +43,7 @@ export async function seedAssociations(
       name: faker.company.name(),
       description: faker.lorem.paragraph(),
       aboutText: faker.lorem.paragraphs(3),
-      primaryColor: faker.helpers.arrayElement(Object.values(Colors)),
-      secondaryColor: faker.helpers.arrayElement(Object.values(Colors)),
+      primaryColor: generateRandomHexColor(),
       contact: faker.internet.email(),
       siret: siret,
       status: Status.ACCEPTED,

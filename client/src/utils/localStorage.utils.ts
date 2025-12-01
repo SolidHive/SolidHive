@@ -17,6 +17,7 @@ export interface PendingAssociation {
   description: string;
   contact: string;
   siret: string;
+  primaryColor?: string;
 }
 
 export interface PendingFile {

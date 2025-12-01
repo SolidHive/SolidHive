@@ -53,7 +53,7 @@
           </span>
 
           <Button variant="ghost" size="sm" as-child class="h-8">
-            <router-link :to="`/associations/${userAssoc.association.id}`">Voir →</router-link>
+            <router-link :to="`/crm/${userAssoc.association.id}/home`">Gérer →</router-link>
           </Button>
         </div>
       </div>

@@ -25,9 +25,14 @@
           <div v-if="loadingEvents">
             <LoadingOverlay message="Chargement des événements..." />
           </div>
-          <EventsSlider v-else :items="eventsList" :color="association?.primaryColor" />
+          <EventsSlider
+            v-else
+            :items="eventsList"
+            :color="association?.primaryColor"
+            @view-details="viewEventDetails"
+          />
         </div>
-        <div class="mt-8">
+        <div v-if="association?.aboutText" class="mt-8">
           <AboutUs :about-text="association?.aboutText" :about-image="association?.aboutImage" />
         </div>
         <div class="mt-8">
@@ -112,6 +117,7 @@
               :key="`event-${eventsPage}-${index}`"
               :item="event"
               :color="association?.primaryColor"
+              @view-details="viewEventDetails"
             />
           </div>
           <Pagination
@@ -307,6 +313,10 @@
 
   const viewCagnotteDetails = (fundraising: Fundraising) => {
     router.push(`/association/${route.params.id}/fundraising/${fundraising.id}`);
+  };
+
+  const viewEventDetails = (event: Event) => {
+    router.push(`/association/${route.params.id}/event/${event.id}`);
   };
 
   const onTabChange = (tab: string) => {

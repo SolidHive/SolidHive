@@ -91,7 +91,15 @@ export const useAuthStore = defineStore('auth', () => {
     type: 'logo' | 'background'
   ) {
     try {
-      await Database.uploadFile(`/association/${associationId}/files`, file, { type });
+      const purpose = type === 'logo' ? 'logo' : 'banner';
+      const index = type === 'logo' ? 0 : 1;
+
+      await Database.uploadFile(file, {
+        relatedTo: 'Association',
+        relatedBy: associationId,
+        purpose,
+        index,
+      });
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
       error.value = axiosError.response?.data?.message || "Erreur lors de l'upload du fichier";

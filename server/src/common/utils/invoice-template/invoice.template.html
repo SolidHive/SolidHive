@@ -49,6 +49,9 @@
                     <div class="border-l-4 border-secondary pl-4">
                         <div class="font-semibold text-base mb-1">{{userName}} {{userFirstname}}</div>
                         <div class="text-sm text-gray-600">{{userEmail}}</div>
+                        <div class="text-sm text-gray-600">{{userPhone}}</div>
+                        <div class="text-sm text-gray-600 mt-2">{{userAddress}}</div>
+                        <div class="text-sm text-gray-600">{{userPostcode}} {{userCity}}</div>
                     </div>
                 </div>
                 <div>
@@ -71,10 +74,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="border-b border-gray-200">
-                            <td class="py-4 text-sm">{{transactionDescription}}: {{entityName}}</td>
-                            <td class="text-right py-4 text-sm font-semibold">{{netAmount}} €</td>
-                        </tr>
+                        {{invoiceLines}}
                         {{solidHiveAmountRow}}
                         <tr class="border-t-2 border-secondary bg-gray-50">
                             <td class="py-5 text-lg font-bold text-secondary">TOTAL</td>

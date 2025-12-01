@@ -125,7 +125,6 @@ export class UsersService {
         name: ua.association.name,
         description: ua.association.description,
         primaryColor: ua.association.primaryColor,
-        secondaryColor: ua.association.secondaryColor,
         status: ua.association.status,
       },
       role: ua.role

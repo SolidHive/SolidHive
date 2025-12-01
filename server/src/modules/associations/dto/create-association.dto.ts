@@ -1,13 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Colors } from '../../../common/enums/colors';
 import {
   IsEmail,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   Length,
   IsNumberString,
+  Matches,
 } from 'class-validator';
 
 export class CreateAssociationDto {
@@ -39,25 +38,15 @@ export class CreateAssociationDto {
 
   @ApiProperty({
     example: '#000000',
-    description: "Couleur primaire de l'association",
+    description: "Couleur primaire de l'association (format hexadécimal)",
     required: false,
   })
-  @IsEnum(Colors, {
-    message: 'La couleur primaire doit être une couleur valide',
-  })
   @IsOptional()
-  primaryColor?: Colors;
-
-  @ApiProperty({
-    example: '#FF0000',
-    description: "Couleur secondaire de l'association",
-    required: false,
+  @IsString({ message: 'La couleur primaire doit être une chaîne de caractères' })
+  @Matches(/^#(?:[0-9a-fA-F]{3}){1,2}$/, {
+    message: 'La couleur primaire doit être au format hexadécimal (ex: #FF0000 ou #FFF)',
   })
-  @IsEnum(Colors, {
-    message: 'La couleur secondaire doit être une couleur valide',
-  })
-  @IsOptional()
-  secondaryColor?: Colors;
+  primaryColor?: string;
 
   @ApiProperty({
     example: 'contact@example.com',

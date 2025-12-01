@@ -1,8 +1,9 @@
 <template>
   <div
-    class="bg-muted relative h-56 w-full overflow-hidden rounded-xl bg-cover bg-center shadow-md md:h-64 xl:h-72 2xl:h-96"
+    class="bg-muted relative h-56 w-full cursor-pointer overflow-hidden rounded-xl bg-cover bg-center shadow-md md:h-64 xl:h-72 2xl:h-96"
     :class="{ 'bg-muted': !item.image }"
     :style="item.image ? { backgroundImage: `url(${item.image})` } : {}"
+    @click="$emit('view-details', item)"
   >
     <div
       class="absolute inset-0 z-10 h-full w-full"
@@ -27,7 +28,13 @@
 
 <script setup lang="ts">
   defineProps<{
-    item: { title: string; description: string; image: string | null };
+    item: { id: string; title: string; description: string; image: string | null };
     color?: string;
+  }>();
+
+  defineEmits<{
+    'view-details': [
+      event: { id: string; title: string; description: string; image: string | null },
+    ];
   }>();
 </script>

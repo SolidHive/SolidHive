@@ -1,10 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { EventPricing } from '../../pricings/entities/event-pricing.entity';
 import { User } from '../../../../../../../modules/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-@Unique(['user', 'eventPricing'])
 export class EventRegister {
   @ApiProperty({
     example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',

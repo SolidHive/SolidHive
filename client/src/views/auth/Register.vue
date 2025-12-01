@@ -255,6 +255,42 @@
             </template>
           </InputForm>
 
+          <!-- Couleur principale -->
+          <div>
+            <label class="font-paragraph text-foreground mb-2 block text-sm font-medium">
+              Couleur principale
+              <span class="text-destructive">*</span>
+            </label>
+            <div class="flex items-center gap-4">
+              <input
+                v-model="associationForm.primaryColor.$value"
+                type="color"
+                class="h-12 w-12 cursor-pointer rounded border"
+                @blur="() => (touchedAssociationFields.primaryColor = true)"
+              />
+              <div class="flex-1">
+                <input
+                  v-model="associationForm.primaryColor.$value"
+                  type="text"
+                  placeholder="#000000"
+                  maxlength="7"
+                  class="font-paragraph border-input bg-background focus:border-secondary focus:ring-secondary/20 w-full rounded-xl border px-4 py-2 font-mono text-sm focus:ring-2 focus:outline-none"
+                  :class="showAssociationError('primaryColor') ? 'border-destructive' : ''"
+                  @blur="() => (touchedAssociationFields.primaryColor = true)"
+                />
+              </div>
+            </div>
+            <p class="font-paragraph text-muted-foreground mt-2 text-xs">
+              Format hexadécimal (ex: #FF0000 pour rouge)
+            </p>
+            <p
+              v-if="showAssociationError('primaryColor')"
+              class="font-paragraph text-destructive mt-2 text-sm"
+            >
+              {{ associationForm.primaryColor.$error?.message }}
+            </p>
+          </div>
+
           <!-- Boutons -->
           <div class="flex flex-col gap-4 pt-4 sm:flex-row sm:items-center sm:justify-between">
             <Button type="button" variant="outline" @click="currentStep = 1">
@@ -456,6 +492,7 @@
         .required('Le numéro SIRET est requis')
         .matches(/^\d{14}$/, 'Le SIRET doit contenir exactement 14 chiffres')
     ),
+    primaryColor: field('', yup.string().required('La couleur principale est requise')),
   });
 
   // Fichiers
@@ -480,12 +517,15 @@
     description: false,
     contact: false,
     siret: false,
+    primaryColor: false,
   });
 
   const showUserError = (fieldName: 'name' | 'firstname' | 'email' | 'phone' | 'password') =>
     (touchedUserFields[fieldName] || formSubmitted.value) && !!userForm[fieldName].$error;
 
-  const showAssociationError = (fieldName: 'name' | 'description' | 'contact' | 'siret') =>
+  const showAssociationError = (
+    fieldName: 'name' | 'description' | 'contact' | 'siret' | 'primaryColor'
+  ) =>
     (touchedAssociationFields[fieldName] || formSubmitted.value) &&
     !!associationForm[fieldName].$error;
 
@@ -671,6 +711,7 @@
         description: associationForm.description.$value.trim(),
         contact: associationForm.contact.$value.trim(),
         siret: associationForm.siret.$value.trim(),
+        primaryColor: associationForm.primaryColor.$value.trim(),
       };
 
       savePendingAssociation(associationData);
