@@ -75,8 +75,7 @@ export class EventPaymentService {
     // Calculer le montant total et vérifier les capacités
     const { totalAmount } = await this.calculateAmountAndValidateCapacity(
       event,
-      createEventRegistrationDto.participants,
-      userId
+      createEventRegistrationDto.participants
     );
 
     this.logger.log(
