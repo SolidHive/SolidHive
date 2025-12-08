@@ -34,7 +34,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.9",
     "@nestjs/swagger": "^11.2.3",
-    "@nestjs/throttler": "^6.4.0",
+    "@nestjs/throttler": "^6.5.0",
     "@nestjs/typeorm": "^11.0.0",
     "@prisma/client": "^6.18.0",
     "@types/passport-google-oauth20": "^2.0.17",
@@ -45,7 +45,7 @@
     "express-session": "^1.18.1",
     "handlebars": "^4.7.8",
     "helmet": "^8.0.0",
-    "jsonwebtoken": "^9.0.2",
+    "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.10",
     "passport": "^0.7.0",
@@ -59,7 +59,7 @@
     "rxjs": "^7.8.2",
     "stripe": "^19.1.0",
     "swagger-ui-express": "^5.0.1",
-    "typeorm": "^0.3.27"
+    "typeorm": "^0.3.28"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
