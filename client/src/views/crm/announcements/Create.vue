@@ -2,7 +2,8 @@
   <Create
     :can-create-item="crmAccess.canCreateAnnouncement"
     :create-endpoint="`association/${associationId}/announcement`"
-    :form-data="form"
+    :form-data="formData"
+    :on-before-submit="handleBeforeSubmit"
     @after-create="handleAfterCreate"
   >
     <template #title>Créer une nouvelle annonce</template>
@@ -17,28 +18,41 @@
           height="md"
         />
 
-        <div class="space-y-2">
-          <label class="text-sm font-medium">Titre *</label>
-          <input
-            v-model="form.title"
-            type="text"
-            placeholder="Ex: Nouvelle réunion, Événement à venir..."
-            class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-          />
-        </div>
-        <div class="space-y-2">
-          <label class="text-sm font-medium">Contenu *</label>
-          <textarea
-            v-model="form.content"
-            placeholder="Décrivez votre annonce..."
-            rows="4"
-            class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-          />
-        </div>
+        <InputForm
+          v-model="form.title.$value"
+          input-name="announcement-title"
+          type="text"
+          placeholder="Ex: Nouvelle réunion, Événement à venir..."
+          :error-message="form.title.$error?.message || ''"
+          :error-state="showError('title')"
+          @blur="() => (touchedFields.title = true)"
+        >
+          <template #label>
+            Titre
+            <span class="text-destructive">*</span>
+          </template>
+        </InputForm>
+
+        <TextareaForm
+          v-model="form.content.$value"
+          input-name="announcement-content"
+          placeholder="Décrivez votre annonce..."
+          :rows="4"
+          :max-length="1000"
+          :error-message="form.content.$error?.message || ''"
+          :error-state="showError('content')"
+          @blur="() => (touchedFields.content = true)"
+        >
+          <template #label>
+            Contenu
+            <span class="text-destructive">*</span>
+          </template>
+        </TextareaForm>
+
         <div class="flex items-center space-x-2">
           <input
             id="is-active"
-            v-model="form.isActive"
+            v-model="form.isActive.$value"
             type="checkbox"
             class="border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2"
           />
@@ -54,27 +68,77 @@
 
 <script setup lang="ts">
   import { Create } from '@/components/dashboard/crud';
+  import InputForm from '@/components/form/InputForm.vue';
+  import TextareaForm from '@/components/form/TextareaForm.vue';
+  import ImageUpload from '@/components/form/ImageUpload.vue';
   import { useCrmAccess } from '@/composables/crm-access';
   import { useCrmStore } from '@/stores/crm';
-  import { ref } from 'vue';
-  import { useRoute } from 'vue-router';
-  import ImageUpload from '@/components/form/ImageUpload.vue';
   import Database from '@/utils/database.utils';
+  import { announcementCrmErrorMessages } from '@/utils/errors/crm/announcements';
+  import { computed, reactive, ref } from 'vue';
+  import { useRoute } from 'vue-router';
+  import { defineForm, field, isValidForm } from 'vue-yup-form';
+  import * as yup from 'yup';
+  import { useToast } from 'vue-toastification';
 
   const crmStore = useCrmStore();
   const member = crmStore.getMember();
   const crmAccess = useCrmAccess(member);
   const route = useRoute();
   const associationId = route.params.id as string;
+  const toast = useToast();
+  const formSubmitted = ref(false);
 
-  const form = ref({
-    title: '',
-    content: '',
-    isActive: true,
+  // Schéma de validation avec yup
+  const form = defineForm({
+    title: field(
+      '',
+      yup
+        .string()
+        .required(announcementCrmErrorMessages.required.title)
+        .min(5, announcementCrmErrorMessages.minLength.title)
+        .max(100, announcementCrmErrorMessages.maxLength.title)
+    ),
+    content: field(
+      '',
+      yup
+        .string()
+        .required(announcementCrmErrorMessages.required.content)
+        .min(10, announcementCrmErrorMessages.minLength.content)
+        .max(1000, announcementCrmErrorMessages.maxLength.content)
+    ),
+    isActive: field(true, yup.boolean()),
   });
+
+  // Gestion des champs touchés
+  const touchedFields = reactive({
+    title: false,
+    content: false,
+  });
+
+  const showError = (fieldName: keyof typeof touchedFields) =>
+    (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
 
   const imageFile = ref<File | null>(null);
   const imagePreview = ref<string>('');
+
+  // Données du formulaire pour le composant Create
+  const formData = computed(() => ({
+    title: form.title.$value,
+    content: form.content.$value,
+    isActive: form.isActive.$value,
+  }));
+
+  async function handleBeforeSubmit(): Promise<boolean> {
+    formSubmitted.value = true;
+
+    if (!(await isValidForm(form))) {
+      toast.error('Veuillez corriger les erreurs du formulaire');
+      return false;
+    }
+
+    return true;
+  }
 
   async function handleAfterCreate(createdItem: any) {
     console.log('handleAfterCreate called with:', createdItem);

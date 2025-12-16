@@ -3,7 +3,8 @@
     :can-update-item="crmAccess.canUpdateFundraising"
     :fetch-item="`association/${associationId}/fundraising/${id}`"
     :update-endpoint="`association/${associationId}/fundraising/${id}`"
-    :form-data="form"
+    :form-data="formData"
+    :on-before-submit="handleBeforeSubmit"
     @after-update="handleAfterUpdate"
   >
     <template #title>Modifier la cagnotte</template>
@@ -18,54 +19,80 @@
           height="md"
         />
 
-        <div class="space-y-2">
-          <label class="text-sm font-medium">Titre *</label>
-          <input
-            v-model="form.title"
-            type="text"
-            placeholder="Ex: Aide pour les enfants, Projet solidaire..."
-            class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-          />
-        </div>
-        <div class="space-y-2">
-          <label class="text-sm font-medium">Description</label>
-          <textarea
-            v-model="form.description"
-            placeholder="Décrivez votre cagnotte..."
-            rows="4"
-            class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-          />
-        </div>
+        <InputForm
+          v-model="form.title.$value"
+          input-name="fundraising-title"
+          type="text"
+          placeholder="Ex: Aide pour les enfants, Projet solidaire..."
+          :error-message="form.title.$error?.message || ''"
+          :error-state="showError('title')"
+          @blur="() => (touchedFields.title = true)"
+        >
+          <template #label>
+            Titre
+            <span class="text-destructive">*</span>
+          </template>
+        </InputForm>
+
+        <TextareaForm
+          v-model="form.description.$value"
+          input-name="fundraising-description"
+          placeholder="Décrivez votre cagnotte..."
+          :rows="4"
+          :max-length="2000"
+          :error-message="form.description.$error?.message || ''"
+          :error-state="showError('description')"
+          @blur="() => (touchedFields.description = true)"
+        >
+          <template #label>
+            Description
+            <span class="text-destructive">*</span>
+          </template>
+        </TextareaForm>
+
+        <InputForm
+          v-model="form.wantedAmount.$value"
+          input-name="fundraising-wanted-amount"
+          type="number"
+          placeholder="0.00"
+          :error-message="form.wantedAmount.$error?.message || ''"
+          :error-state="showError('wantedAmount')"
+          @blur="() => (touchedFields.wantedAmount = true)"
+        >
+          <template #label>
+            Montant souhaité (€)
+            <span class="text-destructive">*</span>
+          </template>
+        </InputForm>
+
         <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Montant souhaité *</label>
-            <input
-              v-model.number="form.wantedAmount"
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-              class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            />
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Date de début *</label>
-            <input
-              v-model="form.startDate"
-              type="datetime-local"
-              class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            />
-          </div>
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Date de fin</label>
-            <input
-              v-model="form.endDate"
-              type="datetime-local"
-              class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-            />
-          </div>
+          <InputForm
+            v-model="form.startDate.$value"
+            input-name="fundraising-start-date"
+            type="datetime-local"
+            :error-message="form.startDate.$error?.message || ''"
+            :error-state="showError('startDate')"
+            @blur="() => (touchedFields.startDate = true)"
+          >
+            <template #label>
+              Date de début
+              <span class="text-destructive">*</span>
+            </template>
+          </InputForm>
+
+          <InputForm
+            v-model="form.endDate.$value"
+            input-name="fundraising-end-date"
+            type="datetime-local"
+            :error-message="form.endDate.$error?.message || ''"
+            :error-state="showError('endDate')"
+            @blur="() => (touchedFields.endDate = true)"
+          >
+            <template #label>
+              Date de fin
+              <span class="text-destructive">*</span>
+            </template>
+          </InputForm>
         </div>
       </div>
     </template>
@@ -75,13 +102,19 @@
 
 <script setup lang="ts">
   import { Update as UpdateRaw } from '@/components/dashboard/crud';
+  import InputForm from '@/components/form/InputForm.vue';
+  import TextareaForm from '@/components/form/TextareaForm.vue';
+  import ImageUpload from '@/components/form/ImageUpload.vue';
   import { useCrmAccess } from '@/composables/crm-access';
   import type { Fundraising } from '@/interfaces';
   import { useCrmStore } from '@/stores/crm';
   import Database from '@/utils/database.utils';
-  import { onMounted, ref } from 'vue';
+  import { fundraisingCrmErrorMessages } from '@/utils/errors/crm/fundraisings';
+  import { computed, onMounted, reactive, ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
-  import ImageUpload from '@/components/form/ImageUpload.vue';
+  import { defineForm, field, isValidForm } from 'vue-yup-form';
+  import * as yup from 'yup';
+  import { useToast } from 'vue-toastification';
 
   const Update = UpdateRaw<Fundraising>;
   const crmStore = useCrmStore();
@@ -90,22 +123,92 @@
   const route = useRoute();
   const associationId = route.params.id as string;
   const id = route.params.itemId;
+  const toast = useToast();
+  const formSubmitted = ref(false);
 
   if (!id || typeof id !== 'string') {
     console.error('No fundraising ID provided in route parameters.');
   }
 
-  const form = ref({
-    title: '',
-    description: '',
-    amount: 0,
-    wantedAmount: 0,
-    startDate: '',
-    endDate: '',
+  // Schéma de validation avec yup
+  const form = defineForm({
+    title: field(
+      '',
+      yup
+        .string()
+        .required(fundraisingCrmErrorMessages.required.title)
+        .min(5, fundraisingCrmErrorMessages.minLength.title)
+        .max(100, fundraisingCrmErrorMessages.maxLength.title)
+    ),
+    description: field(
+      '',
+      yup
+        .string()
+        .required(fundraisingCrmErrorMessages.required.description)
+        .min(20, fundraisingCrmErrorMessages.minLength.description)
+        .max(2000, fundraisingCrmErrorMessages.maxLength.description)
+    ),
+    wantedAmount: field(
+      0,
+      yup
+        .number()
+        .required(fundraisingCrmErrorMessages.required.wantedAmount)
+        .min(0.01, fundraisingCrmErrorMessages.min.wantedAmount)
+        .typeError(fundraisingCrmErrorMessages.required.wantedAmount)
+    ),
+    startDate: field('', yup.string().required(fundraisingCrmErrorMessages.required.startDate)),
+    endDate: field(
+      '',
+      yup
+        .string()
+        .required(fundraisingCrmErrorMessages.required.endDate)
+        .test(
+          'is-after-start',
+          fundraisingCrmErrorMessages.date.endDateBeforeStart,
+          function (value) {
+            const { startDate } = this.parent;
+            if (!value || !startDate) return true;
+            return new Date(value) > new Date(startDate);
+          }
+        )
+    ),
   });
+
+  // Gestion des champs touchés
+  const touchedFields = reactive({
+    title: false,
+    description: false,
+    wantedAmount: false,
+    startDate: false,
+    endDate: false,
+  });
+
+  const showError = (fieldName: keyof typeof touchedFields) =>
+    (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
 
   const imageFile = ref<File | null>(null);
   const imagePreview = ref<string>('');
+
+  // Données du formulaire pour le composant Update
+  const formData = computed(() => ({
+    title: form.title.$value,
+    description: form.description.$value,
+    amount: 0,
+    wantedAmount: form.wantedAmount.$value,
+    startDate: form.startDate.$value,
+    endDate: form.endDate.$value,
+  }));
+
+  async function handleBeforeSubmit(): Promise<boolean> {
+    formSubmitted.value = true;
+
+    if (!(await isValidForm(form))) {
+      toast.error('Veuillez corriger les erreurs du formulaire');
+      return false;
+    }
+
+    return true;
+  }
 
   async function handleAfterUpdate() {
     console.log('handleAfterUpdate called');
@@ -135,14 +238,13 @@
     try {
       const response = await Database.getAll(`association/${associationId}/fundraising/${id}`);
       if (response) {
-        form.value.title = response.title || '';
-        form.value.description = response.description || '';
-        form.value.amount = response.amount || 0;
-        form.value.wantedAmount = response.wantedAmount || 0;
-        form.value.startDate = response.startDate
+        form.title.$value = response.title || '';
+        form.description.$value = response.description || '';
+        form.wantedAmount.$value = response.wantedAmount || 0;
+        form.startDate.$value = response.startDate
           ? new Date(response.startDate).toISOString().slice(0, 16)
           : '';
-        form.value.endDate = response.endDate
+        form.endDate.$value = response.endDate
           ? new Date(response.endDate).toISOString().slice(0, 16)
           : '';
 
@@ -155,6 +257,20 @@
       console.error('Erreur lors du chargement de la cagnotte:', err);
     }
   }
+
+  // Réinitialiser les erreurs lors du chargement
+  watch(
+    () => form.title.$value,
+    () => {
+      if (formSubmitted.value) {
+        formSubmitted.value = false;
+        Object.keys(touchedFields).forEach((key) => {
+          touchedFields[key as keyof typeof touchedFields] = false;
+        });
+      }
+    },
+    { once: true }
+  );
 
   onMounted(async () => {
     await fetchFundraising();

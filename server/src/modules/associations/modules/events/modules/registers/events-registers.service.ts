@@ -32,6 +32,9 @@ export class EventsRegistersService {
     const eventRegister = this.eventsRegisterRepository.create({
       eventPricing,
       user,
+      participantFirstName: createEventRegisterDto.participantFirstName || null,
+      participantLastName: createEventRegisterDto.participantLastName || null,
+      participantEmail: createEventRegisterDto.participantEmail || null,
     });
 
     return this.eventsRegisterRepository.save(eventRegister);
@@ -41,6 +44,7 @@ export class EventsRegistersService {
     return this.eventsRegisterRepository.find({
       ...options,
       where: { eventPricing: { event: { id: eventId } } },
+      relations: ['user', 'eventPricing'],
     });
   }
 
