@@ -9,14 +9,6 @@ services:
       - '5173:5173'
     environment:
       - VITE_HOST=0.0.0.0
-    develop:
-      watch:
-        - action: sync
-          path: ./client/src
-          target: /usr/src/app/src
-        - action: rebuild
-          path: ./client/package.json
-          target: /usr/src/app/package.json
     volumes:
       - ./client/package.json:/usr/src/app/package.json
     depends_on:
@@ -34,14 +26,6 @@ services:
       - '3001:3000'
     env_file:
       - ./server/.env
-    develop:
-      watch:
-        - action: sync
-          path: ./server/src
-          target: /usr/src/app/src
-        - action: rebuild
-          path: ./server/package.json
-          target: /usr/src/app/package.json
     volumes:
       - ./server/migrations:/usr/src/app/migrations
       - ./server/package.json:/usr/src/app/package.json
