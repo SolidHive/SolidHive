@@ -17,7 +17,7 @@ ENV NODE_ENV=$NODE_ENV
 RUN if [ "$NODE_ENV" = "production" ]; then npm run build; fi
 
 # Installation des dépendances système pour Puppeteer
-RUN apt-get update && apt-get install -y \
+RUN apk update && apk install -y \
     chromium \
     chromium-sandbox \
     fonts-liberation \
@@ -63,7 +63,7 @@ RUN npm install
 
 COPY --from=builder /usr/src/app/dist ./dist
 
-RUN apt-get update && apt-get install -y \
+RUN apk update && apk install -y \
     chromium \
     chromium-sandbox \
     fonts-liberation \
