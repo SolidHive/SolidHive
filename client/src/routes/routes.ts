@@ -282,9 +282,9 @@ const routes: RouteRecordRaw[] = [
             meta: { title: 'Détail événement - CRM' },
           },
           {
-            path: ':eventId/edit',
-            name: 'CRMEventEdit',
-            component: () => import('../views/crm/events/Edit.vue'),
+            path: ':eventId/update',
+            name: 'CRMEventUpdate',
+            component: () => import('../views/crm/events/Update.vue'),
             meta: { title: 'Modifier un événement - CRM' },
           },
         ],

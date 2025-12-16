@@ -48,103 +48,111 @@
       <div v-show="currentStep === 1" class="bg-card rounded-lg border p-6 shadow-sm">
         <h2 class="mb-4 text-xl font-bold">Informations de l'événement</h2>
         <div class="space-y-4">
-          <div>
-            <label class="mb-1 block text-sm font-medium">Titre *</label>
-            <input
-              v-model="form.title"
-              type="text"
-              required
-              placeholder="Nom de l'événement"
-              class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-            />
-          </div>
+          <InputForm
+            v-model="form.title.$value"
+            input-name="title"
+            label="Titre"
+            placeholder="Nom de l'événement"
+            :error-message="showError('title') ? getFieldError('title') : ''"
+            :error-state="showError('title')"
+            required
+            @blur="touchedFields.title = true"
+          />
 
-          <div>
-            <label class="mb-1 block text-sm font-medium">Description</label>
-            <textarea
-              v-model="form.description"
-              rows="4"
-              placeholder="Description de l'événement"
-              class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-            />
-          </div>
+          <TextareaForm
+            v-model="form.description.$value"
+            input-name="description"
+            label="Description"
+            placeholder="Description de l'événement"
+            :rows="4"
+            :max-length="1000"
+            :error-message="showError('description') ? getFieldError('description') : ''"
+            :error-state="showError('description')"
+            @blur="touchedFields.description = true"
+          />
 
           <div class="grid gap-4 md:grid-cols-2">
-            <div>
-              <label class="mb-1 block text-sm font-medium">Date de début *</label>
-              <input
-                v-model="form.startDate"
-                type="datetime-local"
-                required
-                class="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-              />
-            </div>
-            <div>
-              <label class="mb-1 block text-sm font-medium">Date de fin</label>
-              <input
-                v-model="form.endDate"
-                type="datetime-local"
-                class="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-              />
-            </div>
+            <InputForm
+              v-model="form.startDate.$value"
+              input-name="startDate"
+              label="Date de début"
+              type="datetime-local"
+              :error-message="showError('startDate') ? getFieldError('startDate') : ''"
+              :error-state="showError('startDate')"
+              required
+              @blur="touchedFields.startDate = true"
+            />
+            <InputForm
+              v-model="form.endDate.$value"
+              input-name="endDate"
+              label="Date de fin"
+              type="datetime-local"
+              :error-message="showError('endDate') ? getFieldError('endDate') : ''"
+              :error-state="showError('endDate')"
+              @blur="touchedFields.endDate = true"
+            />
           </div>
 
           <!-- Adresse -->
           <div class="border-t pt-4">
             <h3 class="mb-3 font-medium">Adresse</h3>
             <div class="space-y-4">
-              <div>
-                <label class="mb-1 block text-sm font-medium">Rue *</label>
-                <input
-                  v-model="form.address.street"
-                  type="text"
+              <InputForm
+                v-model="form.address.street.$value"
+                input-name="street"
+                label="Rue"
+                placeholder="123 rue de la Paix"
+                :error-message="showError('address.street') ? getFieldError('address.street') : ''"
+                :error-state="showError('address.street')"
+                required
+                @blur="touchedFields['address.street'] = true"
+              />
+              <div class="grid gap-4 md:grid-cols-2">
+                <InputForm
+                  v-model="form.address.city.$value"
+                  input-name="city"
+                  label="Ville"
+                  placeholder="Paris"
+                  :error-message="showError('address.city') ? getFieldError('address.city') : ''"
+                  :error-state="showError('address.city')"
                   required
-                  placeholder="123 rue de la Paix"
-                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  @blur="touchedFields['address.city'] = true"
+                />
+                <InputForm
+                  v-model="form.address.postcode.$value"
+                  input-name="postcode"
+                  label="Code postal"
+                  placeholder="75001"
+                  :error-message="
+                    showError('address.postcode') ? getFieldError('address.postcode') : ''
+                  "
+                  :error-state="showError('address.postcode')"
+                  required
+                  @blur="touchedFields['address.postcode'] = true"
                 />
               </div>
               <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label class="mb-1 block text-sm font-medium">Ville *</label>
-                  <input
-                    v-model="form.address.city"
-                    type="text"
-                    required
-                    placeholder="Paris"
-                    class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                  />
-                </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium">Code postal *</label>
-                  <input
-                    v-model="form.address.postcode"
-                    type="text"
-                    required
-                    placeholder="75001"
-                    class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                  />
-                </div>
-              </div>
-              <div class="grid gap-4 md:grid-cols-2">
-                <div>
-                  <label class="mb-1 block text-sm font-medium">Région</label>
-                  <input
-                    v-model="form.address.state"
-                    type="text"
-                    placeholder="Île-de-France"
-                    class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                  />
-                </div>
-                <div>
-                  <label class="mb-1 block text-sm font-medium">Pays *</label>
-                  <input
-                    v-model="form.address.country"
-                    type="text"
-                    required
-                    placeholder="France"
-                    class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                  />
-                </div>
+                <InputForm
+                  v-model="form.address.state.$value"
+                  input-name="state"
+                  label="Région"
+                  placeholder="Île-de-France"
+                  :error-message="showError('address.state') ? getFieldError('address.state') : ''"
+                  :error-state="showError('address.state')"
+                  @blur="touchedFields['address.state'] = true"
+                />
+                <InputForm
+                  v-model="form.address.country.$value"
+                  input-name="country"
+                  label="Pays"
+                  placeholder="France"
+                  :error-message="
+                    showError('address.country') ? getFieldError('address.country') : ''
+                  "
+                  :error-state="showError('address.country')"
+                  required
+                  @blur="touchedFields['address.country'] = true"
+                />
               </div>
             </div>
           </div>
@@ -259,19 +267,19 @@
             <div class="text-muted-foreground space-y-1 text-sm">
               <p>
                 <strong>Titre :</strong>
-                {{ form.title }}
+                {{ formData.title }}
               </p>
-              <p v-if="form.description">
+              <p v-if="formData.description">
                 <strong>Description :</strong>
-                {{ form.description }}
+                {{ formData.description }}
               </p>
               <p>
                 <strong>Date de début :</strong>
-                {{ formatDate(form.startDate) }}
+                {{ formatDate(formData.startDate) }}
               </p>
-              <p v-if="form.endDate">
+              <p v-if="formData.endDate">
                 <strong>Date de fin :</strong>
-                {{ formatDate(form.endDate) }}
+                {{ formatDate(formData.endDate) }}
               </p>
             </div>
           </div>
@@ -279,10 +287,10 @@
           <div>
             <h3 class="mb-2 font-medium">Adresse</h3>
             <div class="text-muted-foreground text-sm">
-              <p>{{ form.address.street }}</p>
-              <p>{{ form.address.postcode }} {{ form.address.city }}</p>
-              <p v-if="form.address.state">{{ form.address.state }}</p>
-              <p>{{ form.address.country }}</p>
+              <p>{{ formData.address.street }}</p>
+              <p>{{ formData.address.postcode }} {{ formData.address.city }}</p>
+              <p v-if="formData.address.state">{{ formData.address.state }}</p>
+              <p>{{ formData.address.country }}</p>
             </div>
           </div>
 
@@ -321,20 +329,26 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, ref } from 'vue';
+  import { computed, reactive, ref } from 'vue';
   import { useRouter } from 'vue-router';
   import { Plus, Trash2 } from 'lucide-vue-next';
+  import * as yup from 'yup';
+  import { defineForm, field, isValidForm } from 'vue-yup-form';
   import Header from '@/components/dashboard/Header.vue';
   import Button from '@/components/ui/button/Button.vue';
   import ImageUpload from '@/components/form/ImageUpload.vue';
+  import InputForm from '@/components/form/InputForm.vue';
+  import TextareaForm from '@/components/form/TextareaForm.vue';
   import { useCrmStore } from '@/stores/crm';
   import Database from '@/utils/database.utils';
+  import { eventCrmErrorMessages } from '@/utils/errors/crm/events';
 
   const router = useRouter();
   const crmStore = useCrmStore();
 
   const currentStep = ref(1);
   const isLoading = ref(false);
+  const formSubmitted = ref(false);
 
   const steps = [
     { number: 1, title: 'Informations' },
@@ -342,19 +356,94 @@
     { number: 3, title: 'Confirmation' },
   ];
 
-  const form = ref({
-    title: '',
-    description: '',
-    startDate: '',
-    endDate: '',
+  const form = defineForm({
+    title: field(
+      '',
+      yup
+        .string()
+        .required(eventCrmErrorMessages.required.title)
+        .min(5, eventCrmErrorMessages.minLength.title)
+        .max(100, eventCrmErrorMessages.maxLength.title)
+    ),
+    description: field(
+      '',
+      yup
+        .string()
+        .min(10, eventCrmErrorMessages.minLength.description)
+        .max(1000, eventCrmErrorMessages.maxLength.description)
+    ),
+    startDate: field('', yup.string().required(eventCrmErrorMessages.required.startDate)),
+    endDate: field(
+      '',
+      yup
+        .string()
+        .test('is-after-start', eventCrmErrorMessages.date.endAfterStart, function (value) {
+          if (!value) return true;
+          const startDate = this.parent.startDate;
+          if (!startDate) return true;
+          return new Date(value) > new Date(startDate);
+        })
+    ),
     address: {
-      street: '',
-      city: '',
-      postcode: '',
-      state: '',
-      country: 'France',
+      street: field(
+        '',
+        yup
+          .string()
+          .required(eventCrmErrorMessages.required.street)
+          .min(3, eventCrmErrorMessages.minLength.street)
+      ),
+      city: field(
+        '',
+        yup
+          .string()
+          .required(eventCrmErrorMessages.required.city)
+          .min(2, eventCrmErrorMessages.minLength.city)
+      ),
+      postcode: field('', yup.string().required(eventCrmErrorMessages.required.postcode)),
+      state: field('', yup.string()),
+      country: field('France', yup.string().required(eventCrmErrorMessages.required.country)),
     },
   });
+
+  const touchedFields = reactive<Record<string, boolean>>({
+    title: false,
+    description: false,
+    startDate: false,
+    endDate: false,
+    'address.street': false,
+    'address.city': false,
+    'address.postcode': false,
+    'address.state': false,
+    'address.country': false,
+  });
+
+  const getFieldError = (fieldName: string) => {
+    const parts = fieldName.split('.');
+    let field: any = form;
+    for (const part of parts) {
+      field = field[part];
+      if (!field) return '';
+    }
+    return field.$error?.message || '';
+  };
+
+  const showError = (fieldName: string) => {
+    return (touchedFields[fieldName] || formSubmitted.value) && !!getFieldError(fieldName);
+  };
+
+  const formData = computed(() => ({
+    title: form.title.$value,
+    description: form.description.$value,
+    startDate: form.startDate.$value,
+    endDate: form.endDate.$value,
+    address: {
+      street: form.address.street.$value,
+      city: form.address.city.$value,
+      postcode: form.address.postcode.$value,
+      state: form.address.state.$value,
+      country: form.address.country.$value,
+    },
+  }));
 
   const imageFile = ref<File | null>(null);
   const imagePreview = ref<string>('');
@@ -368,15 +457,16 @@
     },
   ]);
 
+  const handleBeforeSubmit = () => {
+    formSubmitted.value = true;
+    if (!isValidForm(form)) {
+      return false;
+    }
+    return true;
+  };
+
   const isStep1Valid = computed(() => {
-    return (
-      form.value.title.length >= 3 &&
-      form.value.startDate &&
-      form.value.address.street &&
-      form.value.address.city &&
-      form.value.address.postcode &&
-      form.value.address.country
-    );
+    return isValidForm(form);
   });
 
   const isStep2Valid = computed(() => {
@@ -397,6 +487,9 @@
   };
 
   const nextStep = () => {
+    if (currentStep.value === 1 && !handleBeforeSubmit()) {
+      return;
+    }
     if (currentStep.value < 3) {
       currentStep.value++;
     }
@@ -420,8 +513,10 @@
   };
 
   const createEvent = async () => {
-    console.log('🚀 Début de createEvent');
-    console.log('Association ID:', crmStore.currentAssociationId);
+    if (!handleBeforeSubmit()) {
+      console.error('Validation échouée');
+      return;
+    }
 
     if (!crmStore.currentAssociationId) {
       console.error('Aucune association sélectionnée');
@@ -430,15 +525,16 @@
 
     try {
       isLoading.value = true;
-      console.log('Loading activé');
 
       // 1. Créer l'événement
       const eventData = {
-        title: form.value.title,
-        description: form.value.description || undefined,
-        startDate: new Date(form.value.startDate).toISOString(),
-        endDate: form.value.endDate ? new Date(form.value.endDate).toISOString() : undefined,
-        address: form.value.address,
+        title: formData.value.title,
+        description: formData.value.description || undefined,
+        startDate: new Date(formData.value.startDate).toISOString(),
+        endDate: formData.value.endDate
+          ? new Date(formData.value.endDate).toISOString()
+          : undefined,
+        address: formData.value.address,
       };
 
       console.log("📝 Données de l'événement:", eventData);

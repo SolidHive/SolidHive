@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateEventRegisterDto {
   @ApiProperty({
@@ -11,4 +11,31 @@ export class CreateEventRegisterDto {
   })
   @IsNotEmpty({ message: "L'ID du tarif de l'événement est requis" })
   eventPricingId: string;
+
+  @ApiProperty({
+    example: 'Doe',
+    description: 'Nom du participant (optionnel pour les invités)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Le nom doit être une chaîne de caractères' })
+  participantLastName?: string;
+
+  @ApiProperty({
+    example: 'John',
+    description: 'Prénom du participant (optionnel pour les invités)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'Le prénom doit être une chaîne de caractères' })
+  participantFirstName?: string;
+
+  @ApiProperty({
+    example: 'john.doe@example.com',
+    description: 'Email du participant (optionnel pour les invités)',
+    required: false,
+  })
+  @IsOptional()
+  @IsEmail({}, { message: "L'email doit être valide" })
+  participantEmail?: string;
 }

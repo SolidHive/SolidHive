@@ -81,6 +81,8 @@ export function useCrmAccess(member: Member) {
     (permission) => permission === Permissions.ALL || permission === Permissions.EVENTS_DELETE
   );
 
+  const isOwner = member.role.name === 'owner';
+
   return {
     canAccessToMembers,
     canCreateMember,
@@ -101,5 +103,6 @@ export function useCrmAccess(member: Member) {
     canCreateEvent,
     canUpdateEvent,
     canDeleteEvent,
+    isOwner,
   };
 }

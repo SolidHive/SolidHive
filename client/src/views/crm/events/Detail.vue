@@ -38,7 +38,7 @@
           <Button
             v-if="crmAccess.canUpdateEvent"
             variant="outline"
-            @click="router.push(`/crm/${crmStore.currentAssociationId}/events/${event.id}/edit`)"
+            @click="router.push(`/crm/${crmStore.currentAssociationId}/events/${event.id}/update`)"
           >
             <Pencil class="mr-2 h-4 w-4" />
             Modifier
@@ -191,14 +191,26 @@
                 class="border-b last:border-b-0"
               >
                 <td class="p-4">
-                  {{ registration.user?.firstName }} {{ registration.user?.lastName }}
+                  <div>
+                    {{ getParticipantName(registration) }}
+                  </div>
+                  <div
+                    v-if="!registration.user"
+                    class="text-muted-foreground mt-1 flex items-center gap-1 text-xs"
+                  >
+                    <span class="bg-muted rounded px-1.5 py-0.5">Invité</span>
+                  </div>
                 </td>
-                <td class="text-muted-foreground p-4 text-sm">{{ registration.user?.email }}</td>
-                <td class="p-4 text-sm">{{ registration.pricing?.title }}</td>
                 <td class="text-muted-foreground p-4 text-sm">
-                  {{ formatDate(registration.createdAt) }}
+                  {{ getParticipantEmail(registration) }}
                 </td>
-                <td class="p-4 text-right font-medium">{{ registration.pricing?.amount }}€</td>
+                <td class="p-4 text-sm">{{ registration.eventPricing?.title || '-' }}</td>
+                <td class="text-muted-foreground p-4 text-sm">
+                  {{ formatDate(registration.registeredAt) }}
+                </td>
+                <td class="p-4 text-right font-medium">
+                  {{ Number(registration.eventPricing?.amount || 0).toFixed(2) }} €
+                </td>
               </tr>
             </tbody>
           </table>
@@ -210,7 +222,7 @@
             </div>
             <div class="mt-1 flex items-center justify-between">
               <span class="text-sm font-medium">Montant total collecté</span>
-              <span class="text-primary text-lg font-bold">{{ totalAmount }}€</span>
+              <span class="text-primary text-lg font-bold">{{ totalAmount }} €</span>
             </div>
           </div>
         </div>
@@ -312,7 +324,7 @@
   import { useCrmAccess } from '@/composables/crm-access';
   import Database from '@/utils/database.utils';
   import api from '@/utils/api.utils';
-  import type { Event, EventPricing } from '@/interfaces';
+  import type { Event, EventPricing, ParticipantCRM } from '@/interfaces';
 
   const route = useRoute();
   const router = useRouter();
@@ -347,8 +359,25 @@
   });
 
   const totalAmount = computed(() => {
-    return registrations.value.reduce((sum, reg) => sum + (reg.pricing?.amount || 0), 0).toFixed(2);
+    const total = registrations.value.reduce(
+      (sum, reg) => sum + Number(reg.eventPricing?.amount || 0),
+      0
+    );
+    return total.toFixed(2);
   });
+
+  const getParticipantName = (registration: ParticipantCRM) => {
+    const firstName = registration.participantFirstName?.trim() || '';
+    const lastName = registration.participantLastName?.trim() || '';
+    if (firstName || lastName) {
+      return `${firstName} ${lastName}`.trim();
+    }
+    return 'Invité anonyme';
+  };
+
+  const getParticipantEmail = (registration: ParticipantCRM) => {
+    return registration.user?.email || registration.participantEmail || '-';
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('fr-FR', {
@@ -463,8 +492,6 @@
   };
   onMounted(async () => {
     await loadEvent();
-    if (currentTab.value === 'registrations') {
-      await loadRegistrations();
-    }
+    await loadRegistrations();
   });
 </script>
