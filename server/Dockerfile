@@ -1,95 +1,72 @@
-FROM node:20
-ARG TARGET_STAGE=dev-runner
-ARG NODE_ENV=production
-
-FROM node:20-alpine AS builder
-
+# =====================
+# Base
+# =====================
+FROM node:20-alpine AS base
 WORKDIR /usr/src/app
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
+# =====================
+# Dependencies
+# =====================
+FROM base AS deps
+
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
 
 COPY package*.json ./
 RUN npm install
 
-COPY . .
+# =====================
+# Build
+# =====================
+FROM deps AS builder
 
-ARG NODE_ENV
+COPY . .
+ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
 
 RUN if [ "$NODE_ENV" = "production" ]; then npm run build; fi
 
-# Installation des dépendances système pour Puppeteer
-RUN apk update && apk install -y \
-    chromium \
-    chromium-sandbox \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
-    && rm -rf /var/lib/apt/lists/*
-
-# Définir le chemin de Chromium pour Puppeteer
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-
-COPY package*.json ./
-
-RUN npm install
+# =====================
+# Dev runner
+# =====================
+FROM deps AS dev-runner
 
 COPY . .
-
 EXPOSE 3000
-
 CMD ["npm", "run", "start:dev"]
 
+# =====================
+# Prod runner
+# =====================
+FROM base AS prod-runner
 
-FROM node:20-slim AS prod-runner
-
-WORKDIR /usr/src/app
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
 
 COPY package*.json ./
-RUN npm install
+RUN npm install --omit=dev
 
 COPY --from=builder /usr/src/app/dist ./dist
 
-RUN apk update && apk install -y \
-    chromium \
-    chromium-sandbox \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
-    && rm -rf /var/lib/apt/lists/*
-
-
 ENV NODE_ENV=production
 EXPOSE 3000
-
 CMD ["node", "dist/index.js"]
 
-
+# =====================
+# Final stage selector
+# =====================
+ARG TARGET_STAGE=prod-runner
 FROM ${TARGET_STAGE}
