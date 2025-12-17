@@ -110,8 +110,7 @@
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import { Button } from '@/components/ui/button';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
-  import { userErrorMessages } from '@/utils/errors/auth/users';
+  import { resetPasswordValidationSchema } from '@/utils/errors/auth/users';
   import { Loader2, Check, X } from 'lucide-vue-next';
 
   // États
@@ -131,13 +130,7 @@
   const toast = useToast();
 
   const form = defineForm({
-    password: field(
-      '',
-      yup
-        .string()
-        .required(userErrorMessages.required.password)
-        .matches(userErrorMessages.patterns.password, userErrorMessages.password.invalid)
-    ),
+    password: field('', resetPasswordValidationSchema.password),
   });
 
   type FormFields = 'password';

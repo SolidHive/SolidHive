@@ -79,8 +79,7 @@
   import InputForm from '@/components/form/InputForm.vue';
   import { formatCurrency, getPricingInfo } from '@/utils/eventRegistration.utils';
   import type { EventPricing, Participant } from '@/interfaces';
-  import { eventRegistrationErrorMessages } from '@/utils/errors/eventRegistration';
-  import * as yup from 'yup';
+  import { participantValidationSchema } from '@/utils/errors/eventRegistration';
 
   const props = defineProps<{
     participants: Participant[];
@@ -95,31 +94,7 @@
 
   const touchedFields = reactive<Record<number, Record<string, boolean>>>({});
 
-  // Schéma de validation Yup pour un participant
-  const participantSchema = yup.object({
-    firstName: yup
-      .string()
-      .required(eventRegistrationErrorMessages.participants.firstName.required)
-      .min(2, eventRegistrationErrorMessages.participants.firstName.invalid),
-    lastName: yup
-      .string()
-      .required(eventRegistrationErrorMessages.participants.lastName.required)
-      .min(2, eventRegistrationErrorMessages.participants.lastName.invalid),
-    email: yup
-      .string()
-      .required(eventRegistrationErrorMessages.participants.email.required)
-      .email(eventRegistrationErrorMessages.participants.email.invalid),
-    phone: yup
-      .string()
-      .test(
-        'phone',
-        eventRegistrationErrorMessages.participants.phone.invalid,
-        (value: string | undefined) => {
-          if (!value) return true;
-          return eventRegistrationErrorMessages.validation.phonePattern.test(value);
-        }
-      ),
-  });
+  const participantSchema = participantValidationSchema;
 
   // Stocker les erreurs de validation manuellement
   const validationErrors = reactive<Record<number, Record<string, string>>>({});

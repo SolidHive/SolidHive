@@ -78,6 +78,15 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/create-association',
+    name: 'CreateAssociation',
+    component: () => import('../views/association/CreateAssociation.vue'),
+    meta: {
+      title: 'Créer une association',
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/cagnottes',
     name: 'Cagnottes',
     component: () => import('../views/cagnotte/Cagnottes.vue'),

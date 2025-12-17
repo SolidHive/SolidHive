@@ -104,9 +104,8 @@
   import FormSection from './common/FormSection.vue';
   import InputForm from '@/components/form/InputForm.vue';
   import type { ContactInfo } from '@/interfaces';
-  import { eventRegistrationErrorMessages } from '@/utils/errors/eventRegistration';
+  import { contactFormValidationSchema } from '@/utils/errors/eventRegistration';
   import { defineForm, field } from 'vue-yup-form';
-  import * as yup from 'yup';
 
   const props = defineProps<{
     contact: ContactInfo;
@@ -139,65 +138,13 @@
   const showError = (fieldName: ContactFields) => props.formSubmitted && !!form[fieldName].$error;
 
   const form = defineForm({
-    firstName: field(
-      '',
-      yup
-        .string()
-        .required(eventRegistrationErrorMessages.contact.firstName.required)
-        .min(2, eventRegistrationErrorMessages.contact.firstName.invalid)
-    ),
-    lastName: field(
-      '',
-      yup
-        .string()
-        .required(eventRegistrationErrorMessages.contact.lastName.required)
-        .min(2, eventRegistrationErrorMessages.contact.lastName.invalid)
-    ),
-    email: field(
-      '',
-      yup
-        .string()
-        .required(eventRegistrationErrorMessages.contact.email.required)
-        .email(eventRegistrationErrorMessages.contact.email.invalid)
-    ),
-    phone: field(
-      '',
-      yup
-        .string()
-        .required(eventRegistrationErrorMessages.contact.phone.required)
-        .test(
-          'phone',
-          eventRegistrationErrorMessages.contact.phone.invalid,
-          (value: string | undefined) => {
-            if (!value) return false;
-            return eventRegistrationErrorMessages.validation.phonePattern.test(value);
-          }
-        )
-    ),
-    address: field(
-      '',
-      yup
-        .string()
-        .required(eventRegistrationErrorMessages.contact.address.required)
-        .min(5, eventRegistrationErrorMessages.contact.address.invalid)
-    ),
-    postcode: field(
-      '',
-      yup
-        .string()
-        .required(eventRegistrationErrorMessages.contact.postcode.required)
-        .matches(
-          eventRegistrationErrorMessages.validation.postcodePattern,
-          eventRegistrationErrorMessages.contact.postcode.invalid
-        )
-    ),
-    city: field(
-      '',
-      yup
-        .string()
-        .required(eventRegistrationErrorMessages.contact.city.required)
-        .min(2, eventRegistrationErrorMessages.contact.city.invalid)
-    ),
+    firstName: field('', contactFormValidationSchema.firstName),
+    lastName: field('', contactFormValidationSchema.lastName),
+    email: field('', contactFormValidationSchema.email),
+    phone: field('', contactFormValidationSchema.phone),
+    address: field('', contactFormValidationSchema.address),
+    postcode: field('', contactFormValidationSchema.postcode),
+    city: field('', contactFormValidationSchema.city),
   });
 
   const handleBlur = (field: ContactFields) => {

@@ -114,7 +114,7 @@ export class UsersService {
 
   async getUserAssociations(userId: string) {
     const userAssociations = await this.userAssociationRepository.find({
-      where: { userId, status: Status.ACCEPTED },
+      where: { userId },
       relations: ['association', 'role'],
     });
 

@@ -29,37 +29,50 @@ export class AssociationsService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new HttpException('Utilisateur non trouvé', HttpStatus.NOT_FOUND);
     }
 
-    return await this.associationsRepository.manager.transaction(
-      async (transactionalEntityManager) => {
-        const addAssociation = transactionalEntityManager.create(Association, {
-          ...createAssociationDto,
-          createdBy: user,
-        });
-        const savedAssociation = await transactionalEntityManager.save(Association, addAssociation);
+    try {
+      return await this.associationsRepository.manager.transaction(
+        async (transactionalEntityManager) => {
+          const addAssociation = transactionalEntityManager.create(Association, {
+            ...createAssociationDto,
+            createdBy: user,
+          });
+          const savedAssociation = await transactionalEntityManager.save(
+            Association,
+            addAssociation
+          );
 
-        const addDefaultRole = transactionalEntityManager.create(AssociationRole, {
-          name: 'owner',
-          association: savedAssociation,
-          description: "Rôle propriétaire de l'association",
-          createdBy: null,
-          permissions: [Permissions.ALL],
-        });
-        const savedRole = await transactionalEntityManager.save(AssociationRole, addDefaultRole);
+          const addDefaultRole = transactionalEntityManager.create(AssociationRole, {
+            name: 'owner',
+            association: savedAssociation,
+            description: "Rôle propriétaire de l'association",
+            createdBy: null,
+            permissions: [Permissions.ALL],
+          });
+          const savedRole = await transactionalEntityManager.save(AssociationRole, addDefaultRole);
 
-        const addUserAssociation = transactionalEntityManager.create(UserAssociation, {
-          user,
-          association: savedAssociation,
-          role: savedRole,
-          status: Status.ACCEPTED,
-        });
-        await transactionalEntityManager.save(UserAssociation, addUserAssociation);
+          const addUserAssociation = transactionalEntityManager.create(UserAssociation, {
+            user,
+            association: savedAssociation,
+            role: savedRole,
+            status: Status.ACCEPTED,
+          });
+          await transactionalEntityManager.save(UserAssociation, addUserAssociation);
 
-        return savedAssociation;
+          return savedAssociation;
+        }
+      );
+    } catch (error: any) {
+      if (error.code === '23505' && error.constraint === 'UQ_ceee675aefe0bb8f10f54db1696') {
+        throw new HttpException(
+          'Ce numéro SIRET est déjà utilisé par une autre association',
+          HttpStatus.CONFLICT
+        );
       }
-    );
+      throw error;
+    }
   }
 
   findAll(options?: FindOptionsDto & { name?: string; orderBy?: 'ASC' | 'DESC' }) {

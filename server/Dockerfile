@@ -64,9 +64,3 @@ COPY --from=builder /usr/src/app/dist ./dist
 ENV NODE_ENV=production
 EXPOSE 3000
 CMD ["node", "dist/index.js"]
-
-# =====================
-# Final stage selector
-# =====================
-ARG TARGET_STAGE=prod-runner
-FROM ${TARGET_STAGE}

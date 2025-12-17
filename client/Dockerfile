@@ -1,6 +1,3 @@
-ARG TARGET_STAGE=prod-runner
-
-
 # Étape 1 – Build (optionnel en dev)
 FROM node:20 AS builder
 WORKDIR /app
@@ -21,7 +18,7 @@ RUN if [ "$NODE_ENV" = "production" ]; then npm run build; fi
 # En prod : serveur NGINX
 # En dev : serveur Vite/Nuxt/etc.
 
-FROM node:20
+FROM node:20 AS dev-runner
 
 WORKDIR /usr/src/app
 
@@ -44,6 +41,3 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
-
-# Image finale conditionnelle
-FROM ${TARGET_STAGE}

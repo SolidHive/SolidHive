@@ -1,4 +1,5 @@
 import { validationPatterns, commonErrorMessages } from '../common/validation';
+import * as yup from 'yup';
 
 export const userErrorMessages = {
   required: {
@@ -42,4 +43,52 @@ export const userErrorMessages = {
     500: 'Erreur serveur, veuillez réessayer plus tard.',
     unknown: "Une erreur est survenue lors de l'authentification.",
   },
+};
+
+export const userValidationSchema = {
+  name: yup
+    .string()
+    .required(userErrorMessages.required.name)
+    .max(50, userErrorMessages.length.name),
+  firstname: yup
+    .string()
+    .required(userErrorMessages.required.firstname)
+    .max(50, userErrorMessages.length.firstname),
+  email: yup
+    .string()
+    .required(userErrorMessages.required.email)
+    .email(userErrorMessages.format.email),
+  phone: yup
+    .string()
+    .optional()
+    .test('phone-format', userErrorMessages.format.phone, (value) => {
+      if (!value) return true;
+      return userErrorMessages.patterns.phone.test(value);
+    }),
+  password: yup
+    .string()
+    .required(userErrorMessages.required.password)
+    .matches(userErrorMessages.patterns.password, userErrorMessages.password.invalid),
+};
+
+export const loginValidationSchema = {
+  email: yup
+    .string()
+    .required(userErrorMessages.required.email)
+    .email(userErrorMessages.format.email),
+  password: yup.string().required(userErrorMessages.required.password),
+};
+
+export const forgotPasswordValidationSchema = {
+  email: yup
+    .string()
+    .required(userErrorMessages.required.email)
+    .email(userErrorMessages.format.email),
+};
+
+export const resetPasswordValidationSchema = {
+  password: yup
+    .string()
+    .required(userErrorMessages.required.password)
+    .matches(userErrorMessages.patterns.password, userErrorMessages.password.invalid),
 };

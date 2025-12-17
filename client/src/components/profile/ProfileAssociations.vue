@@ -29,10 +29,10 @@
             {{ userAssoc.association.name }}
           </h3>
           <span
-            :class="getStatusBadgeClass(userAssoc.status)"
+            :class="getStatusBadgeClass(userAssoc)"
             class="font-paragraph shrink-0 rounded-lg px-2.5 py-1 text-xs font-medium"
           >
-            {{ getStatusText(userAssoc.status) }}
+            {{ getStatusText(userAssoc) }}
           </span>
         </div>
 
@@ -52,9 +52,29 @@
             {{ userAssoc.role.name }}
           </span>
 
-          <Button variant="ghost" size="sm" as-child class="h-8">
+          <Button
+            v-if="userAssoc.status === 'accepted' && userAssoc.association.status === 'accepted'"
+            variant="ghost"
+            size="sm"
+            as-child
+            class="h-8"
+          >
             <router-link :to="`/crm/${userAssoc.association.id}/home`">Gérer →</router-link>
           </Button>
+
+          <span
+            v-else-if="userAssoc.status === 'pending'"
+            class="font-paragraph text-muted-foreground text-xs italic"
+          >
+            Invitation en attente
+          </span>
+
+          <span
+            v-else-if="userAssoc.association.status === 'pending'"
+            class="font-paragraph text-muted-foreground text-xs italic"
+          >
+            Association en attente de validation
+          </span>
         </div>
       </div>
     </div>
@@ -97,29 +117,35 @@
 
   const hasNoAssociations = computed(() => props.associations.length === 0);
 
-  function getStatusBadgeClass(status: string): string {
-    switch (status) {
-      case 'accepted':
-        return 'bg-secondary/10 text-secondary border border-secondary/20';
-      case 'pending':
-        return 'bg-amber-500/10 text-amber-700 border border-amber-500/20';
-      case 'rejected':
-        return 'bg-destructive/10 text-destructive border border-destructive/20';
-      default:
-        return 'bg-muted/50 text-muted-foreground';
+  function getStatusBadgeClass(userAssoc: UserAssociation): string {
+    // Si l'utilisateur n'a pas accepté l'invitation
+    if (userAssoc.status === 'pending') {
+      return 'bg-amber-500/10 text-amber-700 border border-amber-500/20';
     }
+    // Si l'utilisateur a accepté mais l'association n'est pas validée
+    if (userAssoc.status === 'accepted' && userAssoc.association.status === 'pending') {
+      return 'bg-amber-500/10 text-amber-700 border border-amber-500/20';
+    }
+    // Si tout est accepté
+    if (userAssoc.status === 'accepted' && userAssoc.association.status === 'accepted') {
+      return 'bg-secondary/10 text-secondary border border-secondary/20';
+    }
+    return 'bg-muted/50 text-muted-foreground';
   }
 
-  function getStatusText(status: string): string {
-    switch (status) {
-      case 'accepted':
-        return 'Accepté';
-      case 'pending':
-        return 'En attente';
-      case 'rejected':
-        return 'Refusé';
-      default:
-        return status;
+  function getStatusText(userAssoc: UserAssociation): string {
+    // Si l'utilisateur n'a pas accepté l'invitation
+    if (userAssoc.status === 'pending') {
+      return 'Invitation en attente';
     }
+    // Si l'utilisateur a accepté mais l'association n'est pas validée
+    if (userAssoc.status === 'accepted' && userAssoc.association.status === 'pending') {
+      return 'En attente de validation';
+    }
+    // Si tout est accepté
+    if (userAssoc.status === 'accepted' && userAssoc.association.status === 'accepted') {
+      return 'Validé';
+    }
+    return userAssoc.status;
   }
 </script>
