@@ -31,7 +31,7 @@ export class AssociationsController {
 
   @Post('association')
   @UseGuards(AuthenticatedGuard, RolesGuard)
-  @Roles('user')
+  @Roles('user', 'admin')
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })

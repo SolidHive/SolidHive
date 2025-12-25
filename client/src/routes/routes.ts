@@ -309,6 +309,38 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/admin/dashboard',
+    name: 'AdminDashboard',
+    component: () => import('../views/admin-dashboard/Shell.vue'),
+    meta: {
+      title: 'Dashboard Admin',
+      dashboard: true,
+    },
+    redirect(to, _) {
+      return { name: 'AdminDashboardHome', params: to.params };
+    },
+    children: [
+      {
+        path: 'home',
+        name: 'AdminDashboardHome',
+        component: () => import('../views/admin-dashboard/Home.vue'),
+        meta: { title: 'Accueil - Dashboard Admin' },
+      },
+      {
+        path: 'associations',
+        name: 'AdminDashboardAssociations',
+        component: () => import('../views/admin-dashboard/associations/Read.vue'),
+        meta: { title: 'Associations - Dashboard Admin' },
+      },
+      {
+        path: 'association/:associationId',
+        name: 'AdminDashboardAssociationDetail',
+        component: () => import('../views/admin-dashboard/associations/Detail.vue'),
+        meta: { title: 'Détails Association - Dashboard Admin' },
+      },
+    ],
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('../views/NotFound.vue'),

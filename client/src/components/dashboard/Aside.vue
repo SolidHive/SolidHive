@@ -1,5 +1,7 @@
 <template>
-  <aside class="bg-accent flex min-h-screen min-w-16 flex-none flex-col lg:w-45 xl:w-55 2xl:w-65">
+  <aside
+    class="bg-accent fixed top-0 left-0 z-40 flex h-screen min-w-16 flex-none flex-col lg:w-45 xl:w-55 2xl:w-65"
+  >
     <div
       id="crm-aside-header"
       class="flex h-16 w-full items-center justify-center border-b border-gray-200 sm:h-24"
@@ -22,7 +24,7 @@
             <span class="hidden lg:block">Accueil</span>
           </RouterLink>
           <RouterLink
-            v-if="crmAccess.canAccessToMembers"
+            v-if="crmAccess.canAccessToMembers && isAssociationAccepted"
             :to="{ name: 'CRMMembers', params: { locale: $route.params.locale } }"
             class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
             active-class="bg-secondary rounded-lg font-semibold"
@@ -31,7 +33,7 @@
             <span class="hidden lg:block">Membres</span>
           </RouterLink>
           <RouterLink
-            v-if="crmAccess.canAccessToRoles"
+            v-if="crmAccess.canAccessToRoles && isAssociationAccepted"
             :to="{ name: 'CRMRoles', params: { locale: $route.params.locale } }"
             class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
             active-class="bg-secondary rounded-lg font-semibold"
@@ -40,6 +42,7 @@
             <span class="hidden lg:block">Rôles</span>
           </RouterLink>
           <RouterLink
+            v-if="isAssociationAccepted"
             :to="{ name: 'CRMAnnouncements', params: { locale: $route.params.locale } }"
             class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
             active-class="bg-secondary rounded-lg font-semibold"
@@ -48,6 +51,7 @@
             <span class="hidden lg:block">Annonces</span>
           </RouterLink>
           <RouterLink
+            v-if="isAssociationAccepted"
             :to="{ name: 'CRMFundraisings', params: { locale: $route.params.locale } }"
             class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
             active-class="bg-secondary rounded-lg font-semibold"
@@ -56,7 +60,7 @@
             <span class="hidden lg:block">Cagnottes</span>
           </RouterLink>
           <RouterLink
-            v-if="crmAccess.canCreateEvent"
+            v-if="crmAccess.canCreateEvent && isAssociationAccepted"
             :to="{ name: 'CRMEvents', params: { locale: $route.params.locale } }"
             class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
             active-class="bg-secondary rounded-lg font-semibold"
@@ -80,10 +84,25 @@
   import { Home, Users, ShieldCheck, Megaphone, Heart, Calendar } from 'lucide-vue-next';
   import { useWindowSize } from '@vueuse/core';
   import { useCrmStore } from '@/stores/crm';
+  import { useAuthStore } from '@/stores/auth';
   import { useCrmAccess } from '@/composables/crm-access';
+  import { computed } from 'vue';
+  import { Status } from '@/enums/status';
 
   const { width } = useWindowSize();
   const crmStore = useCrmStore();
+  const authStore = useAuthStore();
   const member = crmStore.getMember();
   const crmAccess = useCrmAccess(member);
+
+  const isAssociationAccepted = computed(() => {
+    const associationId = crmStore.currentAssociationId;
+    if (!associationId) return false;
+
+    const userAssociation = authStore.associations.find(
+      (ua) => ua.association.id === associationId
+    );
+
+    return userAssociation?.association?.status === Status.ACCEPTED;
+  });
 </script>

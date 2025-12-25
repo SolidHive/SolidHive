@@ -1,8 +1,8 @@
 <template>
-  <div class="bg-card rounded-lg border p-6 shadow-sm">
-    <div class="space-y-6">
+  <div class="bg-card overflow-hidden rounded-lg border p-3 shadow-sm sm:p-4 md:p-6">
+    <div class="space-y-4 sm:space-y-6">
       <!-- Logo et Image de couverture -->
-      <div class="grid gap-4 md:grid-cols-2">
+      <div class="grid gap-3 sm:gap-4 md:grid-cols-2">
         <div>
           <label class="text-sm font-medium">Logo</label>
           <div
@@ -36,60 +36,65 @@
       </div>
 
       <!-- Informations principales -->
-      <div class="grid gap-4 md:grid-cols-2">
+      <div class="grid gap-3 sm:gap-4 md:grid-cols-2">
         <div>
-          <label class="text-muted-foreground text-sm">Nom de l'association</label>
-          <p class="mt-1 font-medium">{{ association.name }}</p>
+          <label class="text-muted-foreground text-xs sm:text-sm">Nom de l'association</label>
+          <p class="mt-1 font-medium break-all">{{ association.name }}</p>
         </div>
         <div>
-          <label class="text-muted-foreground text-sm">Statut</label>
+          <label class="text-muted-foreground text-xs sm:text-sm">Statut</label>
           <p class="mt-1 font-medium capitalize">{{ getStatusLabel(association.status) }}</p>
         </div>
       </div>
 
       <div v-if="association.description">
-        <label class="text-muted-foreground text-sm">Description</label>
-        <p class="mt-1 break-all">{{ association.description }}</p>
+        <label class="text-muted-foreground text-xs sm:text-sm">Description</label>
+        <p class="mt-1 text-sm break-words sm:text-base">{{ association.description }}</p>
       </div>
 
       <div v-if="association.contact">
-        <label class="text-muted-foreground text-sm">Contact</label>
-        <p class="mt-1">{{ association.contact }}</p>
+        <label class="text-muted-foreground text-xs sm:text-sm">Contact</label>
+        <p class="mt-1 text-sm break-all sm:text-base">{{ association.contact }}</p>
       </div>
 
       <div v-if="association.aboutText">
-        <label class="text-muted-foreground text-sm">À propos</label>
-        <p class="mt-1">{{ association.aboutText }}</p>
+        <label class="text-muted-foreground text-xs sm:text-sm">À propos</label>
+        <p class="mt-1 text-sm break-words sm:text-base">{{ association.aboutText }}</p>
       </div>
 
       <div v-if="association.siret">
-        <label class="text-muted-foreground text-sm">SIRET</label>
-        <p class="mt-1 font-mono">{{ association.siret }}</p>
+        <label class="text-muted-foreground text-xs sm:text-sm">SIRET</label>
+        <p class="mt-1 font-mono text-sm break-all sm:text-base">{{ association.siret }}</p>
       </div>
 
-      <div v-if="association.additionalRequest" class="rounded-lg bg-yellow-50 p-4">
-        <label class="text-sm font-medium text-yellow-900">
+      <div v-if="association.additionalRequest" class="rounded-lg bg-yellow-50 p-3 sm:p-4">
+        <label class="text-xs font-medium text-yellow-900 sm:text-sm">
           Demande d'informations supplémentaires
         </label>
-        <p class="mt-1 text-sm text-yellow-800">{{ association.additionalRequest }}</p>
+        <p class="mt-1 text-xs break-words text-yellow-800 sm:text-sm">
+          {{ association.additionalRequest }}
+        </p>
       </div>
 
       <!-- Couleur -->
       <div v-if="association.primaryColor">
-        <label class="text-muted-foreground text-sm">Couleur principale</label>
+        <label class="text-muted-foreground text-xs sm:text-sm">Couleur principale</label>
         <div class="mt-1 flex items-center gap-2">
           <div
-            class="h-8 w-8 rounded border"
+            class="h-6 w-6 rounded border sm:h-8 sm:w-8"
             :style="{ backgroundColor: association.primaryColor }"
           />
-          <span class="font-mono text-sm">{{ association.primaryColor }}</span>
+          <span class="font-mono text-xs break-all sm:text-sm">{{ association.primaryColor }}</span>
         </div>
       </div>
 
       <!-- Stripe -->
       <div v-if="association.stripeAccountId || showStripeForOwner">
-        <label class="text-muted-foreground text-sm">Stripe Connect</label>
-        <div v-if="association.stripeAccountId" class="mt-1 flex items-center gap-2">
+        <label class="text-muted-foreground text-xs sm:text-sm">Stripe Connect</label>
+        <div
+          v-if="association.stripeAccountId"
+          class="mt-1 flex flex-wrap items-center gap-1.5 sm:gap-2"
+        >
           <span class="rounded-full bg-green-100 px-2 py-1 text-xs text-green-800">Connecté</span>
           <span
             v-if="association.canReceiveDonations"
@@ -151,8 +156,10 @@
   const getStatusLabel = (status: string): string => {
     const statusMap: Record<string, string> = {
       pending: 'En attente',
-      approved: 'Approuvée',
+      accepted: 'Acceptée',
       rejected: 'Rejetée',
+      additional_request: 'Informations requises',
+      approved: 'Approuvée',
       active: 'Active',
       inactive: 'Inactive',
     };

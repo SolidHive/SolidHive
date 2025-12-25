@@ -81,25 +81,6 @@
           <template #label>Contact</template>
         </InputForm>
 
-        <InputForm
-          v-model="editForm.siret.$value"
-          input-name="association-siret"
-          type="text"
-          placeholder="14 chiffres"
-          maxlength="14"
-          :error-message="editForm.siret.$error?.message || ''"
-          :error-state="showError('siret')"
-          @blur="() => (touchedFields.siret = true)"
-        >
-          <template #label>
-            SIRET
-            <span class="text-destructive">*</span>
-          </template>
-          <template #hint>
-            <span v-if="!showError('siret')">Le numéro SIRET doit contenir 14 chiffres</span>
-          </template>
-        </InputForm>
-
         <div class="flex flex-col space-y-2">
           <label class="text-sm font-medium">Couleur principale</label>
           <input
@@ -137,7 +118,7 @@
   import { ref, reactive, watch, computed } from 'vue';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
   import * as yup from 'yup';
-  import { associationCrmErrorMessages, validationPatterns } from '@/utils/errors/crm/associations';
+  import { associationCrmErrorMessages } from '@/utils/errors/crm/associations';
 
   const props = defineProps<{
     modelValue: boolean;
@@ -162,7 +143,7 @@
         description?: string;
         aboutText?: string;
         contact?: string;
-        siret: string;
+
         primaryColor?: string;
       }
     ): void;
@@ -214,13 +195,6 @@
       yup.string().optional().max(1000, associationCrmErrorMessages.length.aboutText)
     ),
     contact: field('', yup.string().optional().email(associationCrmErrorMessages.format.email)),
-    siret: field(
-      '',
-      yup
-        .string()
-        .required(associationCrmErrorMessages.required.siret)
-        .matches(validationPatterns.siret, associationCrmErrorMessages.format.siret)
-    ),
     primaryColor: field('', yup.string().optional()),
   });
 
@@ -230,7 +204,6 @@
     description: false,
     aboutText: false,
     contact: false,
-    siret: false,
     primaryColor: false,
   });
 
@@ -244,7 +217,6 @@
       editForm.description.$value = props.association.description || '';
       editForm.aboutText.$value = props.association.aboutText || '';
       editForm.contact.$value = props.association.contact || '';
-      editForm.siret.$value = props.association.siret || '';
       editForm.primaryColor.$value = props.association.primaryColor || '#000000';
 
       // Réinitialiser les champs touchés et l'état de soumission
@@ -285,7 +257,6 @@
       description: editForm.description.$value?.trim() || undefined,
       aboutText: editForm.aboutText.$value?.trim() || undefined,
       contact: editForm.contact.$value?.trim() || undefined,
-      siret: editForm.siret.$value.trim(),
       primaryColor: editForm.primaryColor.$value || undefined,
     });
   };

@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading" class="w-full grow">
     <div class="flex h-full w-full">
-      <Aside />
+      <AdminAside />
       <main class="bg-background ml-16 flex-1 overflow-y-auto lg:ml-45 xl:ml-55 2xl:ml-65">
         <router-view />
       </main>
@@ -27,49 +27,34 @@
     <span class="sr-only">Loading...</span>
   </div>
 </template>
+
 <script setup lang="ts">
-  import Aside from '@/components/dashboard/Aside.vue';
+  import AdminAside from '@/components/admin-dashboard/AdminAside.vue';
   import { useAuthStore } from '@/stores/auth';
-  import { useCrmStore } from '@/stores/crm';
-  import { onBeforeMount } from 'vue';
-  import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router';
-  import { ref } from 'vue';
+  import { onBeforeMount, ref } from 'vue';
+  import { useRouter } from 'vue-router';
 
   const isLoading = ref(false);
-
-  const route = useRoute();
   const router = useRouter();
   const authStore = useAuthStore();
-  const crmStore = useCrmStore();
 
   onBeforeMount(async () => {
     isLoading.value = true;
-    const id = route.params.id;
 
     if (!authStore.isAuthenticated()) {
       router.push('/login');
       return;
     }
 
-    if (typeof id !== 'string' || id === '') {
+    const hasAdminRole = authStore.user?.roles?.some(
+      (role: any) => role.name?.toLowerCase() === 'admin'
+    );
+
+    if (!hasAdminRole) {
       router.push('/unauthorized');
       return;
     }
 
-    const hasAccess = await crmStore.hasAccessToAssociation(id);
-
-    if (!hasAccess) {
-      router.push('/unauthorized');
-      return;
-    }
-
-    // Définir l'association et la route actuelles
-    crmStore.setCurrentAssociation(id);
-    crmStore.setCurrentRoute(route.name as string);
     isLoading.value = false;
-  });
-
-  onBeforeRouteLeave(() => {
-    crmStore.reset();
   });
 </script>

@@ -53,7 +53,7 @@
           </span>
 
           <Button
-            v-if="userAssoc.status === 'accepted' && userAssoc.association.status === 'accepted'"
+            v-if="userAssoc.status === 'accepted'"
             variant="ghost"
             size="sm"
             as-child
@@ -67,13 +67,6 @@
             class="font-paragraph text-muted-foreground text-xs italic"
           >
             Invitation en attente
-          </span>
-
-          <span
-            v-else-if="userAssoc.association.status === 'pending'"
-            class="font-paragraph text-muted-foreground text-xs italic"
-          >
-            Association en attente de validation
           </span>
         </div>
       </div>

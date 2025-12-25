@@ -1,12 +1,94 @@
 <template>
   <Header />
-  <div class="p-6 md:px-12">
+  <div class="px-2 py-4 sm:p-6 md:px-12">
     <div class="mx-auto max-w-4xl space-y-6">
       <!-- En-tête -->
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold">{{ association?.name || 'Chargement...' }}</h1>
-          <p class="text-muted-foreground mt-1">Gérez les informations de votre association</p>
+          <h1 class="text-xl font-bold sm:text-2xl md:text-3xl">
+            {{ association?.name || 'Chargement...' }}
+          </h1>
+          <p class="text-muted-foreground mt-1 text-sm sm:text-base">
+            Gérez les informations de votre association
+          </p>
+        </div>
+      </div>
+
+      <!-- Message d'avertissement selon le statut -->
+      <div
+        v-if="association?.status === Status.PENDING"
+        class="rounded-lg border border-amber-500/30 bg-amber-50 p-3 sm:p-4"
+      >
+        <div class="flex items-start gap-2 sm:gap-3">
+          <div class="mt-0.5 flex-shrink-0">
+            <svg class="h-5 w-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-amber-900">
+              Association en attente de validation
+            </h3>
+            <p class="mt-1 text-sm text-amber-800">
+              Votre association est en cours de validation par un administrateur. Vous pouvez
+              modifier les informations de base, mais l'accès complet au CRM sera disponible une
+              fois l'association acceptée.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-else-if="association?.status === Status.ADDITIONAL_REQUEST"
+        class="rounded-lg border border-blue-500/30 bg-blue-50 p-3 sm:p-4"
+      >
+        <div class="flex items-start gap-2 sm:gap-3">
+          <div class="mt-0.5 flex-shrink-0">
+            <svg class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-blue-900">
+              Informations supplémentaires requises
+            </h3>
+            <p class="mt-1 text-sm text-blue-800">
+              L'administrateur a demandé des informations complémentaires. Veuillez mettre à jour
+              les informations de votre association pour que votre demande soit réexaminée.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div
+        v-else-if="association?.status === Status.REJECTED"
+        class="rounded-lg border border-red-500/30 bg-red-50 p-3 sm:p-4"
+      >
+        <div class="flex items-start gap-2 sm:gap-3">
+          <div class="mt-0.5 flex-shrink-0">
+            <svg class="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-red-900">Association rejetée</h3>
+            <p class="mt-1 text-sm text-red-800">
+              Votre demande d'enregistrement a été rejetée. Vous pouvez consulter les informations
+              de votre association mais l'accès complet au CRM n'est pas disponible.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -70,15 +152,18 @@
   import { useCrmAccess } from '@/composables/crm-access';
   import type { Association } from '@/interfaces';
   import type { FileMetadata } from '@/interfaces/file.interface';
+  import { Status } from '@/enums/status';
   import { useCrmStore } from '@/stores/crm';
+  import { useAuthStore } from '@/stores/auth';
   import Database from '@/utils/database.utils';
   import api from '@/utils/api.utils';
-  import { onMounted, ref } from 'vue';
+  import { onMounted, onActivated, ref } from 'vue';
   import { useRouter } from 'vue-router';
   import { associationCrmErrorMessages } from '@/utils/errors/crm/associations';
   import { useToast } from 'vue-toastification';
 
   const crmStore = useCrmStore();
+  const authStore = useAuthStore();
   const router = useRouter();
   const member = crmStore.getMember();
   const crmAccess = useCrmAccess(member);
@@ -121,6 +206,15 @@
 
       // Forcer le rechargement des images
       imageKey.value++;
+
+      if (authStore.associations) {
+        const userAssociation = authStore.associations.find(
+          (ua) => ua.association.id === crmStore.currentAssociationId
+        );
+        if (userAssociation) {
+          userAssociation.association.status = associationData.status;
+        }
+      }
     } catch (error) {
       console.error("Erreur lors du chargement de l'association:", error);
     }
@@ -132,7 +226,7 @@
     associationId: string
   ): string | undefined => {
     const file = files.find((f) => f.purpose === purpose);
-    const timestamp = Date.now() + Math.random(); // Timestamp unique pour éviter le cache
+    const timestamp = Date.now() + Math.random();
     return file
       ? `/files/Association/${associationId}?index=${file.index}&t=${timestamp}`
       : undefined;
@@ -313,6 +407,12 @@
   }
 
   onMounted(() => {
+    if (crmStore.currentAssociationId) {
+      fetchAssociation();
+    }
+  });
+
+  onActivated(() => {
     if (crmStore.currentAssociationId) {
       fetchAssociation();
     }

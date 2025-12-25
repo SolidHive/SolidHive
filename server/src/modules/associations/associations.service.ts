@@ -75,8 +75,19 @@ export class AssociationsService {
     }
   }
 
-  findAll(options?: FindOptionsDto & { name?: string; orderBy?: 'ASC' | 'DESC' }) {
-    const where: any = { status: Status.ACCEPTED };
+  findAll(
+    options?: FindOptionsDto & {
+      name?: string;
+      orderBy?: 'ASC' | 'DESC';
+      includeAllStatuses?: boolean;
+    }
+  ) {
+    const where: any = {};
+
+    if (!options?.includeAllStatuses) {
+      where.status = Status.ACCEPTED;
+    }
+
     if (options?.name) {
       where.name = Like(`%${options.name}%`);
     }
@@ -109,14 +120,30 @@ export class AssociationsService {
     });
   }
 
-  findAllByStatus(status: string, options?: FindOptionsDto) {
+  findAllByStatus(status: string, options?: FindOptionsDto & { name?: string }) {
     if (!Object.values(Status).includes(status as Status)) {
       throw new HttpException('Invalid status', HttpStatus.BAD_REQUEST);
     }
 
+    const where: any = { status: status as Status };
+    if (options?.name) {
+      where.name = Like(`%${options.name}%`);
+    }
+
+    if (options?.take) {
+      return this.associationsRepository
+        .findAndCount({
+          where,
+          order: options?.order,
+          skip: options.skip,
+          take: options.take,
+        })
+        .then(([data, total]) => ({ data, total }));
+    }
+
     return this.associationsRepository.find({
       ...options,
-      where: { status: status as Status },
+      where,
     });
   }
 

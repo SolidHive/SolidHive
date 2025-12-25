@@ -65,6 +65,9 @@
                   Créer une association
                 </router-link>
               </DropdownMenuItem>
+              <DropdownMenuItem v-if="isAdmin">
+                <router-link to="/admin/dashboard" class="w-full">Dashboard Admin</router-link>
+              </DropdownMenuItem>
               <DropdownMenuSub v-if="accessibleAssociations.length > 0">
                 <DropdownMenuSubTrigger>Accès CRM</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
@@ -192,6 +195,9 @@
                     Créer une association
                   </router-link>
                 </DropdownMenuItem>
+                <DropdownMenuItem v-if="isAdmin">
+                  <router-link to="/admin/dashboard" class="w-full">Dashboard Admin</router-link>
+                </DropdownMenuItem>
                 <DropdownMenuSub v-if="accessibleAssociations.length > 0">
                   <DropdownMenuSubTrigger>Accès CRM</DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
@@ -263,9 +269,11 @@
   const router = useRouter();
 
   const accessibleAssociations = computed(() =>
-    authStore.associations.filter(
-      (uia) => uia.status === Status.ACCEPTED && uia.association.status === Status.ACCEPTED
-    )
+    authStore.associations.filter((uia) => uia.status === Status.ACCEPTED)
+  );
+
+  const isAdmin = computed(
+    () => authStore.user?.roles?.some((role: any) => role.name?.toLowerCase() === 'admin') ?? false
   );
 
   function toggleMenu() {
