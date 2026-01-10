@@ -1,6 +1,7 @@
-import { validationPatterns, commonErrorMessages } from '../common/validation';
+import * as yup from 'yup';
+import { validationPatterns, commonErrorMessages } from './common/validation';
 
-export const associationErrorMessages = {
+export const associationValidationMessages = {
   required: {
     name: "Le nom de l'association est requis",
     description: 'La description est requise',
@@ -8,6 +9,7 @@ export const associationErrorMessages = {
     siret: commonErrorMessages.siret.required,
     logo: 'Le logo est requis',
     background: 'La bannière est requise',
+    primaryColor: 'La couleur principale est requise',
   },
   format: {
     contact: commonErrorMessages.email.invalid,
@@ -42,4 +44,22 @@ export const associationErrorMessages = {
       'Compte créé ! Vérifiez votre email pour confirmer votre inscription. Votre association sera créée après connexion.',
     uploadFailed: "L'association a été créée mais l'upload des fichiers a échoué.",
   },
+};
+
+export const associationValidationSchema = {
+  name: yup.string().required(associationValidationMessages.required.name).min(3).max(100),
+  description: yup
+    .string()
+    .required(associationValidationMessages.required.description)
+    .min(5)
+    .max(1000),
+  contact: yup
+    .string()
+    .required(associationValidationMessages.required.contact)
+    .email(associationValidationMessages.format.contact),
+  siret: yup
+    .string()
+    .required(associationValidationMessages.required.siret)
+    .matches(/^\d{14}$/, associationValidationMessages.format.siret),
+  primaryColor: yup.string().required(associationValidationMessages.required.primaryColor),
 };

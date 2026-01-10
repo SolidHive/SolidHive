@@ -145,8 +145,7 @@
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import { Button } from '@/components/ui/button';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
-  import { userErrorMessages } from '@/utils/errors/auth/users';
+  import { forgotPasswordValidationSchema } from '@/utils/errors/auth/users';
   import { Info, Loader2 } from 'lucide-vue-next';
 
   // États
@@ -163,10 +162,7 @@
 
   // Validation du formulaire
   const form = defineForm({
-    email: field(
-      '',
-      yup.string().required(userErrorMessages.required.email).email(userErrorMessages.format.email)
-    ),
+    email: field('', forgotPasswordValidationSchema.email),
   });
 
   type FormFields = 'email';

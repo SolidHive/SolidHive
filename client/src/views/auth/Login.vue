@@ -69,27 +69,7 @@
               class="w-full sm:w-auto"
               :disabled="isLoading"
             >
-              <svg
-                v-if="isLoading"
-                class="mr-2 -ml-1 h-4 w-4 animate-spin"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                />
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
+              <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
               {{ isLoading ? 'Connexion en cours...' : 'Se connecter' }}
             </Button>
           </div>
@@ -97,7 +77,6 @@
       </div>
     </div>
   </div>
-  <LoadingOverlay :show="isLoading" message="Connexion en cours..." />
 </template>
 
 <script setup lang="ts">
@@ -105,13 +84,12 @@
   import { useRouter } from 'vue-router';
   import { useToast } from 'vue-toastification';
   import { useAuthStore } from '@/stores/auth';
-  import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import InputForm from '@/components/form/InputForm.vue';
   import { Button } from '@/components/ui/button';
+  import { Loader2 } from 'lucide-vue-next';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
-  import { userErrorMessages } from '@/utils/errors/auth/users';
-  import { associationErrorMessages } from '@/utils/errors/auth/associations';
+  import { userErrorMessages, loginValidationSchema } from '@/utils/errors/auth/users';
+  import { associationValidationMessages } from '@/utils/errors/associations';
   import {
     hasPendingAssociation,
     getPendingAssociation,
@@ -138,18 +116,8 @@
     (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
 
   const form = defineForm({
-    email: field(
-      '',
-      yup.string().required(userErrorMessages.required.email).email(userErrorMessages.format.email)
-    ),
-
-    password: field(
-      '',
-      yup
-        .string()
-        .required(userErrorMessages.required.password)
-        .matches(userErrorMessages.patterns.password, userErrorMessages.password.invalid)
-    ),
+    email: field('', loginValidationSchema.email),
+    password: field('', loginValidationSchema.password),
   });
 
   /**
@@ -232,13 +200,13 @@
         await authStore.uploadAssociationFile(associationId, backgroundFile, 'background');
       }
 
-      toast.success(associationErrorMessages.creation.success);
+      toast.success(associationValidationMessages.creation.success);
     } catch (error) {
       console.error("Erreur lors de la création de l'association:", error);
 
       // Ne pas afficher d'erreur si l'association a été créée (erreur uniquement sur les uploads)
       if (!associationCreated) {
-        toast.warning(associationErrorMessages.apiErrors.unknown);
+        toast.warning(associationValidationMessages.apiErrors.unknown);
       }
     } finally {
       // Nettoyer le localStorage pour éviter de recréer l'association à chaque connexion

@@ -136,8 +136,7 @@ export default class Database {
         `files/${data.relatedTo}/${data.relatedBy}?index=${data.index ?? 0}&purpose=${data.purpose}`
       );
     } catch (err) {
-      // Ignorer l'erreur si le fichier n'existe pas
-      console.log('No existing file to delete or error deleting:', err);
+      console.warn('Aucun fichier existant à supprimer ou erreur lors de la suppression:', err);
     }
 
     // Créer le nouveau fichier

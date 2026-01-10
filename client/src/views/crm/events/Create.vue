@@ -1,14 +1,17 @@
 <template>
   <Header />
-  <div class="p-6 md:px-12">
+  <div class="px-2 py-4 sm:p-6 md:px-12">
     <div class="mx-auto max-w-4xl">
-      <div class="mb-6 flex items-start justify-between">
+      <div class="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 class="text-3xl font-bold">Créer un événement</h1>
-          <p class="text-muted-foreground mt-1">Étape {{ currentStep }} sur 3</p>
+          <h1 class="text-xl font-bold sm:text-2xl md:text-3xl">Créer un événement</h1>
+          <p class="text-muted-foreground mt-1 text-sm sm:text-base">
+            Étape {{ currentStep }} sur 3
+          </p>
         </div>
         <Button
           variant="outline"
+          class="w-full sm:w-auto"
           @click="router.push(`/crm/${crmStore.currentAssociationId}/events`)"
         >
           Annuler
@@ -16,38 +19,45 @@
       </div>
 
       <!-- Stepper -->
-      <div class="mb-8 flex items-center justify-between">
-        <div
-          v-for="step in steps"
-          :key="step.number"
-          class="flex flex-1 items-center"
-          :class="{ 'opacity-40': step.number > currentStep }"
-        >
-          <div class="flex items-center">
-            <div
-              class="flex h-10 w-10 items-center justify-center rounded-full border-2 font-bold"
-              :class="
-                step.number <= currentStep
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-border'
-              "
-            >
-              {{ step.number }}
-            </div>
-            <span class="ml-2 hidden font-medium md:inline">{{ step.title }}</span>
-          </div>
+      <div class="mb-4 flex items-center justify-center px-4 sm:mb-6 sm:px-8 md:mb-8">
+        <div class="flex max-w-lg items-center">
           <div
-            v-if="step.number < steps.length"
-            class="border-border mx-2 flex-1 border-t-2"
-            :class="{ 'border-primary': step.number < currentStep }"
-          />
+            v-for="step in steps"
+            :key="step.number"
+            class="flex items-center"
+            :class="{ 'opacity-40': step.number > currentStep }"
+          >
+            <div class="flex items-center">
+              <div
+                class="flex h-7 w-7 items-center justify-center rounded-full border-2 text-xs font-bold sm:h-8 sm:w-8 sm:text-sm"
+                :class="
+                  step.number <= currentStep
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'border-border'
+                "
+              >
+                {{ step.number }}
+              </div>
+              <span class="ml-1 hidden text-xs font-medium sm:ml-2 sm:text-sm md:inline">
+                {{ step.title }}
+              </span>
+            </div>
+            <div
+              v-if="step.number < steps.length"
+              class="border-border mx-2 w-12 border-t-2 sm:mx-3 sm:w-16 md:w-20"
+              :class="{ 'border-primary': step.number < currentStep }"
+            />
+          </div>
         </div>
       </div>
 
       <!-- Step 1: Informations de l'événement -->
-      <div v-show="currentStep === 1" class="bg-card rounded-lg border p-6 shadow-sm">
-        <h2 class="mb-4 text-xl font-bold">Informations de l'événement</h2>
-        <div class="space-y-4">
+      <div
+        v-show="currentStep === 1"
+        class="bg-card overflow-hidden rounded-lg border p-3 shadow-sm sm:p-4 md:p-6"
+      >
+        <h2 class="mb-3 text-lg font-bold sm:mb-4 sm:text-xl">Informations de l'événement</h2>
+        <div class="space-y-3 sm:space-y-4">
           <InputForm
             v-model="form.title.$value"
             input-name="title"
@@ -71,7 +81,7 @@
             @blur="touchedFields.description = true"
           />
 
-          <div class="grid gap-4 md:grid-cols-2">
+          <div class="grid gap-3 sm:gap-4 md:grid-cols-2">
             <InputForm
               v-model="form.startDate.$value"
               input-name="startDate"
@@ -94,9 +104,9 @@
           </div>
 
           <!-- Adresse -->
-          <div class="border-t pt-4">
-            <h3 class="mb-3 font-medium">Adresse</h3>
-            <div class="space-y-4">
+          <div class="border-t pt-3 sm:pt-4">
+            <h3 class="mb-2 text-sm font-medium sm:mb-3 sm:text-base">Adresse</h3>
+            <div class="space-y-3 sm:space-y-4">
               <InputForm
                 v-model="form.address.street.$value"
                 input-name="street"
@@ -158,7 +168,7 @@
           </div>
 
           <!-- Image -->
-          <div class="border-t pt-4">
+          <div class="border-t pt-3 sm:pt-4">
             <ImageUpload
               v-model="imageFile"
               v-model:preview="imagePreview"
@@ -169,26 +179,31 @@
           </div>
         </div>
 
-        <div class="mt-6 flex justify-end">
-          <Button :disabled="!isStep1Valid" @click="nextStep">Suivant</Button>
+        <div class="mt-4 flex justify-end sm:mt-6">
+          <Button :disabled="!isStep1Valid" class="w-full sm:w-auto" @click="nextStep">
+            Suivant
+          </Button>
         </div>
       </div>
 
       <!-- Step 2: Tarifs -->
-      <div v-show="currentStep === 2" class="bg-card rounded-lg border p-6 shadow-sm">
-        <h2 class="mb-4 text-xl font-bold">Tarifs de participation</h2>
-        <p class="text-muted-foreground mb-4 text-sm">
+      <div
+        v-show="currentStep === 2"
+        class="bg-card overflow-hidden rounded-lg border p-3 shadow-sm sm:p-4 md:p-6"
+      >
+        <h2 class="mb-3 text-lg font-bold sm:mb-4 sm:text-xl">Tarifs de participation</h2>
+        <p class="text-muted-foreground mb-3 text-xs sm:mb-4 sm:text-sm">
           Ajoutez différents types de tarifs pour votre événement
         </p>
 
-        <div class="mb-4 space-y-4">
+        <div class="mb-3 space-y-3 sm:mb-4 sm:space-y-4">
           <div
             v-for="(pricing, index) in pricings"
             :key="index"
-            class="border-border rounded-lg border p-4"
+            class="border-border overflow-hidden rounded-lg border p-3 sm:p-4"
           >
             <div class="mb-2 flex items-center justify-between">
-              <span class="font-medium">Tarif {{ index + 1 }}</span>
+              <span class="text-sm font-medium sm:text-base">Tarif {{ index + 1 }}</span>
               <Button
                 v-if="pricings.length > 1"
                 variant="ghost"
@@ -198,19 +213,19 @@
                 <Trash2 class="h-4 w-4 text-red-500" />
               </Button>
             </div>
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-3 sm:gap-4 md:grid-cols-2">
               <div>
-                <label class="mb-1 block text-sm font-medium">Titre *</label>
+                <label class="mb-1 block text-xs font-medium sm:text-sm">Titre *</label>
                 <input
                   v-model="pricing.title"
                   type="text"
                   required
                   placeholder="Tarif normal, réduit, etc."
-                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2"
                 />
               </div>
               <div>
-                <label class="mb-1 block text-sm font-medium">Prix (€) *</label>
+                <label class="mb-1 block text-xs font-medium sm:text-sm">Prix (€) *</label>
                 <input
                   v-model.number="pricing.amount"
                   type="number"
@@ -218,53 +233,60 @@
                   step="0.01"
                   required
                   placeholder="0.00"
-                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2"
                 />
               </div>
             </div>
-            <div class="mt-3 grid gap-4 md:grid-cols-2">
+            <div class="mt-3 grid gap-3 sm:gap-4 md:grid-cols-2">
               <div>
-                <label class="mb-1 block text-sm font-medium">Description</label>
+                <label class="mb-1 block text-xs font-medium sm:text-sm">Description</label>
                 <input
                   v-model="pricing.description"
                   type="text"
                   placeholder="Description du tarif"
-                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2"
                 />
               </div>
               <div>
-                <label class="mb-1 block text-sm font-medium">Capacité max</label>
+                <label class="mb-1 block text-xs font-medium sm:text-sm">Capacité max</label>
                 <input
                   v-model.number="pricing.maxCapacity"
                   type="number"
                   min="1"
                   placeholder="Illimité"
-                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <Button variant="outline" class="mb-6 w-full" @click="addPricing">
+        <Button variant="outline" class="mb-4 w-full sm:mb-6" @click="addPricing">
           <Plus class="mr-2 h-4 w-4" />
           Ajouter un tarif
         </Button>
 
-        <div class="flex justify-between">
-          <Button variant="outline" @click="previousStep">Précédent</Button>
-          <Button :disabled="!isStep2Valid" @click="nextStep">Suivant</Button>
+        <div class="flex flex-col gap-2 sm:flex-row sm:justify-between">
+          <Button variant="outline" class="w-full sm:w-auto" @click="previousStep">
+            Précédent
+          </Button>
+          <Button :disabled="!isStep2Valid" class="w-full sm:w-auto" @click="nextStep">
+            Suivant
+          </Button>
         </div>
       </div>
 
       <!-- Step 3: Confirmation -->
-      <div v-show="currentStep === 3" class="bg-card rounded-lg border p-6 shadow-sm">
-        <h2 class="mb-4 text-xl font-bold">Récapitulatif</h2>
+      <div
+        v-show="currentStep === 3"
+        class="bg-card overflow-hidden rounded-lg border p-3 shadow-sm sm:p-4 md:p-6"
+      >
+        <h2 class="mb-3 text-lg font-bold sm:mb-4 sm:text-xl">Récapitulatif</h2>
 
-        <div class="space-y-6">
+        <div class="space-y-4 sm:space-y-6">
           <div>
-            <h3 class="mb-2 font-medium">Informations générales</h3>
-            <div class="text-muted-foreground space-y-1 text-sm">
+            <h3 class="mb-2 text-sm font-medium sm:text-base">Informations générales</h3>
+            <div class="text-muted-foreground space-y-1 text-xs break-words sm:text-sm">
               <p>
                 <strong>Titre :</strong>
                 {{ formData.title }}
@@ -285,8 +307,8 @@
           </div>
 
           <div>
-            <h3 class="mb-2 font-medium">Adresse</h3>
-            <div class="text-muted-foreground text-sm">
+            <h3 class="mb-2 text-sm font-medium sm:text-base">Adresse</h3>
+            <div class="text-muted-foreground text-xs break-words sm:text-sm">
               <p>{{ formData.address.street }}</p>
               <p>{{ formData.address.postcode }} {{ formData.address.city }}</p>
               <p v-if="formData.address.state">{{ formData.address.state }}</p>
@@ -295,7 +317,7 @@
           </div>
 
           <div v-if="pricings.length > 0">
-            <h3 class="mb-2 font-medium">Tarifs ({{ pricings.length }})</h3>
+            <h3 class="mb-2 text-sm font-medium sm:text-base">Tarifs ({{ pricings.length }})</h3>
             <div class="space-y-2">
               <div
                 v-for="(pricing, index) in pricings"
@@ -312,14 +334,20 @@
           </div>
 
           <div v-if="imagePreview">
-            <h3 class="mb-2 font-medium">Image</h3>
-            <img :src="imagePreview" alt="Aperçu" class="h-48 rounded-lg object-cover" />
+            <h3 class="mb-2 text-sm font-medium sm:text-base">Image</h3>
+            <img
+              :src="imagePreview"
+              alt="Aperçu"
+              class="h-32 rounded-lg object-cover sm:h-40 md:h-48"
+            />
           </div>
         </div>
 
-        <div class="mt-6 flex justify-between">
-          <Button variant="outline" @click="previousStep">Précédent</Button>
-          <Button :disabled="isLoading" @click="createEvent">
+        <div class="mt-4 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:justify-between">
+          <Button variant="outline" class="w-full sm:w-auto" @click="previousStep">
+            Précédent
+          </Button>
+          <Button :disabled="isLoading" class="w-full sm:w-auto" @click="createEvent">
             {{ isLoading ? 'Création...' : "Créer l'événement" }}
           </Button>
         </div>
@@ -379,7 +407,7 @@
         .string()
         .test('is-after-start', eventCrmErrorMessages.date.endAfterStart, function (value) {
           if (!value) return true;
-          const startDate = this.parent.startDate;
+          const startDate = this.parent?.startDate;
           if (!startDate) return true;
           return new Date(value) > new Date(startDate);
         })

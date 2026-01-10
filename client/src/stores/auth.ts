@@ -27,8 +27,10 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = data || null;
 
       if (user.value !== null) {
-        const data = await Database.getAll('users/me/associations');
-        associations.value = data || [];
+        const associationsData = await Database.getAll('users/me/associations');
+        associations.value = associationsData || [];
+      } else {
+        associations.value = [];
       }
     } catch (err) {
       user.value = null;
@@ -76,6 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
   }) {
     try {
       const result = await Database.create('association', associationData);
+      await loadUser();
       return result.data;
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
