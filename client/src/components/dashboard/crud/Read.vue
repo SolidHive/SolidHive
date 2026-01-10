@@ -11,7 +11,7 @@
       <slot name="add-button"></slot>
     </template>
   </Header>
-  <div class="relative w-full p-6 md:px-12">
+  <div class="relative w-full px-2 py-4 sm:p-6 md:px-12">
     <!-- Barre de recherche -->
     <SearchBar v-model="searchQuery" />
 
@@ -55,7 +55,10 @@
       <template #table-row>
         <TableRow v-for="item in items" :key="item.id">
           <slot name="table-row" v-bind="item"></slot>
-          <TableCell class="text-center">
+          <TableCell v-if="$slots.actions" class="text-center">
+            <slot name="actions" :item="item"></slot>
+          </TableCell>
+          <TableCell v-else class="text-center">
             <DropdownMenu>
               <DropdownMenuTrigger
                 :disabled="!canModifySpecificItem(item) || (!canUpdateItems && !canDeleteItems)"

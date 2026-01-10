@@ -1,40 +1,66 @@
-FROM node:20
-
+# =====================
+# Base
+# =====================
+FROM node:20-alpine AS base
 WORKDIR /usr/src/app
 
-# Installation des dépendances système pour Puppeteer
-RUN apt-get update && apt-get install -y \
-    chromium \
-    chromium-sandbox \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
-    && rm -rf /var/lib/apt/lists/*
-
-# Définir le chemin de Chromium pour Puppeteer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-COPY package*.json ./
+# =====================
+# Dependencies
+# =====================
+FROM base AS deps
 
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+COPY package*.json ./
 RUN npm install
 
+# =====================
+# Build
+# =====================
+FROM deps AS builder
+
 COPY . .
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
 
+RUN if [ "$NODE_ENV" = "production" ]; then npm run build; fi
+
+# =====================
+# Dev runner
+# =====================
+FROM deps AS dev-runner
+
+COPY . .
 EXPOSE 3000
-
 CMD ["npm", "run", "start:dev"]
+
+# =====================
+# Prod runner
+# =====================
+FROM base AS prod-runner
+
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+COPY package*.json ./
+RUN npm install --omit=dev
+
+COPY --from=builder /usr/src/app/dist ./dist
+
+ENV NODE_ENV=production
+EXPOSE 3000
+CMD ["node", "dist/index.js"]

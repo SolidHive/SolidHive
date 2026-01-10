@@ -33,16 +33,31 @@
         </div>
       </div>
     </div>
-    <input
-      :id="inputName"
-      :type="type"
-      :placeholder="placeholder"
-      :value="modelValue"
-      class="font-paragraph w-full rounded-lg border px-4 py-2"
-      :class="errorState ? 'border-destructive' : 'border-border'"
-      @input="handleInput"
-      @blur="$emit('blur')"
-    />
+    <div class="relative">
+      <input
+        :id="inputName"
+        :type="inputType"
+        :placeholder="placeholder"
+        :value="modelValue"
+        :class="
+          inputClass || [
+            'font-paragraph w-full rounded-lg border px-4 py-2 pr-10',
+            errorState ? 'border-destructive' : 'border-border',
+          ]
+        "
+        @input="handleInput"
+        @blur="$emit('blur')"
+      />
+      <button
+        v-if="isPassword"
+        type="button"
+        class="absolute inset-y-0 right-0 flex items-center pr-3"
+        @click="togglePasswordVisibility"
+      >
+        <Eye v-if="showPassword" class="text-muted-foreground h-5 w-5" />
+        <EyeOff v-else class="text-muted-foreground h-5 w-5" />
+      </button>
+    </div>
     <p v-if="errorState" class="text-destructive mt-1 text-sm">
       {{ errorMessage }}
     </p>
@@ -50,7 +65,10 @@
 </template>
 
 <script setup lang="ts">
-  defineProps({
+  import { ref, computed } from 'vue';
+  import { Eye, EyeOff } from 'lucide-vue-next';
+
+  const props = defineProps({
     labelValue: {
       type: String,
       required: false,
@@ -80,12 +98,31 @@
       type: Boolean,
       default: false,
     },
+    inputClass: {
+      type: String,
+      default: '',
+    },
   });
 
   const emit = defineEmits(['update:modelValue', 'blur']);
 
+  const showPassword = ref(false);
+
+  const isPassword = computed(() => props.type === 'password');
+
+  const inputType = computed(() => {
+    if (isPassword.value) {
+      return showPassword.value ? 'text' : 'password';
+    }
+    return props.type;
+  });
+
   function handleInput(event: Event) {
     const target = event.target as HTMLInputElement;
     emit('update:modelValue', target.value);
+  }
+
+  function togglePasswordVisibility() {
+    showPassword.value = !showPassword.value;
   }
 </script>

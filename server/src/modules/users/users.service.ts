@@ -103,6 +103,7 @@ export class UsersService {
   async findOne(id: string): Promise<User> {
     const user = await this.usersRepository.findOne({
       where: { id },
+      relations: ['roles'],
     });
 
     if (!user) {
@@ -114,7 +115,7 @@ export class UsersService {
 
   async getUserAssociations(userId: string) {
     const userAssociations = await this.userAssociationRepository.find({
-      where: { userId, status: Status.ACCEPTED },
+      where: { userId },
       relations: ['association', 'role'],
     });
 

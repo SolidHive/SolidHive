@@ -56,6 +56,7 @@ export class AuthService {
       createdAt: user.timestamps.createdAt,
       updatedAt: user.timestamps.updatedAt,
       associations: userAssociations,
+      roles: user.roles,
     };
   }
 

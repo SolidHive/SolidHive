@@ -6,29 +6,20 @@
         <div class="mb-10">
           <div class="mb-6 text-center">
             <h1 class="font-title text-primary mb-3 text-4xl sm:text-5xl">
-              {{
-                currentStep === 1
-                  ? 'Créer un compte'
-                  : currentStep === 2
-                    ? 'Votre association'
-                    : 'Personnaliser votre association'
-              }}
+              {{ currentStep === 1 ? 'Créer un compte' : 'Votre association' }}
             </h1>
             <p class="font-paragraph text-muted-foreground text-lg">
               {{
                 currentStep === 1
                   ? 'Rejoignez SolidHive en quelques étapes'
-                  : currentStep === 2
-                    ? 'Parlez-nous de votre association'
-                    : 'Ajoutez logo et bannière'
+                  : 'Parlez-nous de votre association'
               }}
             </p>
           </div>
 
-          <!-- Indicateur de progression (affiché seulement si association) -->
           <div v-if="wantsAssociation" class="flex items-center justify-center gap-2">
             <div
-              v-for="step in 3"
+              v-for="step in 2"
               :key="step"
               :class="[
                 'h-2 rounded-full transition-all',
@@ -168,249 +159,18 @@
           </div>
         </form>
 
-        <!-- Étape 2: Informations de l'association -->
-        <form v-else-if="currentStep === 2" class="space-y-6" @submit.prevent="handleStep2Submit">
-          <!-- Nom de l'association -->
-          <InputForm
-            v-model="associationForm.name.$value"
-            input-name="association-name"
-            type="text"
-            placeholder="Association Solidaire"
-            :error-message="associationForm.name.$error?.message || ''"
-            :error-state="showAssociationError('name')"
-            @blur="() => (touchedAssociationFields.name = true)"
-          >
-            <template #label>
-              Nom de l'association
-              <span class="text-destructive">*</span>
-            </template>
-            <template #hint>
-              <div>Le nom officiel de votre association tel qu'il apparaît sur vos documents.</div>
-            </template>
-          </InputForm>
-
-          <!-- Description -->
-          <div>
-            <label class="font-paragraph text-foreground mb-2 block text-sm font-medium">
-              Description
-              <span class="text-destructive">*</span>
-            </label>
-            <textarea
-              v-model="associationForm.description.$value"
-              placeholder="Décrivez votre association, ses missions, ses objectifs..."
-              rows="4"
-              class="font-paragraph border-input bg-background focus:border-secondary focus:ring-secondary/20 w-full rounded-xl border px-4 py-3 text-sm focus:ring-2 focus:outline-none"
-              :class="showAssociationError('description') ? 'border-destructive' : ''"
-              @blur="() => (touchedAssociationFields.description = true)"
-            />
-            <p
-              v-if="showAssociationError('description')"
-              class="font-paragraph text-destructive mt-2 text-sm"
-            >
-              {{ associationForm.description.$error?.message }}
-            </p>
-          </div>
-
-          <!-- Email de contact -->
-          <InputForm
-            v-model="associationForm.contact.$value"
-            input-name="association-contact"
-            type="email"
-            placeholder="contact@association.fr"
-            :error-message="associationForm.contact.$error?.message || ''"
-            :error-state="showAssociationError('contact')"
-            @blur="() => (touchedAssociationFields.contact = true)"
-          >
-            <template #label>
-              Email de contact
-              <span class="text-destructive">*</span>
-            </template>
-            <template #hint>
-              <div>
-                Adresse email professionnelle de l'association pour être contacté par les bénévoles
-                et donateurs.
-              </div>
-            </template>
-          </InputForm>
-
-          <!-- SIRET -->
-          <InputForm
-            v-model="associationForm.siret.$value"
-            input-name="association-siret"
-            type="text"
-            placeholder="12345678901234"
-            :error-message="associationForm.siret.$error?.message || ''"
-            :error-state="showAssociationError('siret')"
-            @blur="() => (touchedAssociationFields.siret = true)"
-          >
-            <template #label>
-              SIRET
-              <span class="text-destructive">*</span>
-            </template>
-            <template #hint>
-              <div>
-                Numéro SIRET de l'association (14 chiffres). Ce numéro permet d'identifier
-                légalement votre association.
-              </div>
-            </template>
-          </InputForm>
-
-          <!-- Couleur principale -->
-          <div>
-            <label class="font-paragraph text-foreground mb-2 block text-sm font-medium">
-              Couleur principale
-              <span class="text-destructive">*</span>
-            </label>
-            <div class="flex items-center gap-4">
-              <input
-                v-model="associationForm.primaryColor.$value"
-                type="color"
-                class="h-12 w-12 cursor-pointer rounded border"
-                @blur="() => (touchedAssociationFields.primaryColor = true)"
-              />
-              <div class="flex-1">
-                <input
-                  v-model="associationForm.primaryColor.$value"
-                  type="text"
-                  placeholder="#000000"
-                  maxlength="7"
-                  class="font-paragraph border-input bg-background focus:border-secondary focus:ring-secondary/20 w-full rounded-xl border px-4 py-2 font-mono text-sm focus:ring-2 focus:outline-none"
-                  :class="showAssociationError('primaryColor') ? 'border-destructive' : ''"
-                  @blur="() => (touchedAssociationFields.primaryColor = true)"
-                />
-              </div>
-            </div>
-            <p class="font-paragraph text-muted-foreground mt-2 text-xs">
-              Format hexadécimal (ex: #FF0000 pour rouge)
-            </p>
-            <p
-              v-if="showAssociationError('primaryColor')"
-              class="font-paragraph text-destructive mt-2 text-sm"
-            >
-              {{ associationForm.primaryColor.$error?.message }}
-            </p>
-          </div>
-
-          <!-- Boutons -->
-          <div class="flex flex-col gap-4 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <Button type="button" variant="outline" @click="currentStep = 1">
-              <ChevronLeft class="mr-2 h-4 w-4" />
-              Retour
-            </Button>
-            <Button type="submit" variant="default" size="lg" :disabled="isLoading">
-              <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
-              Continuer
-            </Button>
-          </div>
-        </form>
-
-        <!-- Étape 3: Logo et bannière -->
-        <form v-else-if="currentStep === 3" class="space-y-6" @submit.prevent="handleStep3Submit">
-          <!-- Upload Logo -->
-          <div>
-            <label class="font-paragraph text-foreground mb-2 block text-sm font-medium">
-              Logo de l'association
-              <span class="text-destructive">*</span>
-            </label>
-            <div class="flex items-center gap-4">
-              <div
-                :class="[
-                  'bg-muted flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-dashed',
-                  fileErrors.logo ? 'border-destructive' : 'border-border',
-                ]"
-              >
-                <Building2 v-if="!logoPreview" class="text-muted-foreground h-10 w-10" />
-                <img
-                  v-else
-                  :src="logoPreview"
-                  alt="Logo preview"
-                  class="h-full w-full rounded-2xl object-cover"
-                />
-              </div>
-              <div class="flex-1">
-                <input
-                  ref="logoInput"
-                  type="file"
-                  accept="image/*"
-                  class="hidden"
-                  @change="handleLogoUpload"
-                />
-                <Button type="button" variant="outline" size="sm" @click="logoInput?.click()">
-                  <Upload class="mr-2 h-4 w-4" />
-                  Choisir un logo
-                </Button>
-                <p class="font-paragraph text-muted-foreground mt-2 text-xs">
-                  Format recommandé : carré, PNG ou JPG (max 5 Mo)
-                </p>
-                <p v-if="fileErrors.logo" class="font-paragraph text-destructive mt-2 text-sm">
-                  {{ fileErrors.logo }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Upload Bannière -->
-          <div>
-            <label class="font-paragraph text-foreground mb-2 block text-sm font-medium">
-              Bannière de l'association
-              <span class="text-destructive">*</span>
-            </label>
-            <div class="space-y-4">
-              <div
-                :class="[
-                  'bg-muted flex h-32 items-center justify-center rounded-2xl border-2 border-dashed',
-                  fileErrors.background ? 'border-destructive' : 'border-border',
-                ]"
-              >
-                <Image v-if="!backgroundPreview" class="text-muted-foreground h-10 w-10" />
-                <img
-                  v-else
-                  :src="backgroundPreview"
-                  alt="Background preview"
-                  class="h-full w-full rounded-2xl object-cover"
-                />
-              </div>
-              <div>
-                <input
-                  ref="backgroundInput"
-                  type="file"
-                  accept="image/*"
-                  class="hidden"
-                  @change="handleBackgroundUpload"
-                />
-                <Button type="button" variant="outline" size="sm" @click="backgroundInput?.click()">
-                  <Upload class="mr-2 h-4 w-4" />
-                  Choisir une bannière
-                </Button>
-                <p class="font-paragraph text-muted-foreground mt-2 text-xs">
-                  Format recommandé : 16:9, PNG ou JPG (max 10 Mo)
-                </p>
-                <p
-                  v-if="fileErrors.background"
-                  class="font-paragraph text-destructive mt-2 text-sm"
-                >
-                  {{ fileErrors.background }}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Boutons -->
-          <div class="flex flex-col gap-4 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <Button type="button" variant="outline" @click="currentStep = 2">
-              <ChevronLeft class="mr-2 h-4 w-4" />
-              Retour
-            </Button>
-            <Button type="submit" variant="default" size="lg" :disabled="isLoading">
-              <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
-              Créer mon compte
-            </Button>
-          </div>
-        </form>
+        <!-- Étapes 2 et 3: Formulaire d'association -->
+        <AssociationForm
+          v-else
+          :is-loading="isLoading"
+          :show-back-button="true"
+          submit-button-text="Créer mon compte"
+          @back="currentStep = 1"
+          @submit="handleAssociationSubmit"
+        />
       </div>
     </div>
   </div>
-  <LoadingOverlay :show="isLoading" message="Création de votre compte..." />
 </template>
 
 <script setup lang="ts">
@@ -418,14 +178,13 @@
   import { useRouter } from 'vue-router';
   import Database from '@/utils/database.utils';
   import InputForm from '@/components/form/InputForm.vue';
+  import AssociationForm from '@/components/form/AssociationForm.vue';
   import { Button } from '@/components/ui/button';
   import { useToast } from 'vue-toastification';
-  import LoadingOverlay from '@/components/LoadingOverlay.vue';
-  import { Loader2, ChevronLeft, Building2, Upload, Image } from 'lucide-vue-next';
+  import { Loader2 } from 'lucide-vue-next';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
-  import { userErrorMessages } from '@/utils/errors/auth/users';
-  import { associationErrorMessages } from '@/utils/errors/auth/associations';
+  import { userErrorMessages, userValidationSchema } from '@/utils/errors/auth/users';
+  import { associationValidationMessages } from '@/utils/errors/associations';
   import { savePendingAssociation, savePendingFile } from '@/utils/localStorage.utils';
 
   const toast = useToast();
@@ -435,73 +194,14 @@
   const wantsAssociation = ref(false);
   const formSubmitted = ref(false);
 
-  // Erreurs des fichiers
-  const fileErrors = reactive({
-    logo: '',
-    background: '',
-  });
-
   // Schéma de validation utilisateur avec yup
   const userForm = defineForm({
-    name: field(
-      '',
-      yup.string().required(userErrorMessages.required.name).max(50, userErrorMessages.length.name)
-    ),
-    firstname: field(
-      '',
-      yup
-        .string()
-        .required(userErrorMessages.required.firstname)
-        .max(50, userErrorMessages.length.firstname)
-    ),
-    email: field(
-      '',
-      yup.string().required(userErrorMessages.required.email).email(userErrorMessages.format.email)
-    ),
-    phone: field(
-      '',
-      yup
-        .string()
-        .optional()
-        .test('phone-format', userErrorMessages.format.phone, (value) => {
-          if (!value) return true;
-          return userErrorMessages.patterns.phone.test(value);
-        })
-    ),
-    password: field(
-      '',
-      yup
-        .string()
-        .required(userErrorMessages.required.password)
-        .matches(userErrorMessages.patterns.password, userErrorMessages.password.invalid)
-    ),
+    name: field('', userValidationSchema.name),
+    firstname: field('', userValidationSchema.firstname),
+    email: field('', userValidationSchema.email),
+    phone: field('', userValidationSchema.phone),
+    password: field('', userValidationSchema.password),
   });
-
-  // Schéma de validation association avec yup
-  const associationForm = defineForm({
-    name: field('', yup.string().required("Le nom de l'association est requis").min(3).max(100)),
-    description: field('', yup.string().required('La description est requise').min(5).max(1000)),
-    contact: field(
-      '',
-      yup.string().required("L'email de contact est requis").email('Email invalide')
-    ),
-    siret: field(
-      '',
-      yup
-        .string()
-        .required('Le numéro SIRET est requis')
-        .matches(/^\d{14}$/, 'Le SIRET doit contenir exactement 14 chiffres')
-    ),
-    primaryColor: field('', yup.string().required('La couleur principale est requise')),
-  });
-
-  // Fichiers
-  const logoFile = ref<File | null>(null);
-  const backgroundFile = ref<File | null>(null);
-  const logoPreview = ref<string>('');
-  const backgroundPreview = ref<string>('');
-  const logoInput = ref<HTMLInputElement | null>(null);
-  const backgroundInput = ref<HTMLInputElement | null>(null);
 
   // Gestion erreurs pour affichage
   const touchedUserFields = reactive({
@@ -512,85 +212,8 @@
     password: false,
   });
 
-  const touchedAssociationFields = reactive({
-    name: false,
-    description: false,
-    contact: false,
-    siret: false,
-    primaryColor: false,
-  });
-
   const showUserError = (fieldName: 'name' | 'firstname' | 'email' | 'phone' | 'password') =>
     (touchedUserFields[fieldName] || formSubmitted.value) && !!userForm[fieldName].$error;
-
-  const showAssociationError = (
-    fieldName: 'name' | 'description' | 'contact' | 'siret' | 'primaryColor'
-  ) =>
-    (touchedAssociationFields[fieldName] || formSubmitted.value) &&
-    !!associationForm[fieldName].$error;
-
-  // Gestion uploads
-  function handleLogoUpload(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
-    fileErrors.logo = '';
-
-    if (file) {
-      // Validation du type de fichier
-      if (!file.type.match(/^image\/(jpeg|jpg|png|gif|webp)$/)) {
-        fileErrors.logo = associationErrorMessages.format.logo;
-        logoFile.value = null;
-        logoPreview.value = '';
-        return;
-      }
-
-      // Validation de la taille (5 Mo max)
-      if (file.size > 5 * 1024 * 1024) {
-        fileErrors.logo = associationErrorMessages.size.logo;
-        logoFile.value = null;
-        logoPreview.value = '';
-        return;
-      }
-
-      logoFile.value = file;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        logoPreview.value = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  function handleBackgroundUpload(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
-    fileErrors.background = '';
-
-    if (file) {
-      // Validation du type de fichier
-      if (!file.type.match(/^image\/(jpeg|jpg|png|gif|webp)$/)) {
-        fileErrors.background = associationErrorMessages.format.background;
-        backgroundFile.value = null;
-        backgroundPreview.value = '';
-        return;
-      }
-
-      // Validation de la taille (10 Mo max)
-      if (file.size > 10 * 1024 * 1024) {
-        fileErrors.background = associationErrorMessages.size.background;
-        backgroundFile.value = null;
-        backgroundPreview.value = '';
-        return;
-      }
-
-      backgroundFile.value = file;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        backgroundPreview.value = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    }
-  }
 
   // Fonction pour gérer les erreurs API
   function getErrorMessage(error: unknown): string {
@@ -627,43 +250,19 @@
     }
   }
 
-  // Soumission étape 2
-  async function handleStep2Submit() {
-    formSubmitted.value = true;
-
-    // Valider le formulaire association
-    if (!(await isValidForm(associationForm))) {
-      toast.error('Veuillez corriger les erreurs du formulaire');
-      return;
-    }
-
-    // Passer à l'étape 3
-    currentStep.value = 3;
-  }
-
-  // Soumission étape 3
-  async function handleStep3Submit() {
-    // Valider que les fichiers sont présents
-    fileErrors.logo = '';
-    fileErrors.background = '';
-    let hasError = false;
-
-    if (!logoFile.value) {
-      fileErrors.logo = associationErrorMessages.required.logo;
-      hasError = true;
-    }
-
-    if (!backgroundFile.value) {
-      fileErrors.background = associationErrorMessages.required.background;
-      hasError = true;
-    }
-
-    if (hasError) {
-      toast.error('Veuillez ajouter le logo et la bannière de votre association');
-      return;
-    }
-
-    await createUserAndAssociation();
+  // Soumission du formulaire d'association
+  async function handleAssociationSubmit(data: {
+    associationData: {
+      name: string;
+      description: string;
+      contact: string;
+      siret: string;
+      primaryColor: string;
+    };
+    logoFile: File | null;
+    backgroundFile: File | null;
+  }) {
+    await createUserAndAssociation(data);
   }
 
   // Créer uniquement le compte utilisateur
@@ -691,7 +290,17 @@
   }
 
   // Créer compte utilisateur + sauvegarder données association pour après connexion
-  async function createUserAndAssociation() {
+  async function createUserAndAssociation(data: {
+    associationData: {
+      name: string;
+      description: string;
+      contact: string;
+      siret: string;
+      primaryColor: string;
+    };
+    logoFile: File | null;
+    backgroundFile: File | null;
+  }) {
     isLoading.value = true;
     try {
       // 1. Créer l'utilisateur
@@ -706,26 +315,18 @@
       await Database.create('users/register', userData);
 
       // 2. Sauvegarder les données de l'association dans localStorage
-      const associationData = {
-        name: associationForm.name.$value.trim(),
-        description: associationForm.description.$value.trim(),
-        contact: associationForm.contact.$value.trim(),
-        siret: associationForm.siret.$value.trim(),
-        primaryColor: associationForm.primaryColor.$value.trim(),
-      };
-
-      savePendingAssociation(associationData);
+      savePendingAssociation(data.associationData);
 
       // 3. Sauvegarder les fichiers en base64
-      if (logoFile.value) {
-        await savePendingFile(logoFile.value, 'logo');
+      if (data.logoFile) {
+        await savePendingFile(data.logoFile, 'logo');
       }
 
-      if (backgroundFile.value) {
-        await savePendingFile(backgroundFile.value, 'background');
+      if (data.backgroundFile) {
+        await savePendingFile(data.backgroundFile, 'background');
       }
 
-      toast.success(associationErrorMessages.creation.userCreated);
+      toast.success(associationValidationMessages.creation.userCreated);
       router.push('/login');
     } catch (error: any) {
       console.error('Erreur lors de la création:', error);

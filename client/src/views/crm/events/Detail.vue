@@ -1,6 +1,6 @@
 <template>
   <Header />
-  <div class="p-6 md:px-12">
+  <div class="px-2 py-4 sm:p-6 md:px-12">
     <div v-if="loading" class="flex justify-center py-12">
       <LoadingOverlay message="Chargement de l'événement..." />
     </div>
@@ -11,8 +11,8 @@
 
     <div v-else class="mx-auto max-w-6xl">
       <!-- Header -->
-      <div class="mb-6 flex items-start justify-between">
-        <div>
+      <div class="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0 flex-1">
           <div class="mb-2 flex items-center gap-2">
             <Button
               variant="ghost"
@@ -21,24 +21,29 @@
             >
               <ArrowLeft class="h-4 w-4" />
             </Button>
-            <h1 class="text-3xl font-bold">{{ event.title }}</h1>
+            <h1 class="line-clamp-2 text-xl font-bold break-words sm:text-2xl md:text-3xl">
+              {{ event.title }}
+            </h1>
           </div>
-          <div class="text-muted-foreground flex items-center gap-4 text-sm">
+          <div
+            class="text-muted-foreground flex flex-wrap items-center gap-2 text-xs sm:gap-4 sm:text-sm"
+          >
             <span class="flex items-center gap-1">
-              <Calendar class="h-4 w-4" />
-              {{ formatDate(event.startDate) }}
+              <Calendar class="h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4" />
+              <span class="truncate">{{ formatDate(event.startDate) }}</span>
             </span>
             <span v-if="event.endDate" class="flex items-center gap-1">
-              <ArrowRight class="h-4 w-4" />
-              {{ formatDate(event.endDate) }}
+              <ArrowRight class="h-3 w-3 flex-shrink-0 sm:h-4 sm:w-4" />
+              <span class="truncate">{{ formatDate(event.endDate) }}</span>
             </span>
           </div>
         </div>
-        <div class="flex gap-2">
+        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
           <Button
             v-if="crmAccess.canUpdateEvent"
             variant="outline"
-            @click="router.push(`/crm/${crmStore.currentAssociationId}/events/${event.id}/edit`)"
+            class="w-full sm:w-auto"
+            @click="router.push(`/crm/${crmStore.currentAssociationId}/events/${event.id}/update`)"
           >
             <Pencil class="mr-2 h-4 w-4" />
             Modifier
@@ -46,6 +51,7 @@
           <Button
             v-if="crmAccess.canDeleteEvent"
             variant="destructive"
+            class="w-full sm:w-auto"
             @click="showDeleteDialog = true"
           >
             <Trash2 class="mr-2 h-4 w-4" />
@@ -55,18 +61,18 @@
       </div>
 
       <!-- Image -->
-      <div v-if="event.image" class="mb-6 aspect-video overflow-hidden rounded-lg">
+      <div v-if="event.image" class="mb-4 aspect-video overflow-hidden rounded-lg sm:mb-6">
         <img :src="event.image" :alt="event.title" class="h-full w-full object-cover" />
       </div>
 
       <!-- Tabs -->
-      <div class="mb-6">
+      <div class="mb-4 sm:mb-6">
         <div class="border-b">
-          <div class="flex gap-4">
+          <div class="flex gap-2 overflow-x-auto sm:gap-4">
             <button
               v-for="tab in tabs"
               :key="tab.id"
-              class="border-b-2 px-4 py-3 font-medium transition-colors"
+              class="border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:px-4 sm:py-3 sm:text-base"
               :class="
                 currentTab === tab.id
                   ? 'border-primary text-primary'
@@ -81,21 +87,21 @@
       </div>
 
       <!-- Tab: Détails -->
-      <div v-show="currentTab === 'details'" class="space-y-6">
-        <div class="bg-card rounded-lg border p-6">
-          <h2 class="mb-4 text-xl font-bold">Informations</h2>
+      <div v-show="currentTab === 'details'" class="space-y-4 sm:space-y-6">
+        <div class="bg-card overflow-hidden rounded-lg border p-3 sm:p-4 md:p-6">
+          <h2 class="mb-3 text-lg font-bold sm:mb-4 sm:text-xl">Informations</h2>
           <div class="space-y-3">
             <div v-if="event.description">
-              <label class="text-muted-foreground text-sm">Description</label>
-              <p class="mt-1">{{ event.description }}</p>
+              <label class="text-muted-foreground text-xs sm:text-sm">Description</label>
+              <p class="mt-1 text-sm break-words sm:text-base">{{ event.description }}</p>
             </div>
             <div>
-              <label class="text-muted-foreground text-sm">Montant récolté</label>
-              <p class="mt-1 font-medium">{{ event.amount }}€</p>
+              <label class="text-muted-foreground text-xs sm:text-sm">Montant récolté</label>
+              <p class="mt-1 text-sm font-medium sm:text-base">{{ event.amount }}€</p>
             </div>
             <div v-if="event.address">
-              <label class="text-muted-foreground text-sm">Adresse</label>
-              <div class="mt-1">
+              <label class="text-muted-foreground text-xs sm:text-sm">Adresse</label>
+              <div class="mt-1 text-sm break-words sm:text-base">
                 <p>{{ event.address.street }}</p>
                 <p>{{ event.address.postcode }} {{ event.address.city }}</p>
                 <p v-if="event.address.state">{{ event.address.state }}</p>
@@ -108,26 +114,33 @@
 
       <!-- Tab: Tarifs -->
       <div v-show="currentTab === 'pricings'" class="space-y-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-bold">Tarifs de participation</h2>
-          <Button v-if="crmAccess.canCreateEvent" @click="showAddPricingDialog = true">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 class="text-lg font-bold sm:text-xl">Tarifs de participation</h2>
+          <Button
+            v-if="crmAccess.canCreateEvent"
+            class="w-full sm:w-auto"
+            @click="showAddPricingDialog = true"
+          >
             <Plus class="mr-2 h-4 w-4" />
             Ajouter un tarif
           </Button>
         </div>
 
-        <div v-if="event.pricings && event.pricings.length > 0" class="grid gap-4 md:grid-cols-2">
+        <div
+          v-if="event.pricings && event.pricings.length > 0"
+          class="grid gap-3 sm:gap-4 md:grid-cols-2"
+        >
           <div
             v-for="pricing in event.pricings"
             :key="pricing.id"
-            class="bg-card rounded-lg border p-4"
+            class="bg-card overflow-hidden rounded-lg border p-3 sm:p-4"
           >
-            <div class="mb-2 flex items-start justify-between">
-              <div>
-                <h3 class="font-bold">{{ pricing.title }}</h3>
-                <p class="text-primary text-xl font-bold">{{ pricing.amount }}€</p>
+            <div class="mb-2 flex items-start justify-between gap-2">
+              <div class="min-w-0 flex-1">
+                <h3 class="text-sm font-bold break-words sm:text-base">{{ pricing.title }}</h3>
+                <p class="text-primary text-lg font-bold sm:text-xl">{{ pricing.amount }}€</p>
               </div>
-              <div class="flex gap-1">
+              <div class="flex flex-shrink-0 gap-1">
                 <Button
                   v-if="crmAccess.canUpdateEvent"
                   variant="ghost"
@@ -146,10 +159,13 @@
                 </Button>
               </div>
             </div>
-            <p v-if="pricing.description" class="text-muted-foreground mb-2 text-sm">
+            <p
+              v-if="pricing.description"
+              class="text-muted-foreground mb-2 text-xs break-words sm:text-sm"
+            >
               {{ pricing.description }}
             </p>
-            <div v-if="pricing.maxCapacity" class="text-muted-foreground text-sm">
+            <div v-if="pricing.maxCapacity" class="text-muted-foreground text-xs sm:text-sm">
               <span class="font-medium">Capacité :</span>
               {{ pricing.availableCapacity ?? pricing.maxCapacity }} / {{ pricing.maxCapacity }}
             </div>
@@ -191,14 +207,26 @@
                 class="border-b last:border-b-0"
               >
                 <td class="p-4">
-                  {{ registration.user?.firstName }} {{ registration.user?.lastName }}
+                  <div>
+                    {{ getParticipantName(registration) }}
+                  </div>
+                  <div
+                    v-if="!registration.user"
+                    class="text-muted-foreground mt-1 flex items-center gap-1 text-xs"
+                  >
+                    <span class="bg-muted rounded px-1.5 py-0.5">Invité</span>
+                  </div>
                 </td>
-                <td class="text-muted-foreground p-4 text-sm">{{ registration.user?.email }}</td>
-                <td class="p-4 text-sm">{{ registration.pricing?.title }}</td>
                 <td class="text-muted-foreground p-4 text-sm">
-                  {{ formatDate(registration.createdAt) }}
+                  {{ getParticipantEmail(registration) }}
                 </td>
-                <td class="p-4 text-right font-medium">{{ registration.pricing?.amount }}€</td>
+                <td class="p-4 text-sm">{{ registration.eventPricing?.title || '-' }}</td>
+                <td class="text-muted-foreground p-4 text-sm">
+                  {{ formatDate(registration.registeredAt) }}
+                </td>
+                <td class="p-4 text-right font-medium">
+                  {{ Number(registration.eventPricing?.amount || 0).toFixed(2) }} €
+                </td>
               </tr>
             </tbody>
           </table>
@@ -210,7 +238,7 @@
             </div>
             <div class="mt-1 flex items-center justify-between">
               <span class="text-sm font-medium">Montant total collecté</span>
-              <span class="text-primary text-lg font-bold">{{ totalAmount }}€</span>
+              <span class="text-primary text-lg font-bold">{{ totalAmount }} €</span>
             </div>
           </div>
         </div>
@@ -312,7 +340,7 @@
   import { useCrmAccess } from '@/composables/crm-access';
   import Database from '@/utils/database.utils';
   import api from '@/utils/api.utils';
-  import type { Event, EventPricing } from '@/interfaces';
+  import type { Event, EventPricing, ParticipantCRM } from '@/interfaces';
 
   const route = useRoute();
   const router = useRouter();
@@ -347,8 +375,25 @@
   });
 
   const totalAmount = computed(() => {
-    return registrations.value.reduce((sum, reg) => sum + (reg.pricing?.amount || 0), 0).toFixed(2);
+    const total = registrations.value.reduce(
+      (sum, reg) => sum + Number(reg.eventPricing?.amount || 0),
+      0
+    );
+    return total.toFixed(2);
   });
+
+  const getParticipantName = (registration: ParticipantCRM) => {
+    const firstName = registration.participantFirstName?.trim() || '';
+    const lastName = registration.participantLastName?.trim() || '';
+    if (firstName || lastName) {
+      return `${firstName} ${lastName}`.trim();
+    }
+    return 'Invité anonyme';
+  };
+
+  const getParticipantEmail = (registration: ParticipantCRM) => {
+    return registration.user?.email || registration.participantEmail || '-';
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('fr-FR', {
@@ -463,8 +508,6 @@
   };
   onMounted(async () => {
     await loadEvent();
-    if (currentTab.value === 'registrations') {
-      await loadRegistrations();
-    }
+    await loadRegistrations();
   });
 </script>

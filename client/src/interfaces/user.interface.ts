@@ -8,6 +8,11 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   associations?: UserAssociation[];
+  roles?: Array<{
+    id: number;
+    name: string;
+    description?: string;
+  }>;
 }
 
 export interface UserAssociation extends HasId {
