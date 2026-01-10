@@ -14,8 +14,8 @@
     </div>
     <div>
       <button
-        @click="goToAssociation"
         class="text-secondary hover:text-secondary/80 font-paragraph underline transition-colors"
+        @click="goToAssociation"
       >
         Voir l'association
       </button>

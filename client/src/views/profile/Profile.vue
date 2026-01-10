@@ -86,7 +86,7 @@
 
   // Actions
   function createAssociation(): void {
-    router.push('/association/create');
+    router.push('/create-association');
   }
 
   async function handleLogout(): Promise<void> {
@@ -105,5 +105,6 @@
 
   onMounted(() => {
     loadRecentDonations();
+    authStore.loadUser();
   });
 </script>

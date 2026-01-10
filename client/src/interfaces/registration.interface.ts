@@ -1,3 +1,5 @@
+import type { User } from './user.interface';
+
 export interface Participant {
   firstName: string;
   lastName: string;
@@ -24,4 +26,13 @@ export interface RegistrationData {
   contact: ContactInfo;
   supportSolidHive: boolean;
   solidHivePercentage: number;
+}
+
+export interface ParticipantCRM {
+  id: string;
+  participantEmail: string;
+  participantFirstName: string;
+  participantLastName: string;
+  registeredAt: string;
+  user: User;
 }

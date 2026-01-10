@@ -48,19 +48,31 @@
                   <p class="text-muted-foreground text-xs leading-none">
                     {{ authStore.user?.email }}
                   </p>
+                  <p
+                    v-if="authStore.isLoading"
+                    class="text-xs leading-none font-medium text-amber-600"
+                  >
+                    Création d'association en cours...
+                  </p>
                 </div>
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <router-link to="/profile" class="w-full">Mon compte</router-link>
               </DropdownMenuItem>
-              <DropdownMenuSub v-if="authStore.associations.length > 0">
+              <DropdownMenuItem>
+                <router-link to="/create-association" class="w-full">
+                  Créer une association
+                </router-link>
+              </DropdownMenuItem>
+              <DropdownMenuItem v-if="isAdmin">
+                <router-link to="/admin/dashboard" class="w-full">Dashboard Admin</router-link>
+              </DropdownMenuItem>
+              <DropdownMenuSub v-if="accessibleAssociations.length > 0">
                 <DropdownMenuSubTrigger>Accès CRM</DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
                   <DropdownMenuItem
-                    v-for="userInAssociation in authStore.associations.filter(
-                      (uia) => uia.status === Status.ACCEPTED
-                    )"
+                    v-for="userInAssociation in accessibleAssociations"
                     :key="userInAssociation.id"
                   >
                     <router-link
@@ -178,13 +190,19 @@
                 <DropdownMenuItem>
                   <router-link to="/profile" class="w-full">Mon compte</router-link>
                 </DropdownMenuItem>
-                <DropdownMenuSub v-if="authStore.associations.length > 0">
+                <DropdownMenuItem>
+                  <router-link to="/create-association" class="w-full">
+                    Créer une association
+                  </router-link>
+                </DropdownMenuItem>
+                <DropdownMenuItem v-if="isAdmin">
+                  <router-link to="/admin/dashboard" class="w-full">Dashboard Admin</router-link>
+                </DropdownMenuItem>
+                <DropdownMenuSub v-if="accessibleAssociations.length > 0">
                   <DropdownMenuSubTrigger>Accès CRM</DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
                     <DropdownMenuItem
-                      v-for="userInAssociation in authStore.associations.filter(
-                        (uia) => uia.status === Status.ACCEPTED
-                      )"
+                      v-for="userInAssociation in accessibleAssociations"
                       :key="userInAssociation.id"
                     >
                       <router-link
@@ -228,7 +246,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue';
+  import { ref, computed } from 'vue';
   import { useRouter } from 'vue-router';
   import { useAuthStore } from '../stores/auth';
   import { Button } from '@/components/ui/button';
@@ -249,6 +267,14 @@
   const authStore = useAuthStore();
   const menuOpen = ref(false);
   const router = useRouter();
+
+  const accessibleAssociations = computed(() =>
+    authStore.associations.filter((uia) => uia.status === Status.ACCEPTED)
+  );
+
+  const isAdmin = computed(
+    () => authStore.user?.roles?.some((role: any) => role.name?.toLowerCase() === 'admin') ?? false
+  );
 
   function toggleMenu() {
     menuOpen.value = !menuOpen.value;

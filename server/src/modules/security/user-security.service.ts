@@ -120,6 +120,7 @@ export class UserSecurityService {
     const verificationUrl = `${this.FRONTEND_URL}/verify-email?token=${token}`;
     const htmlContent = template({
       name: user.name,
+      firstName: user.firstname,
       verificationUrl,
     });
 
@@ -157,6 +158,7 @@ export class UserSecurityService {
       const resetUrl = `${this.FRONTEND_URL}/reset-password?token=${token}`;
       const htmlContent = template({
         name: user.name,
+        firstName: user.firstname,
         resetUrl,
       });
 

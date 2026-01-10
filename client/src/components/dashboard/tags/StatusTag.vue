@@ -16,7 +16,7 @@
       pending: 'en attente',
       rejected: 'rejeté',
       draft: 'brouillon',
-      additional_request: 'demande supplémentaire',
+      additional_request: 'info suppl.',
     };
     return translations[key] || key;
   };
