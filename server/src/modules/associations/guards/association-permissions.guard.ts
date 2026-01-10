@@ -38,7 +38,9 @@ export class AssociationPermissionsGuard {
     }
 
     const userId = request.user.id;
-    const associationId: string = request.params.associationId;
+    const associationId = Array.isArray(request.params.associationId)
+      ? request.params.associationId[0]
+      : request.params.associationId;
 
     if (!associationId) {
       throw new UnauthorizedException('The association ID need to be filled');
