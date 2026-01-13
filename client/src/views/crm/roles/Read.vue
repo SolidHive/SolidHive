@@ -67,6 +67,8 @@
     Tooltip,
   } from '@/components/ui/tooltip';
   import type { TableHeader } from '@/interfaces/table-header.interface';
+  import { Permissions } from '@/enums/permissions';
+  import { useCrmPremiumAccess } from '@/composables/crm-premium';
 
   const tableHeaders: TableHeader<Role>[] = [
     { text: 'Nom', sortKey: 'name' },
@@ -79,9 +81,24 @@
   const crmAccess = useCrmAccess(member);
   const route = useRoute();
   const router = useRouter();
+  const crmPremiumAccess = useCrmPremiumAccess(crmStore.associationPremiumUntil);
   const associationId = route.params.id as string;
 
   onBeforeMount(async () => {
+    const hasPremiumAccess = await crmPremiumAccess.hasAccessToPremiumFeatures(
+      Permissions.ROLES_VIEW
+    );
+
+    if (!hasPremiumAccess) {
+      router.push({
+        name: 'CRMPremiumRequired',
+        params: {
+          id: route.params.id,
+        },
+      });
+      return;
+    }
+
     if (!crmAccess.canAccessToRoles) {
       router.push('/unauthorized');
       return;

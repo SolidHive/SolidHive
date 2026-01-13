@@ -75,15 +75,19 @@
   import { useCrmStore } from '@/stores/crm';
   import Database from '@/utils/database.utils';
   import { announcementCrmErrorMessages } from '@/utils/errors/crm/announcements';
-  import { computed, reactive, ref } from 'vue';
-  import { useRoute } from 'vue-router';
+  import { computed, onBeforeMount, reactive, ref } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
   import * as yup from 'yup';
   import { useToast } from 'vue-toastification';
+  import { useCrmPremiumAccess } from '@/composables/crm-premium';
+  import { Permissions } from '@/enums/permissions';
 
   const crmStore = useCrmStore();
   const member = crmStore.getMember();
   const crmAccess = useCrmAccess(member);
+  const crmPremiumAccess = useCrmPremiumAccess(crmStore.associationPremiumUntil);
+  const router = useRouter();
   const route = useRoute();
   const associationId = route.params.id as string;
   const toast = useToast();
@@ -163,4 +167,25 @@
       });
     }
   }
+
+  onBeforeMount(async () => {
+    const hasPremiumAccess = await crmPremiumAccess.hasAccessToPremiumFeatures(
+      Permissions.ANNOUNCEMENTS_CREATE
+    );
+
+    if (!hasPremiumAccess) {
+      router.push({
+        name: 'CRMPremiumRequired',
+        params: {
+          id: route.params.id,
+        },
+      });
+      return;
+    }
+
+    if (!crmAccess.canCreateAnnouncement) {
+      router.push('/unauthorized');
+      return;
+    }
+  });
 </script>

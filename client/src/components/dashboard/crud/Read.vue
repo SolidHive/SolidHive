@@ -79,7 +79,7 @@
                   v-if="canUpdateItems"
                   @click="
                     goTo(updateRouteName ?? ($route.name as string) + 'Update', {
-                      itemId: item.id,
+                      itemId: item[props.routeParamKey ?? ('id' as keyof T)],
                     })
                   "
                 >
@@ -89,7 +89,9 @@
                 <DropdownMenuItem
                   v-if="canDeleteItems"
                   @click="
-                    goTo(deleteRouteName ?? ($route.name as string) + 'Delete', { itemId: item.id })
+                    goTo(deleteRouteName ?? ($route.name as string) + 'Delete', {
+                      itemId: item[props.routeParamKey ?? ('id' as keyof T)],
+                    })
                   "
                 >
                   Supprimer
@@ -151,6 +153,7 @@
     canUpdateItems: boolean;
     canDeleteItems: boolean;
     canModifySpecificItem: (item: T) => boolean;
+    routeParamKey?: keyof T; // Clé utilisée pour les paramètres de route (par défaut 'id')
   }>();
 
   const route = useRoute();

@@ -17,4 +17,5 @@ export interface Association {
   // Propriétés Stripe Connect
   stripeAccountId?: string;
   canReceiveDonations?: boolean;
+  paymentServiceValidUntil?: string;
 }

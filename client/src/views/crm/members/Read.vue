@@ -71,6 +71,8 @@
   import { useCrmAccess } from '@/composables/crm-access';
   import { Read } from '@/components/dashboard/crud';
   import type { TableHeader } from '@/interfaces/table-header.interface';
+  import { Permissions } from '@/enums/permissions';
+  import { useCrmPremiumAccess } from '@/composables/crm-premium';
 
   const tableHeaders: TableHeader<Member>[] = [
     { text: 'Nom', sortKey: 'user.name' },
@@ -85,9 +87,24 @@
   const crmAccess = useCrmAccess(member);
   const route = useRoute();
   const router = useRouter();
+  const crmPremiumAccess = useCrmPremiumAccess(crmStore.associationPremiumUntil);
   const associationId = route.params.id as string;
 
   onBeforeMount(async () => {
+    const hasPremiumAccess = await crmPremiumAccess.hasAccessToPremiumFeatures(
+      Permissions.REGISTERS_VIEW
+    );
+
+    if (!hasPremiumAccess) {
+      router.push({
+        name: 'CRMPremiumRequired',
+        params: {
+          id: route.params.id,
+        },
+      });
+      return;
+    }
+
     if (!crmAccess.canAccessToMembers) {
       router.push('/unauthorized');
       return;

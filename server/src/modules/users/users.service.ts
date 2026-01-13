@@ -165,7 +165,9 @@ export class UsersService {
           phone: true,
         },
         status: true,
-        association: {},
+        association: {
+          paymentServiceValidUntil: true,
+        },
       },
       where: {
         userId,

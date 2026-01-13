@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable, SetMetadata, UnauthorizedException } from '@nestjs/common';
+import { ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -6,6 +6,8 @@ import { Request } from 'express';
 import { Permissions } from '../../../common/enums/permissions';
 import { UserAssociation } from '../modules/users/entities/user-association.entity';
 import { Status } from '../../../common/enums/status';
+import { Association } from '../entities/association.entity';
+import { PermissionAccess } from '../../../modules/permissions-access/entities/permission-access.entity';
 
 export const PERMISSIONS_KEY = 'associationPermissions';
 export const AssociationPermissions = (...permissions: Permissions[]) =>
@@ -21,7 +23,9 @@ export class AssociationPermissionsGuard {
   constructor(
     private reflector: Reflector,
     @InjectRepository(UserAssociation)
-    private usersAssociationsRepository: Repository<UserAssociation>
+    private usersAssociationsRepository: Repository<UserAssociation>,
+    @InjectRepository(PermissionAccess)
+    private permissionAccessRepository: Repository<PermissionAccess>
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -34,7 +38,7 @@ export class AssociationPermissionsGuard {
     const request = context.switchToHttp().getRequest<UserRequest>();
 
     if (typeof request.isAuthenticated === 'function' && !request.isAuthenticated()) {
-      throw new UnauthorizedException('Vous devez être connecté pour accéder à cette ressource');
+      return false;
     }
 
     const userId = request.user.id;
@@ -43,21 +47,37 @@ export class AssociationPermissionsGuard {
       : request.params.associationId;
 
     if (!associationId) {
-      throw new UnauthorizedException('The association ID need to be filled');
+      return false;
     }
 
     const userAssociation = await this.usersAssociationsRepository.findOne({
       where: { userId: userId, associationId, status: Status.ACCEPTED },
-      relations: ['role'],
+      relations: ['role', 'association'],
     });
 
     if (!userAssociation) {
-      throw new UnauthorizedException(
-        "Vous devez être membre de l'association pour accéder à cette ressource"
-      );
+      return false;
     }
 
     request.userAssociation = userAssociation;
+
+    const today = new Date();
+
+    const association: Association = userAssociation.association;
+    requiredPermissions.forEach(async (permission: string) => {
+      const permissionAccess = await this.permissionAccessRepository.findOne({
+        where: { permission: permission as Permissions },
+      });
+
+      if (
+        (permissionAccess?.requiresSubscription &&
+          association.paymentServiceValidUntil &&
+          today > association.paymentServiceValidUntil) ||
+        (permissionAccess?.requiresSubscription && !association.paymentServiceValidUntil)
+      ) {
+        return false;
+      }
+    });
 
     const userPermissions = userAssociation.role.permissions;
 
@@ -71,9 +91,7 @@ export class AssociationPermissionsGuard {
         );
 
     if (!hasPermissions) {
-      throw new UnauthorizedException(
-        "Vous n'avez pas les permissions nécessaires pour accéder à cette ressource"
-      );
+      return false;
     }
 
     return true;

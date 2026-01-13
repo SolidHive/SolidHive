@@ -105,17 +105,21 @@
   import Database from '@/utils/database.utils';
   import { roleCrmErrorMessages } from '@/utils/errors/crm/roles';
   import { availablePermissions } from '@/utils/permissions.utils';
-  import { computed, onMounted, reactive, ref, watch } from 'vue';
-  import { useRoute } from 'vue-router';
+  import { computed, onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
   import * as yup from 'yup';
   import { useToast } from 'vue-toastification';
+  import { Permissions } from '@/enums/permissions';
+  import { useCrmPremiumAccess } from '@/composables/crm-premium';
 
   const Update = UpdateRaw<Role>;
   const crmStore = useCrmStore();
   const member = crmStore.getMember();
   const crmAccess = useCrmAccess(member);
   const route = useRoute();
+  const crmPremiumAccess = useCrmPremiumAccess(crmStore.associationPremiumUntil);
+  const router = useRouter();
   const associationId = route.params.id as string;
   const id = route.params.itemId;
   const toast = useToast();
@@ -212,5 +216,26 @@
 
   onMounted(async () => {
     await fetchRole();
+  });
+
+  onBeforeMount(async () => {
+    const hasPremiumAccess = await crmPremiumAccess.hasAccessToPremiumFeatures(
+      Permissions.ROLES_UPDATE
+    );
+
+    if (!hasPremiumAccess) {
+      router.push({
+        name: 'CRMPremiumRequired',
+        params: {
+          id: route.params.id,
+        },
+      });
+      return;
+    }
+
+    if (!crmAccess.canUpdateRole) {
+      router.push('/unauthorized');
+      return;
+    }
   });
 </script>
