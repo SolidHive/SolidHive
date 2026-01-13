@@ -9,7 +9,10 @@ import { PermissionAccess } from 'src/modules/permissions-access/entities/permis
 import { FilesModule } from '../../../files/files.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Fundraising, UserAssociation, File, PermissionAccess]), FilesModule],
+  imports: [
+    TypeOrmModule.forFeature([Fundraising, UserAssociation, File, PermissionAccess]),
+    FilesModule,
+  ],
   controllers: [FundraisingsController],
   providers: [FundraisingsService],
   exports: [TypeOrmModule],
