@@ -35,10 +35,10 @@ export const useCrmStore = defineStore('crm', () => {
 
     try {
       const result = await Database.getAll(`users/me/association/${associationId}`);
-      const hasAccess = !!result;
+      const hasAccess = result && result.status === 'accepted';
       if (hasAccess) {
         member.value = result;
-        associationPremiumUntil.value = result.association.paymentServiceValidUntil;
+        associationPremiumUntil.value = result.association?.paymentServiceValidUntil || null;
       }
       return hasAccess;
     } catch (err) {
