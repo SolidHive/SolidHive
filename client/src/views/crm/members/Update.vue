@@ -4,18 +4,20 @@
     :can-update-item="crmAccess.canUpdateMember"
     :fetch-item="item"
     :update-endpoint="`association/${associationId}/user/${id}`"
-    :form-data="formData"
+    :form-data="apiFormData"
     :on-before-submit="handleBeforeSubmit"
+    @after-update="handleAfterUpdate"
   >
     <template #title>Modifier un membre</template>
     <template #form>
       <div class="space-y-4 p-4">
         <SelectForm
-          v-model="form.roleId.$value"
+          v-model="formData.roleId"
           input-name="member-role"
           placeholder="Sélectionnez un rôle"
-          :error-message="form.roleId.$error?.message || ''"
+          :error-message="getErrorMessage('roleId')"
           :error-state="showError('roleId')"
+          @input="clearValidationErrors(validationErrors, 'roleId')"
           @blur="() => (touchedFields.roleId = true)"
         >
           <template #label>
@@ -27,7 +29,7 @@
               v-for="role in availableRoles"
               :key="role.id"
               :value="role.id"
-              :selected="role.id === form.roleId.$value"
+              :selected="role.id === formData.roleId"
               class="capitalize"
             >
               {{ role.name === 'owner' ? 'propriétaire' : role.name }}
@@ -49,11 +51,10 @@
   import type { Role } from '@/interfaces/roles.interface';
   import { useCrmStore } from '@/stores/crm';
   import Database from '@/utils/database.utils';
-  import { memberCrmErrorMessages } from '@/utils/errors/crm/members';
   import { computed, onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
+  import { updateMemberValidationSchema } from '@/utils/errors/crm/members';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
   import { useToast } from 'vue-toastification';
   import { Permissions } from '@/enums/permissions';
   import { useCrmPremiumAccess } from '@/composables/crm-premium';
@@ -75,9 +76,13 @@
     console.error('No member ID provided in route parameters.');
   }
 
-  // Schéma de validation avec yup
-  const form = defineForm({
-    roleId: field('', yup.string().required(memberCrmErrorMessages.required.roleId)),
+  // États du formulaire
+  const formData = reactive({
+    roleId: '',
+  });
+
+  const validationErrors = reactive({
+    roleId: '',
   });
 
   // Gestion des champs touchés
@@ -86,7 +91,22 @@
   });
 
   const showError = (fieldName: keyof typeof touchedFields) =>
-    (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (fieldName: keyof typeof touchedFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
+
+  const validateForm = async () => {
+    const result = await validateWithYup(updateMemberValidationSchema as any, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
+  };
 
   const roles = ref<Role[]>([]);
 
@@ -95,19 +115,23 @@
   });
 
   // Données du formulaire pour le composant Update
-  const formData = computed(() => ({
-    roleId: form.roleId.$value,
+  const apiFormData = computed(() => ({
+    roleId: formData.roleId,
   }));
 
   async function handleBeforeSubmit(): Promise<boolean> {
     formSubmitted.value = true;
 
-    if (!(await isValidForm(form))) {
+    if (!(await validateForm())) {
       toast.error('Veuillez corriger les erreurs du formulaire');
       return false;
     }
 
     return true;
+  }
+
+  async function handleAfterUpdate(): Promise<void> {
+    toast.success('Membre mis à jour avec succès');
   }
 
   async function fetchRoles(): Promise<void> {
@@ -125,7 +149,7 @@
       const response = await Database.getAll(`association/${associationId}/user/${id}`);
       item.value = response;
       if (response && response.role) {
-        form.roleId.$value = response.role.id;
+        formData.roleId = response.role.id;
       }
     } catch (err) {
       console.error('Erreur lors du chargement du membre:', err);

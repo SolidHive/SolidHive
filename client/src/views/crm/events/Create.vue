@@ -1,10 +1,12 @@
 <template>
-  <Header />
+  <Header>
+    <template #header>Créer un événement</template>
+  </Header>
+
   <div class="px-2 py-4 sm:p-6 md:px-12">
     <div class="mx-auto max-w-4xl">
       <div class="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 class="text-xl font-bold sm:text-2xl md:text-3xl">Créer un événement</h1>
           <p class="text-muted-foreground mt-1 text-sm sm:text-base">
             Étape {{ currentStep }} sur 3
           </p>
@@ -59,46 +61,51 @@
         <h2 class="mb-3 text-lg font-bold sm:mb-4 sm:text-xl">Informations de l'événement</h2>
         <div class="space-y-3 sm:space-y-4">
           <InputForm
-            v-model="form.title.$value"
+            v-model="formData.title"
             input-name="title"
             label="Titre"
             placeholder="Nom de l'événement"
-            :error-message="showError('title') ? getFieldError('title') : ''"
+            :error-message="showError('title') ? getErrorMessage('title') : ''"
             :error-state="showError('title')"
             required
+            @input="clearValidationErrors(validationErrors, 'title')"
             @blur="touchedFields.title = true"
           />
 
           <TextareaForm
-            v-model="form.description.$value"
+            v-model="formData.description"
             input-name="description"
             label="Description"
             placeholder="Description de l'événement"
             :rows="4"
             :max-length="1000"
-            :error-message="showError('description') ? getFieldError('description') : ''"
+            :error-message="showError('description') ? getErrorMessage('description') : ''"
             :error-state="showError('description')"
+            @input="clearValidationErrors(validationErrors, 'description')"
             @blur="touchedFields.description = true"
           />
 
           <div class="grid gap-3 sm:gap-4 md:grid-cols-2">
             <InputForm
-              v-model="form.startDate.$value"
+              v-model="formData.startDate"
               input-name="startDate"
               label="Date de début"
               type="datetime-local"
-              :error-message="showError('startDate') ? getFieldError('startDate') : ''"
+              :error-message="showError('startDate') ? getErrorMessage('startDate') : ''"
               :error-state="showError('startDate')"
               required
+              @input="clearValidationErrors(validationErrors, 'startDate')"
               @blur="touchedFields.startDate = true"
             />
             <InputForm
-              v-model="form.endDate.$value"
+              v-model="formData.endDate"
               input-name="endDate"
               label="Date de fin"
               type="datetime-local"
-              :error-message="showError('endDate') ? getFieldError('endDate') : ''"
+              :error-message="showError('endDate') ? getErrorMessage('endDate') : ''"
               :error-state="showError('endDate')"
+              required
+              @input="clearValidationErrors(validationErrors, 'endDate')"
               @blur="touchedFields.endDate = true"
             />
           </div>
@@ -108,59 +115,69 @@
             <h3 class="mb-2 text-sm font-medium sm:mb-3 sm:text-base">Adresse</h3>
             <div class="space-y-3 sm:space-y-4">
               <InputForm
-                v-model="form.address.street.$value"
+                v-model="formData.address.street"
                 input-name="street"
                 label="Rue"
                 placeholder="123 rue de la Paix"
-                :error-message="showError('address.street') ? getFieldError('address.street') : ''"
+                :error-message="
+                  showError('address.street') ? getErrorMessage('address.street') : ''
+                "
                 :error-state="showError('address.street')"
                 required
+                @input="clearValidationErrors(validationErrors, 'address.street')"
                 @blur="touchedFields['address.street'] = true"
               />
               <div class="grid gap-4 md:grid-cols-2">
                 <InputForm
-                  v-model="form.address.city.$value"
+                  v-model="formData.address.city"
                   input-name="city"
                   label="Ville"
                   placeholder="Paris"
-                  :error-message="showError('address.city') ? getFieldError('address.city') : ''"
+                  :error-message="showError('address.city') ? getErrorMessage('address.city') : ''"
                   :error-state="showError('address.city')"
                   required
+                  @input="clearValidationErrors(validationErrors, 'address.city')"
                   @blur="touchedFields['address.city'] = true"
                 />
                 <InputForm
-                  v-model="form.address.postcode.$value"
+                  v-model="formData.address.postcode"
                   input-name="postcode"
                   label="Code postal"
                   placeholder="75001"
                   :error-message="
-                    showError('address.postcode') ? getFieldError('address.postcode') : ''
+                    showError('address.postcode') ? getErrorMessage('address.postcode') : ''
                   "
                   :error-state="showError('address.postcode')"
                   required
+                  @input="clearValidationErrors(validationErrors, 'address.postcode')"
                   @blur="touchedFields['address.postcode'] = true"
                 />
               </div>
               <div class="grid gap-4 md:grid-cols-2">
                 <InputForm
-                  v-model="form.address.state.$value"
+                  v-model="formData.address.state"
                   input-name="state"
                   label="Région"
                   placeholder="Île-de-France"
-                  :error-message="showError('address.state') ? getFieldError('address.state') : ''"
+                  :error-message="
+                    showError('address.state') ? getErrorMessage('address.state') : ''
+                  "
                   :error-state="showError('address.state')"
+                  required
+                  @input="clearValidationErrors(validationErrors, 'address.state')"
                   @blur="touchedFields['address.state'] = true"
                 />
                 <InputForm
-                  v-model="form.address.country.$value"
+                  v-model="formData.address.country"
                   input-name="country"
                   label="Pays"
                   placeholder="France"
                   :error-message="
-                    showError('address.country') ? getFieldError('address.country') : ''
+                    showError('address.country') ? getErrorMessage('address.country') : ''
                   "
                   :error-state="showError('address.country')"
                   required
+                  @input="clearValidationErrors(validationErrors, 'address.country')"
                   @blur="touchedFields['address.country'] = true"
                 />
               </div>
@@ -175,14 +192,14 @@
               label="Image de l'événement"
               button-text="Ajouter une image"
               help-text="Format recommandé : JPG ou PNG (max 5 Mo)"
+              :error-message="showError('image') ? getErrorMessage('image') : ''"
+              :error-state="showError('image')"
             />
           </div>
         </div>
 
         <div class="mt-4 flex justify-end sm:mt-6">
-          <Button :disabled="!isStep1Valid" class="w-full sm:w-auto" @click="nextStep">
-            Suivant
-          </Button>
+          <Button class="w-full sm:w-auto" @click="nextStep">Suivant</Button>
         </div>
       </div>
 
@@ -221,8 +238,23 @@
                   type="text"
                   required
                   placeholder="Tarif normal, réduit, etc."
-                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2"
+                  :class="[
+                    'flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2',
+                    showPricingError(index, 'title')
+                      ? 'border-destructive focus-visible:ring-destructive'
+                      : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
+                  ]"
+                  @input="
+                    () => {
+                      pricingTouched[index] = true;
+                      clearPricingError(index, 'title');
+                    }
+                  "
+                  @blur="pricingTouched[index] = true"
                 />
+                <p v-if="showPricingError(index, 'title')" class="text-destructive mt-1 text-xs">
+                  {{ getPricingErrorMessage(index, 'title') }}
+                </p>
               </div>
               <div>
                 <label class="mb-1 block text-xs font-medium sm:text-sm">Prix (€) *</label>
@@ -233,19 +265,53 @@
                   step="0.01"
                   required
                   placeholder="0.00"
-                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2"
+                  :class="[
+                    'flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2',
+                    showPricingError(index, 'amount')
+                      ? 'border-destructive focus-visible:ring-destructive'
+                      : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
+                  ]"
+                  @input="
+                    () => {
+                      pricingTouched[index] = true;
+                      clearPricingError(index, 'amount');
+                    }
+                  "
+                  @blur="pricingTouched[index] = true"
                 />
+                <p v-if="showPricingError(index, 'amount')" class="text-destructive mt-1 text-xs">
+                  {{ getPricingErrorMessage(index, 'amount') }}
+                </p>
               </div>
             </div>
             <div class="mt-3 grid gap-3 sm:gap-4 md:grid-cols-2">
               <div>
-                <label class="mb-1 block text-xs font-medium sm:text-sm">Description</label>
+                <label class="mb-1 block text-xs font-medium sm:text-sm">Description *</label>
                 <input
                   v-model="pricing.description"
                   type="text"
+                  required
                   placeholder="Description du tarif"
-                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2"
+                  :class="[
+                    'flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2',
+                    showPricingError(index, 'description')
+                      ? 'border-destructive focus-visible:ring-destructive'
+                      : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
+                  ]"
+                  @input="
+                    () => {
+                      pricingTouched[index] = true;
+                      clearPricingError(index, 'description');
+                    }
+                  "
+                  @blur="pricingTouched[index] = true"
                 />
+                <p
+                  v-if="showPricingError(index, 'description')"
+                  class="text-destructive mt-1 text-xs"
+                >
+                  {{ getPricingErrorMessage(index, 'description') }}
+                </p>
               </div>
               <div>
                 <label class="mb-1 block text-xs font-medium sm:text-sm">Capacité max</label>
@@ -254,8 +320,26 @@
                   type="number"
                   min="1"
                   placeholder="Illimité"
-                  class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2"
+                  :class="[
+                    'flex h-9 w-full rounded-md border px-2 py-1.5 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-10 sm:px-3 sm:py-2',
+                    showPricingError(index, 'maxCapacity')
+                      ? 'border-destructive focus-visible:ring-destructive'
+                      : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
+                  ]"
+                  @input="
+                    () => {
+                      pricingTouched[index] = true;
+                      clearPricingError(index, 'maxCapacity');
+                    }
+                  "
+                  @blur="pricingTouched[index] = true"
                 />
+                <p
+                  v-if="showPricingError(index, 'maxCapacity')"
+                  class="text-destructive mt-1 text-xs"
+                >
+                  {{ getPricingErrorMessage(index, 'maxCapacity') }}
+                </p>
               </div>
             </div>
           </div>
@@ -270,9 +354,7 @@
           <Button variant="outline" class="w-full sm:w-auto" @click="previousStep">
             Précédent
           </Button>
-          <Button :disabled="!isStep2Valid" class="w-full sm:w-auto" @click="nextStep">
-            Suivant
-          </Button>
+          <Button class="w-full sm:w-auto" @click="nextStep">Suivant</Button>
         </div>
       </div>
 
@@ -357,11 +439,9 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onBeforeMount, reactive, ref } from 'vue';
+  import { onBeforeMount, reactive, ref, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { Plus, Trash2 } from 'lucide-vue-next';
-  import * as yup from 'yup';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
   import Header from '@/components/dashboard/Header.vue';
   import Button from '@/components/ui/button/Button.vue';
   import ImageUpload from '@/components/form/ImageUpload.vue';
@@ -369,10 +449,15 @@
   import TextareaForm from '@/components/form/TextareaForm.vue';
   import { useCrmStore } from '@/stores/crm';
   import Database from '@/utils/database.utils';
-  import { eventCrmErrorMessages } from '@/utils/errors/crm/events';
   import { Permissions } from '@/enums/permissions';
   import { useCrmAccess } from '@/composables/crm-access';
   import { useCrmPremiumAccess } from '@/composables/crm-premium';
+  import {
+    eventStep1ValidationSchema,
+    eventStep2ValidationSchema,
+  } from '@/utils/errors/crm/events';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
+  import { useToast } from 'vue-toastification';
 
   const router = useRouter();
   const crmStore = useCrmStore();
@@ -380,10 +465,11 @@
   const crmAccess = useCrmAccess(member);
   const crmPremiumAccess = useCrmPremiumAccess(crmStore.associationPremiumUntil);
   const route = useRoute();
+  const toast = useToast();
+  const formSubmitted = ref(false);
 
   const currentStep = ref(1);
   const isLoading = ref(false);
-  const formSubmitted = ref(false);
 
   const steps = [
     { number: 1, title: 'Informations' },
@@ -391,60 +477,58 @@
     { number: 3, title: 'Confirmation' },
   ];
 
-  const form = defineForm({
-    title: field(
-      '',
-      yup
-        .string()
-        .required(eventCrmErrorMessages.required.title)
-        .min(5, eventCrmErrorMessages.minLength.title)
-        .max(100, eventCrmErrorMessages.maxLength.title)
-    ),
-    description: field(
-      '',
-      yup
-        .string()
-        .min(10, eventCrmErrorMessages.minLength.description)
-        .max(1000, eventCrmErrorMessages.maxLength.description)
-    ),
-    startDate: field('', yup.string().required(eventCrmErrorMessages.required.startDate)),
-    endDate: field(
-      '',
-      yup
-        .string()
-        .test('is-after-start', eventCrmErrorMessages.date.endAfterStart, function (value) {
-          if (!value) return true;
-          const startDate = this.parent?.startDate;
-          if (!startDate) return true;
-          return new Date(value) > new Date(startDate);
-        })
-    ),
+  // États du formulaire - Step 1
+  const formData = reactive({
+    title: '',
+    description: '',
+    startDate: '',
+    endDate: '',
     address: {
-      street: field(
-        '',
-        yup
-          .string()
-          .required(eventCrmErrorMessages.required.street)
-          .min(3, eventCrmErrorMessages.minLength.street)
-      ),
-      city: field(
-        '',
-        yup
-          .string()
-          .required(eventCrmErrorMessages.required.city)
-          .min(2, eventCrmErrorMessages.minLength.city)
-      ),
-      postcode: field('', yup.string().required(eventCrmErrorMessages.required.postcode)),
-      state: field('', yup.string()),
-      country: field('France', yup.string().required(eventCrmErrorMessages.required.country)),
+      street: '',
+      city: '',
+      postcode: '',
+      state: '',
+      country: 'France',
     },
+    image: undefined as File | undefined,
   });
 
-  const touchedFields = reactive<Record<string, boolean>>({
+  // États du formulaire - Step 2
+  const pricings = ref([
+    {
+      title: '',
+      description: '',
+      amount: undefined as number | undefined,
+      maxCapacity: undefined as number | undefined,
+    },
+  ]);
+
+  // Validation errors - Step 1
+  const validationErrors = reactive({
+    title: '',
+    description: '',
+    startDate: '',
+    endDate: '',
+    image: '',
+    'address.street': '',
+    'address.city': '',
+    'address.postcode': '',
+    'address.state': '',
+    'address.country': '',
+  });
+
+  // Validation errors - Step 2
+  const pricingErrors = ref<
+    Array<{ title?: string; description?: string; amount?: string; maxCapacity?: string }>
+  >([{}]);
+
+  // Gestion des champs touchés - Step 1
+  const touchedFields = reactive({
     title: false,
     description: false,
     startDate: false,
     endDate: false,
+    image: false,
     'address.street': false,
     'address.city': false,
     'address.postcode': false,
@@ -452,80 +536,124 @@
     'address.country': false,
   });
 
-  const getFieldError = (fieldName: string) => {
-    const parts = fieldName.split('.');
-    let field: any = form;
-    for (const part of parts) {
-      field = field[part];
-      if (!field) return '';
+  // Gestion des champs touchés - Step 2
+  const pricingTouched = ref<boolean[]>([false]);
+
+  const showError = (fieldName: keyof typeof touchedFields) =>
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (fieldName: keyof typeof touchedFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
+
+  const validateStep1 = async () => {
+    const result = await validateWithYup(eventStep1ValidationSchema as any, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
     }
-    return field.$error?.message || '';
+
+    return result.isValid;
   };
 
-  const showError = (fieldName: string) => {
-    return (touchedFields[fieldName] || formSubmitted.value) && !!getFieldError(fieldName);
-  };
+  const validateStep2 = async () => {
+    const result = await validateWithYup(eventStep2ValidationSchema as any, {
+      pricings: pricings.value,
+    });
 
-  const formData = computed(() => ({
-    title: form.title.$value,
-    description: form.description.$value,
-    startDate: form.startDate.$value,
-    endDate: form.endDate.$value,
-    address: {
-      street: form.address.street.$value,
-      city: form.address.city.$value,
-      postcode: form.address.postcode.$value,
-      state: form.address.state.$value,
-      country: form.address.country.$value,
-    },
-  }));
+    if (result.isValid) {
+      // Clear all pricing errors
+      pricingErrors.value = pricings.value.map(() => ({}));
+      return true;
+    } else {
+      // Parse errors and assign to pricingErrors
+      const newPricingErrors: Array<{
+        title?: string;
+        description?: string;
+        amount?: string;
+        maxCapacity?: string;
+      }> = pricings.value.map(() => ({}));
 
-  const imageFile = ref<File | null>(null);
-  const imagePreview = ref<string>('');
+      Object.entries(result.errors).forEach(([path, message]) => {
+        const match = path.match(/^pricings\[(\d+)\]\.(.+)$/);
+        if (match && match[1]) {
+          const index = parseInt(match[1]);
+          const field = match[2] as keyof (typeof newPricingErrors)[0];
+          newPricingErrors[index] = newPricingErrors[index] || {};
+          newPricingErrors[index][field] = message;
+        }
+      });
 
-  const pricings = ref([
-    {
-      title: '',
-      description: '',
-      amount: 0,
-      maxCapacity: undefined as number | undefined,
-    },
-  ]);
-
-  const handleBeforeSubmit = () => {
-    formSubmitted.value = true;
-    if (!isValidForm(form)) {
+      pricingErrors.value = newPricingErrors;
       return false;
     }
-    return true;
   };
 
-  const isStep1Valid = computed(() => {
-    return isValidForm(form);
+  const imageFile = ref<File | undefined>(undefined);
+  const imagePreview = ref<string>('');
+
+  watch(imageFile, (newValue) => {
+    formData.image = newValue;
+    touchedFields.image = true;
   });
 
-  const isStep2Valid = computed(() => {
-    return pricings.value.every((p) => p.title.length >= 3 && p.amount >= 0);
+  // Watcher pour effacer l'erreur d'image quand elle change
+  watch(imageFile, () => {
+    clearValidationErrors(validationErrors, 'image');
   });
+
+  // Helpers for pricing errors
+  const showPricingError = (index: number, field: keyof (typeof pricingErrors.value)[0]) =>
+    (pricingTouched.value[index] || formSubmitted.value) && !!pricingErrors.value[index]?.[field];
+
+  const getPricingErrorMessage = (index: number, field: keyof (typeof pricingErrors.value)[0]) =>
+    pricingTouched.value[index] || formSubmitted.value
+      ? pricingErrors.value[index]?.[field] || ''
+      : '';
+
+  const clearPricingError = (index: number, field: keyof (typeof pricingErrors.value)[0]) => {
+    if (pricingErrors.value[index]) {
+      pricingErrors.value[index][field] = '';
+    }
+  };
 
   const addPricing = () => {
     pricings.value.push({
       title: '',
       description: '',
-      amount: 0,
+      amount: undefined,
       maxCapacity: undefined,
     });
+    pricingErrors.value.push({});
+    pricingTouched.value.push(false);
   };
 
   const removePricing = (index: number) => {
     pricings.value.splice(index, 1);
+    pricingErrors.value.splice(index, 1);
+    pricingTouched.value.splice(index, 1);
   };
 
-  const nextStep = () => {
-    if (currentStep.value === 1 && !handleBeforeSubmit()) {
-      return;
+  const nextStep = async () => {
+    if (currentStep.value === 1) {
+      formSubmitted.value = true;
+      if (!(await validateStep1())) {
+        toast.error('Veuillez corriger les erreurs du formulaire');
+        return;
+      }
+    } else if (currentStep.value === 2) {
+      formSubmitted.value = true;
+      // Mark all pricings as touched
+      pricingTouched.value = pricingTouched.value.map(() => true);
+      if (!(await validateStep2())) {
+        toast.error('Veuillez corriger les erreurs des tarifs');
+        return;
+      }
     }
+
     if (currentStep.value < 3) {
+      formSubmitted.value = false; // Reset pour la prochaine étape
       currentStep.value++;
     }
   };
@@ -548,13 +676,22 @@
   };
 
   const createEvent = async () => {
-    if (!handleBeforeSubmit()) {
-      console.error('Validation échouée');
+    // Final validation avant création
+    formSubmitted.value = true;
+    const isStep1Valid = await validateStep1();
+
+    // Mark all pricings as touched
+    pricingTouched.value = pricingTouched.value.map(() => true);
+    const isStep2Valid = await validateStep2();
+
+    if (!isStep1Valid || !isStep2Valid) {
+      toast.error("Veuillez corriger toutes les erreurs avant de créer l'événement");
+      currentStep.value = !isStep1Valid ? 1 : 2; // Retour à l'étape avec erreur
       return;
     }
 
     if (!crmStore.currentAssociationId) {
-      console.error('Aucune association sélectionnée');
+      toast.error('Aucune association sélectionnée');
       return;
     }
 
@@ -563,24 +700,18 @@
 
       // 1. Créer l'événement
       const eventData = {
-        title: formData.value.title,
-        description: formData.value.description || undefined,
-        startDate: new Date(formData.value.startDate).toISOString(),
-        endDate: formData.value.endDate
-          ? new Date(formData.value.endDate).toISOString()
-          : undefined,
-        address: formData.value.address,
+        title: formData.title,
+        description: formData.description || undefined,
+        startDate: new Date(formData.startDate).toISOString(),
+        endDate: formData.endDate ? new Date(formData.endDate).toISOString() : undefined,
+        address: formData.address,
       };
-
-      console.log("📝 Données de l'événement:", eventData);
 
       const response = await Database.create(
         `association/${crmStore.currentAssociationId}/event`,
         eventData
       );
-      console.log('✅ Réponse API:', response);
       const createdEvent = response.data || response;
-      console.log('📌 Événement créé:', createdEvent);
 
       // 2. Uploader l'image si présente
       if (imageFile.value && createdEvent.id) {
@@ -609,11 +740,11 @@
         }
       }
 
-      console.log('Événement créé avec succès !');
+      toast.success('Événement créé avec succès !');
       router.push(`/crm/${crmStore.currentAssociationId}/events/${createdEvent.id}`);
     } catch (error: any) {
       console.error('Erreur lors de la création:', error);
-      console.error(error.response?.data?.message || "Erreur lors de la création de l'événement");
+      toast.error("Erreur lors de la création de l'événement. Veuillez réessayer.");
     } finally {
       isLoading.value = false;
     }

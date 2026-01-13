@@ -5,7 +5,7 @@
       <div
         :class="[
           'bg-muted flex items-center justify-center rounded-lg border-2 border-dashed',
-          error ? 'border-destructive' : 'border-border',
+          errorState ? 'border-destructive' : 'border-border',
           heightClass,
         ]"
       >
@@ -27,8 +27,8 @@
         <p v-if="helpText" class="font-paragraph text-muted-foreground mt-2 text-xs">
           {{ helpText }}
         </p>
-        <p v-if="error" class="font-paragraph text-destructive mt-2 text-sm">
-          {{ error }}
+        <p v-if="errorState && errorMessage" class="font-paragraph text-destructive mt-2 text-sm">
+          {{ errorMessage }}
         </p>
       </div>
     </div>
@@ -40,32 +40,37 @@
   import { ImageIcon, Upload } from 'lucide-vue-next';
   import Button from '@/components/ui/button/Button.vue';
 
-  interface Props {
-    modelValue?: File | null;
-    preview?: string;
-    label?: string;
-    buttonText?: string;
-    helpText?: string;
-    altText?: string;
-    accept?: string;
-    maxSize?: number; // en Mo
-    height?: 'sm' | 'md' | 'lg' | 'xl';
-  }
-
-  const props = withDefaults(defineProps<Props>(), {
-    modelValue: null,
-    preview: '',
-    label: '',
-    buttonText: 'Choisir une image',
-    helpText: 'Format recommandé : PNG ou JPG (max 5 Mo)',
-    altText: 'Image preview',
-    accept: 'image/*',
-    maxSize: 5,
-    height: 'lg',
-  });
+  const props = withDefaults(
+    defineProps<{
+      modelValue?: File | undefined;
+      preview?: string;
+      label?: string;
+      buttonText?: string;
+      helpText?: string;
+      altText?: string;
+      accept?: string;
+      maxSize?: number; // en Mo
+      height?: 'sm' | 'md' | 'lg' | 'xl';
+      errorMessage?: string;
+      errorState?: boolean;
+    }>(),
+    {
+      modelValue: undefined,
+      preview: '',
+      label: '',
+      buttonText: 'Choisir une image',
+      helpText: 'Format recommandé : PNG ou JPG (max 5 Mo)',
+      altText: 'Image preview',
+      accept: 'image/*',
+      maxSize: 5,
+      height: 'lg',
+      errorMessage: '',
+      errorState: false,
+    }
+  );
 
   const emit = defineEmits<{
-    'update:modelValue': [value: File | null];
+    'update:modelValue': [value: File | undefined];
     'update:preview': [value: string];
   }>();
 
@@ -112,7 +117,7 @@
 
     if (!isValidType) {
       error.value = `Le format du fichier n'est pas valide. Formats acceptés : ${props.accept}`;
-      emit('update:modelValue', null);
+      emit('update:modelValue', undefined);
       internalPreview.value = '';
       emit('update:preview', '');
       return;
@@ -122,7 +127,7 @@
     const maxSizeBytes = props.maxSize * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       error.value = `Le fichier est trop volumineux. Taille maximum : ${props.maxSize} Mo.`;
-      emit('update:modelValue', null);
+      emit('update:modelValue', undefined);
       internalPreview.value = '';
       emit('update:preview', '');
       return;

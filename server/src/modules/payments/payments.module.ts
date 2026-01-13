@@ -9,6 +9,7 @@ import { PaymentsController } from './payments.controller';
 import { StripeAccountController } from './stripe-account.controller';
 import { AssociationsModule } from '../associations/associations.module';
 import { TransactionsModule } from '../transactions/transactions.module';
+import { Transaction } from '../transactions/entities/transaction.entity';
 import { FundraisingsModule } from '../associations/modules/fundraisings/fundraisings.module';
 import { Event } from '../associations/modules/events/entities/event.entity';
 import { EventPricing } from '../associations/modules/events/modules/pricings/entities/event-pricing.entity';
@@ -33,7 +34,7 @@ import { EmailModule } from '../../common/utils/email/email.module';
     TicketsModule,
     InvoicesModule,
     EmailModule,
-    TypeOrmModule.forFeature([Event, EventPricing, EventRegister, Fundraising]),
+    TypeOrmModule.forFeature([Transaction, Event, EventPricing, EventRegister, Fundraising]),
   ],
   providers: [
     PaymentsService,

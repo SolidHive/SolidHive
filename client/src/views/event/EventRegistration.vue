@@ -79,7 +79,6 @@
   import { useAuthStore } from '@/stores/auth';
   import Database from '@/utils/database.utils';
   import type { Event, Participant, ContactInfo } from '@/interfaces';
-  import { isValidForm } from 'vue-yup-form';
 
   const route = useRoute();
   const router = useRouter();
@@ -128,14 +127,9 @@
         }
         break;
       case 2:
-        // Valider le formulaire de contact avec isValidForm de vue-yup-form
-        if (contactFormRef.value?.form) {
-          try {
-            isValid = await isValidForm(contactFormRef.value.form);
-          } catch (err) {
-            console.error('Erreur de validation du formulaire de contact:', err);
-            isValid = false;
-          }
+        // Valider le formulaire de contact
+        if (contactFormRef.value?.isValid) {
+          isValid = await contactFormRef.value.isValid();
         }
         break;
       case 3:

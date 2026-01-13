@@ -46,13 +46,9 @@ export const associationValidationMessages = {
   },
 };
 
-export const associationValidationSchema = {
+export const associationValidationSchema = yup.object({
   name: yup.string().required(associationValidationMessages.required.name).min(3).max(100),
-  description: yup
-    .string()
-    .required(associationValidationMessages.required.description)
-    .min(5)
-    .max(1000),
+  description: yup.string().required(associationValidationMessages.required.description).max(1000),
   contact: yup
     .string()
     .required(associationValidationMessages.required.contact)
@@ -62,4 +58,4 @@ export const associationValidationSchema = {
     .required(associationValidationMessages.required.siret)
     .matches(/^\d{14}$/, associationValidationMessages.format.siret),
   primaryColor: yup.string().required(associationValidationMessages.required.primaryColor),
-};
+});

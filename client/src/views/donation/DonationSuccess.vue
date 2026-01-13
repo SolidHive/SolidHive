@@ -32,12 +32,20 @@
       return;
     }
 
-    // Simplement vérifier que la session existe
     try {
-      await Database.getOne('payments/session', sessionId);
+      // Vérifier que la session existe
+      const session = await Database.getOne('payments/session', sessionId);
+
+      if (session.payment_status !== 'paid') {
+        error.value = "Le paiement n'a pas été complété";
+        loading.value = false;
+        return;
+      }
+
+      await Database.create(`payments/donate/${sessionId}/finalize`, {});
     } catch (err) {
-      console.error('Erreur lors de la vérification de la session:', err);
-      error.value = 'Session de paiement invalide';
+      console.error('Erreur lors de la finalisation du don:', err);
+      error.value = 'Erreur lors de la finalisation du don';
     } finally {
       loading.value = false;
     }

@@ -1,5 +1,10 @@
 <template>
-  <Header />
+  <Header>
+    <template #header>
+      {{ event?.title || "Détail de l'événement" }}
+    </template>
+  </Header>
+
   <div class="px-2 py-4 sm:p-6 md:px-12">
     <div v-if="loading" class="flex justify-center py-12">
       <LoadingOverlay message="Chargement de l'événement..." />
@@ -10,7 +15,6 @@
     </div>
 
     <div v-else class="mx-auto max-w-6xl">
-      <!-- Header -->
       <div class="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-start sm:justify-between">
         <div class="min-w-0 flex-1">
           <div class="mb-2 flex items-center gap-2">
@@ -260,8 +264,18 @@
             type="text"
             required
             placeholder="Tarif normal, réduit, etc."
-            class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            :class="[
+              'flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+              showError('title')
+                ? 'border-destructive focus-visible:ring-destructive'
+                : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
+            ]"
+            @input="clearValidationErrors(validationErrors, 'title')"
+            @blur="touchedFields.title = true"
           />
+          <p v-if="showError('title')" class="text-destructive mt-1 text-xs">
+            {{ getErrorMessage('title') }}
+          </p>
         </div>
         <div>
           <label class="mb-1 block text-sm font-medium">Prix (€) *</label>
@@ -272,17 +286,38 @@
             step="0.01"
             required
             placeholder="0.00"
-            class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            :class="[
+              'flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+              showError('amount')
+                ? 'border-destructive focus-visible:ring-destructive'
+                : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
+            ]"
+            @input="clearValidationErrors(validationErrors, 'amount')"
+            @blur="touchedFields.amount = true"
           />
+          <p v-if="showError('amount')" class="text-destructive mt-1 text-xs">
+            {{ getErrorMessage('amount') }}
+          </p>
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium">Description</label>
+          <label class="mb-1 block text-sm font-medium">Description *</label>
           <textarea
             v-model="pricingForm.description"
             rows="3"
+            required
             placeholder="Description du tarif"
-            class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            :class="[
+              'flex w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+              showError('description')
+                ? 'border-destructive focus-visible:ring-destructive'
+                : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
+            ]"
+            @input="clearValidationErrors(validationErrors, 'description')"
+            @blur="touchedFields.description = true"
           />
+          <p v-if="showError('description')" class="text-destructive mt-1 text-xs">
+            {{ getErrorMessage('description') }}
+          </p>
         </div>
         <div>
           <label class="mb-1 block text-sm font-medium">Capacité maximale</label>
@@ -291,13 +326,23 @@
             type="number"
             min="1"
             placeholder="Illimité"
-            class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            :class="[
+              'flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+              showError('maxCapacity')
+                ? 'border-destructive focus-visible:ring-destructive'
+                : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
+            ]"
+            @input="clearValidationErrors(validationErrors, 'maxCapacity')"
+            @blur="touchedFields.maxCapacity = true"
           />
+          <p v-if="showError('maxCapacity')" class="text-destructive mt-1 text-xs">
+            {{ getErrorMessage('maxCapacity') }}
+          </p>
         </div>
       </div>
       <DialogFooter>
         <Button variant="outline" @click="showAddPricingDialog = false">Annuler</Button>
-        <Button :disabled="!isPricingFormValid" @click="savePricing">
+        <Button @click="savePricing">
           {{ editingPricing ? 'Modifier' : 'Ajouter' }}
         </Button>
       </DialogFooter>
@@ -322,7 +367,7 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted, ref } from 'vue';
+  import { computed, onMounted, reactive, ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { ArrowLeft, ArrowRight, Calendar, Pencil, Plus, Trash2 } from 'lucide-vue-next';
   import Header from '@/components/dashboard/Header.vue';
@@ -340,11 +385,15 @@
   import { useCrmAccess } from '@/composables/crm-access';
   import Database from '@/utils/database.utils';
   import api from '@/utils/api.utils';
+  import { singlePricingValidationSchema } from '@/utils/errors/crm/events';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
+  import { useToast } from 'vue-toastification';
   import type { Event, EventPricing, ParticipantCRM } from '@/interfaces';
 
   const route = useRoute();
   const router = useRouter();
   const crmStore = useCrmStore();
+  const toast = useToast();
   const member = crmStore.getMember();
   const crmAccess = useCrmAccess(member);
 
@@ -356,6 +405,7 @@
   const showDeleteDialog = ref(false);
   const editingPricing = ref<EventPricing | null>(null);
   const registrations = ref<any[]>([]);
+  const formSubmitted = ref(false);
 
   const tabs = [
     { id: 'details', label: 'Détails' },
@@ -363,16 +413,58 @@
     { id: 'registrations', label: 'Inscrits' },
   ];
 
-  const pricingForm = ref({
+  const pricingForm = reactive({
     title: '',
     description: '',
-    amount: 0,
+    amount: undefined as number | undefined,
     maxCapacity: undefined as number | undefined,
   });
 
-  const isPricingFormValid = computed(() => {
-    return pricingForm.value.title.length >= 3 && pricingForm.value.amount >= 0;
+  // Validation errors
+  const validationErrors = reactive({
+    title: '',
+    description: '',
+    amount: '',
+    maxCapacity: '',
   });
+
+  // Gestion des champs touchés
+  const touchedFields = reactive({
+    title: false,
+    description: false,
+    amount: false,
+    maxCapacity: false,
+  });
+
+  const showError = (fieldName: keyof typeof touchedFields) =>
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (fieldName: keyof typeof touchedFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
+
+  const validatePricingForm = async () => {
+    const result = await validateWithYup(singlePricingValidationSchema as any, pricingForm);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
+  };
+
+  const resetPricingForm = () => {
+    pricingForm.title = '';
+    pricingForm.description = '';
+    pricingForm.amount = undefined;
+    pricingForm.maxCapacity = undefined;
+    clearValidationErrors(validationErrors);
+    Object.keys(touchedFields).forEach((key) => {
+      touchedFields[key as keyof typeof touchedFields] = false;
+    });
+    formSubmitted.value = false;
+  };
 
   const totalAmount = computed(() => {
     const total = registrations.value.reduce(
@@ -417,7 +509,7 @@
       event.value = response;
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
-      console.error("Erreur lors du chargement de l'événement");
+      toast.error("Erreur lors du chargement de l'événement");
     } finally {
       loading.value = false;
     }
@@ -441,17 +533,22 @@
 
   const editPricing = (pricing: EventPricing) => {
     editingPricing.value = pricing;
-    pricingForm.value = {
-      title: pricing.title,
-      description: pricing.description || '',
-      amount: pricing.amount,
-      maxCapacity: pricing.maxCapacity,
-    };
+    pricingForm.title = pricing.title;
+    pricingForm.description = pricing.description || '';
+    pricingForm.amount = pricing.amount;
+    pricingForm.maxCapacity = pricing.maxCapacity;
     showAddPricingDialog.value = true;
   };
 
   const savePricing = async () => {
     if (!crmStore.currentAssociationId || !event.value) return;
+
+    formSubmitted.value = true;
+
+    if (!(await validatePricingForm())) {
+      toast.error('Veuillez corriger les erreurs du formulaire');
+      return;
+    }
 
     try {
       if (editingPricing.value) {
@@ -459,24 +556,25 @@
         await Database.update(
           `association/${crmStore.currentAssociationId}/event/${event.value.id}/pricing`,
           editingPricing.value.id,
-          pricingForm.value
+          pricingForm
         );
-        console.log('Tarif modifié avec succès');
+        toast.success('Tarif modifié avec succès');
       } else {
         // Créer
         await Database.create(
           `association/${crmStore.currentAssociationId}/event/${event.value.id}/pricing`,
-          pricingForm.value
+          pricingForm
         );
-        console.log('Tarif ajouté avec succès');
+        toast.success('Tarif ajouté avec succès');
       }
 
       showAddPricingDialog.value = false;
       editingPricing.value = null;
-      pricingForm.value = { title: '', description: '', amount: 0, maxCapacity: undefined };
+      resetPricingForm();
       await loadEvent();
     } catch (error: any) {
-      console.error(error.response?.data?.message || "Erreur lors de l'enregistrement");
+      console.error(error);
+      toast.error("Erreur lors de l'enregistrement du tarif");
     }
   };
 
@@ -488,10 +586,11 @@
       await Database.delete(
         `association/${crmStore.currentAssociationId}/event/${event.value.id}/pricing/${pricingId}`
       );
-      console.log('Tarif supprimé avec succès');
+      toast.success('Tarif supprimé avec succès');
       await loadEvent();
     } catch (error: any) {
-      console.error(error.response?.data?.message || 'Erreur lors de la suppression');
+      console.error(error);
+      toast.error('Erreur lors de la suppression du tarif');
     }
   };
 
@@ -500,10 +599,11 @@
 
     try {
       await Database.delete(`association/${crmStore.currentAssociationId}/event/${event.value.id}`);
-      console.log('Événement supprimé avec succès');
+      toast.success('Événement supprimé avec succès');
       router.push(`/crm/${crmStore.currentAssociationId}/events`);
     } catch (error: any) {
-      console.error(error.response?.data?.message || 'Erreur lors de la suppression');
+      console.error(error);
+      toast.error("Erreur lors de la suppression de l'événement");
     }
   };
   onMounted(async () => {

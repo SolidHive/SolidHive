@@ -46,6 +46,17 @@ export class UsersAssociationsService {
       throw new HttpException('Role not found', HttpStatus.NOT_FOUND);
     }
 
+    // Vérifier si l'utilisateur est déjà membre de l'association
+    const existingUserAssociation = await this.usersAssociationsRepository.findOne({
+      where: { userId: user.id, associationId },
+    });
+    if (existingUserAssociation) {
+      throw new HttpException(
+        'Cet utilisateur est déjà membre de cette association',
+        HttpStatus.CONFLICT
+      );
+    }
+
     const userAssociation = this.usersAssociationsRepository.create({
       user,
       association,

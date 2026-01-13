@@ -2,7 +2,7 @@
   <Create
     :can-create-item="crmAccess.canCreateAnnouncement"
     :create-endpoint="`association/${associationId}/announcement`"
-    :form-data="formData"
+    :form-data="apiFormData"
     :on-before-submit="handleBeforeSubmit"
     @after-create="handleAfterCreate"
   >
@@ -16,15 +16,18 @@
           button-text="Choisir une image"
           help-text="Format recommandé : PNG ou JPG (max 5 Mo)"
           height="md"
+          :error-message="getErrorMessage('image')"
+          :error-state="showError('image')"
         />
 
         <InputForm
-          v-model="form.title.$value"
+          v-model="formData.title"
           input-name="announcement-title"
           type="text"
           placeholder="Ex: Nouvelle réunion, Événement à venir..."
-          :error-message="form.title.$error?.message || ''"
+          :error-message="getErrorMessage('title')"
           :error-state="showError('title')"
+          @input="clearValidationErrors(validationErrors, 'title')"
           @blur="() => (touchedFields.title = true)"
         >
           <template #label>
@@ -34,13 +37,14 @@
         </InputForm>
 
         <TextareaForm
-          v-model="form.content.$value"
+          v-model="formData.content"
           input-name="announcement-content"
           placeholder="Décrivez votre annonce..."
           :rows="4"
           :max-length="1000"
-          :error-message="form.content.$error?.message || ''"
+          :error-message="getErrorMessage('content')"
           :error-state="showError('content')"
+          @input="clearValidationErrors(validationErrors, 'content')"
           @blur="() => (touchedFields.content = true)"
         >
           <template #label>
@@ -52,7 +56,7 @@
         <div class="flex items-center space-x-2">
           <input
             id="is-active"
-            v-model="form.isActive.$value"
+            v-model="formData.isActive"
             type="checkbox"
             class="border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2"
           />
@@ -74,11 +78,10 @@
   import { useCrmAccess } from '@/composables/crm-access';
   import { useCrmStore } from '@/stores/crm';
   import Database from '@/utils/database.utils';
-  import { announcementCrmErrorMessages } from '@/utils/errors/crm/announcements';
-  import { computed, onBeforeMount, reactive, ref } from 'vue';
+  import { computed, onBeforeMount, reactive, ref, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
+  import { createAnnouncementValidationSchema } from '@/utils/errors/crm/announcements';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
   import { useToast } from 'vue-toastification';
   import { useCrmPremiumAccess } from '@/composables/crm-premium';
   import { Permissions } from '@/enums/permissions';
@@ -93,50 +96,69 @@
   const toast = useToast();
   const formSubmitted = ref(false);
 
-  // Schéma de validation avec yup
-  const form = defineForm({
-    title: field(
-      '',
-      yup
-        .string()
-        .required(announcementCrmErrorMessages.required.title)
-        .min(5, announcementCrmErrorMessages.minLength.title)
-        .max(100, announcementCrmErrorMessages.maxLength.title)
-    ),
-    content: field(
-      '',
-      yup
-        .string()
-        .required(announcementCrmErrorMessages.required.content)
-        .min(10, announcementCrmErrorMessages.minLength.content)
-        .max(1000, announcementCrmErrorMessages.maxLength.content)
-    ),
-    isActive: field(true, yup.boolean()),
+  // États du formulaire
+  const formData = reactive({
+    title: '',
+    content: '',
+    isActive: true,
+    image: undefined as File | undefined,
+  });
+
+  const apiFormData = computed(() => ({
+    title: formData.title,
+    content: formData.content,
+    isActive: formData.isActive,
+  }));
+
+  const validationErrors = reactive({
+    title: '',
+    content: '',
+    isActive: '',
+    image: '',
   });
 
   // Gestion des champs touchés
   const touchedFields = reactive({
     title: false,
     content: false,
+    image: false,
   });
 
   const showError = (fieldName: keyof typeof touchedFields) =>
-    (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
 
-  const imageFile = ref<File | null>(null);
+  const getErrorMessage = (fieldName: keyof typeof touchedFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
+
+  const validateForm = async () => {
+    const result = await validateWithYup(createAnnouncementValidationSchema as any, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
+  };
+
+  const imageFile = ref<File | undefined>(undefined);
   const imagePreview = ref<string>('');
 
-  // Données du formulaire pour le composant Create
-  const formData = computed(() => ({
-    title: form.title.$value,
-    content: form.content.$value,
-    isActive: form.isActive.$value,
-  }));
+  watch(imageFile, (newValue) => {
+    formData.image = newValue;
+    touchedFields.image = true;
+  });
+
+  // Watcher pour effacer l'erreur d'image quand elle change
+  watch(imageFile, () => {
+    clearValidationErrors(validationErrors, 'image');
+  });
 
   async function handleBeforeSubmit(): Promise<boolean> {
     formSubmitted.value = true;
 
-    if (!(await isValidForm(form))) {
+    if (!(await validateForm())) {
       toast.error('Veuillez corriger les erreurs du formulaire');
       return false;
     }
@@ -144,7 +166,7 @@
     return true;
   }
 
-  async function handleAfterCreate(createdItem: any) {
+  async function handleAfterCreate(createdItem: any): Promise<void> {
     console.log('handleAfterCreate called with:', createdItem);
 
     if (imageFile.value && createdItem?.data?.id) {

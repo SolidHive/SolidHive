@@ -1,20 +1,23 @@
 <template>
-  <CrudCreate
+  <Create
     :can-create-item="crmAccess.canCreateRole"
     :create-endpoint="`association/${associationId}/roles`"
-    :form-data="formData"
+    :form-data="apiFormData"
     :on-before-submit="handleBeforeSubmit"
+    @after-create="handleAfterCreate"
+    @error="handleError"
   >
     <template #title>Créer un nouveau rôle</template>
     <template #form>
       <div class="space-y-4 p-4">
         <InputForm
-          v-model="form.name.$value"
+          v-model="formData.name"
           input-name="role-name"
           type="text"
           placeholder="Ex: Trésorier, Secrétaire..."
-          :error-message="form.name.$error?.message || ''"
+          :error-message="getErrorMessage('name')"
           :error-state="showError('name')"
+          @input="clearValidationErrors(validationErrors, 'name')"
           @blur="() => (touchedFields.name = true)"
         >
           <template #label>
@@ -24,13 +27,14 @@
         </InputForm>
 
         <TextareaForm
-          v-model="form.description.$value"
+          v-model="formData.description"
           input-name="role-description"
           placeholder="Décrivez les responsabilités de ce rôle..."
           :rows="3"
           :max-length="500"
-          :error-message="form.description.$error?.message || ''"
+          :error-message="getErrorMessage('description')"
           :error-state="showError('description')"
+          @input="clearValidationErrors(validationErrors, 'description')"
           @blur="() => (touchedFields.description = true)"
         >
           <template #label>Description</template>
@@ -58,18 +62,23 @@
             >
               <div class="grid grid-cols-2 gap-2">
                 <div
-                  v-for="permission in availablePermissions"
+                  v-for="permission in availablePermissions()"
                   :key="permission.value"
                   class="flex items-center space-x-2"
                 >
                   <input
                     :id="`perm-${permission.value}`"
-                    v-model="form.permissions.$value"
+                    v-model="formData.permissions"
                     type="checkbox"
                     :value="permission.value"
                     :disabled="selectAll"
                     class="border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    @change="() => (touchedFields.permissions = true)"
+                    @change="
+                      () => {
+                        touchedFields.permissions = true;
+                        clearValidationErrors(validationErrors, 'permissions');
+                      }
+                    "
                   />
                   <label
                     :for="`perm-${permission.value}`"
@@ -82,7 +91,7 @@
               </div>
             </div>
             <p v-if="showError('permissions')" class="text-destructive text-sm">
-              {{ form.permissions.$error?.message || '' }}
+              {{ getErrorMessage('permissions') }}
             </p>
           </div>
         </div>
@@ -91,21 +100,20 @@
     <template #description>
       Définissez le nom, la description et les permissions pour ce nouveau rôle.
     </template>
-  </CrudCreate>
+  </Create>
 </template>
 
 <script setup lang="ts">
-  import { Create as CrudCreate } from '@/components/dashboard/crud';
+  import { Create } from '@/components/dashboard/crud';
   import InputForm from '@/components/form/InputForm.vue';
   import TextareaForm from '@/components/form/TextareaForm.vue';
   import { useCrmAccess } from '@/composables/crm-access';
-  import { Permissions } from '@/enums/permissions';
   import { useCrmStore } from '@/stores/crm';
-  import { roleCrmErrorMessages } from '@/utils/errors/crm/roles';
   import { computed, onBeforeMount, reactive, ref, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
+  import { createRoleValidationSchema } from '@/utils/errors/crm/roles';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
+  import { availablePermissions } from '@/utils/permissions.utils';
   import { useToast } from 'vue-toastification';
   import { useCrmPremiumAccess } from '@/composables/crm-premium';
 
@@ -119,25 +127,17 @@
   const toast = useToast();
   const formSubmitted = ref(false);
 
-  // Schéma de validation avec yup
-  const form = defineForm({
-    name: field(
-      '',
-      yup
-        .string()
-        .required(roleCrmErrorMessages.required.name)
-        .min(3, roleCrmErrorMessages.minLength.name)
-        .max(50, roleCrmErrorMessages.maxLength.name)
-    ),
-    description: field('', yup.string().max(500, roleCrmErrorMessages.maxLength.description)),
-    permissions: field(
-      [] as string[],
-      yup
-        .array()
-        .of(yup.string())
-        .min(1, roleCrmErrorMessages.required.permissions)
-        .required(roleCrmErrorMessages.required.permissions)
-    ),
+  // États du formulaire
+  const formData = reactive({
+    name: '',
+    description: '',
+    permissions: [] as string[],
+  });
+
+  const validationErrors = reactive({
+    name: '',
+    description: '',
+    permissions: '',
   });
 
   // Gestion des champs touchés
@@ -148,35 +148,36 @@
   });
 
   const showError = (fieldName: keyof typeof touchedFields) =>
-    (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (fieldName: keyof typeof touchedFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
+
+  const validateForm = async () => {
+    const result = await validateWithYup(createRoleValidationSchema as any, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
+  };
 
   const selectAll = ref(false);
 
-  const availablePermissions = [
-    { value: Permissions.REGISTERS_VIEW, label: 'Voir membres' },
-    { value: Permissions.REGISTERS_CREATE, label: 'Créer membres' },
-    { value: Permissions.REGISTERS_UPDATE, label: 'Modifier membres' },
-    { value: Permissions.REGISTERS_DELETE, label: 'Supprimer membres' },
-    { value: Permissions.ROLES_VIEW, label: 'Voir rôles' },
-    { value: Permissions.ROLES_CREATE, label: 'Créer rôles' },
-    { value: Permissions.ROLES_UPDATE, label: 'Modifier rôles' },
-    { value: Permissions.ROLES_DELETE, label: 'Supprimer rôles' },
-    { value: Permissions.ANNOUNCEMENTS_CREATE, label: 'Créer annonces' },
-    { value: Permissions.ANNOUNCEMENTS_UPDATE, label: 'Modifier annonces' },
-    { value: Permissions.ANNOUNCEMENTS_DELETE, label: 'Supprimer annonces' },
-  ];
-
   // Données du formulaire pour le composant Create
-  const formData = computed(() => ({
-    name: form.name.$value,
-    description: form.description.$value || undefined,
-    permissions: form.permissions.$value,
+  const apiFormData = computed(() => ({
+    name: formData.name,
+    description: formData.description || undefined,
+    permissions: formData.permissions,
   }));
 
   async function handleBeforeSubmit(): Promise<boolean> {
     formSubmitted.value = true;
 
-    if (!(await isValidForm(form))) {
+    if (!(await validateForm())) {
       toast.error('Veuillez corriger les erreurs du formulaire');
       return false;
     }
@@ -184,17 +185,32 @@
     return true;
   }
 
+  async function handleAfterCreate(_createdItem: any): Promise<void> {
+    toast.success('Rôle créé avec succès !');
+  }
+
+  function handleError(errorDetails: { field?: string; message: string }) {
+    if (errorDetails.field) {
+      // Erreur de champ spécifique
+      validationErrors[errorDetails.field as keyof typeof validationErrors] = errorDetails.message;
+      touchedFields[errorDetails.field as keyof typeof touchedFields] = true;
+    } else {
+      // Erreur générale
+      toast.error(errorDetails.message);
+    }
+  }
+
   function toggleSelectAll() {
     if (selectAll.value) {
-      form.permissions.$value = ['*'];
+      formData.permissions = ['*'];
     } else {
-      form.permissions.$value = [];
+      formData.permissions = [];
     }
     touchedFields.permissions = true;
   }
 
   watch(
-    () => form.permissions.$value,
+    () => formData.permissions,
     (newPerms) => {
       if (newPerms.includes('*')) {
         selectAll.value = true;

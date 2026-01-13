@@ -22,11 +22,17 @@
           <InputForm
             label-value="Prénom *"
             :input-name="`participant-${index}-firstName`"
-            :model-value="participant.firstName"
+            :model-value="participant.firstName ?? ''"
             type="text"
             placeholder="Prénom"
             :error-message="getErrorMessage(index, 'firstName')"
             :error-state="showError(index, 'firstName')"
+            @input="
+              clearValidationErrors(
+                validationErrors[index] || (validationErrors[index] = {}),
+                'firstName'
+              )
+            "
             @update:model-value="updateParticipantField(index, 'firstName', $event as string)"
             @blur="handleBlur(index, 'firstName')"
           />
@@ -34,11 +40,17 @@
           <InputForm
             label-value="Nom *"
             :input-name="`participant-${index}-lastName`"
-            :model-value="participant.lastName"
+            :model-value="participant.lastName ?? ''"
             type="text"
             placeholder="Nom"
             :error-message="getErrorMessage(index, 'lastName')"
             :error-state="showError(index, 'lastName')"
+            @input="
+              clearValidationErrors(
+                validationErrors[index] || (validationErrors[index] = {}),
+                'lastName'
+              )
+            "
             @update:model-value="updateParticipantField(index, 'lastName', $event as string)"
             @blur="handleBlur(index, 'lastName')"
           />
@@ -46,11 +58,17 @@
           <InputForm
             label-value="Email *"
             :input-name="`participant-${index}-email`"
-            :model-value="participant.email"
+            :model-value="participant.email ?? ''"
             type="email"
             placeholder="email@exemple.com"
             :error-message="getErrorMessage(index, 'email')"
             :error-state="showError(index, 'email')"
+            @input="
+              clearValidationErrors(
+                validationErrors[index] || (validationErrors[index] = {}),
+                'email'
+              )
+            "
             @update:model-value="updateParticipantField(index, 'email', $event as string)"
             @blur="handleBlur(index, 'email')"
           />
@@ -58,11 +76,17 @@
           <InputForm
             label-value="Téléphone"
             :input-name="`participant-${index}-phone`"
-            :model-value="participant.phone"
+            :model-value="participant.phone ?? ''"
             type="tel"
             placeholder="+33 6 12 34 56 78"
             :error-message="getErrorMessage(index, 'phone')"
             :error-state="showError(index, 'phone')"
+            @input="
+              clearValidationErrors(
+                validationErrors[index] || (validationErrors[index] = {}),
+                'phone'
+              )
+            "
             @update:model-value="updateParticipantField(index, 'phone', $event as string)"
             @blur="handleBlur(index, 'phone')"
           />
@@ -80,6 +104,7 @@
   import { formatCurrency, getPricingInfo } from '@/utils/eventRegistration.utils';
   import type { EventPricing, Participant } from '@/interfaces';
   import { participantValidationSchema } from '@/utils/errors/eventRegistration';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
 
   const props = defineProps<{
     participants: Participant[];
@@ -103,22 +128,23 @@
     const participant = props.participants[index];
     if (!participant) return false;
 
-    try {
-      await participantSchema.validate(participant, { abortEarly: false });
-      validationErrors[index] = {};
-      return true;
-    } catch (err: any) {
-      const errors: Record<string, string> = {};
-      if (err.inner) {
-        err.inner.forEach((error: any) => {
-          if (error.path) {
-            errors[error.path] = error.message;
-          }
-        });
-      }
-      validationErrors[index] = errors;
-      return false;
+    // Créer un objet compatible avec le schéma de validation
+    const validationData = {
+      firstName: participant.firstName,
+      lastName: participant.lastName,
+      email: participant.email,
+      phone: participant.phone || '',
+    };
+
+    const result = await validateWithYup(participantSchema, validationData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors[index]);
+    } else {
+      validationErrors[index] = result.errors;
     }
+
+    return result.isValid;
   };
 
   const createParticipantForm = (index: number) => {
@@ -156,14 +182,14 @@
 
   const updateParticipantField = (index: number, field: keyof Participant, value: string) => {
     const updated = [...props.participants];
-    updated[index] = { ...updated[index], [field]: value };
+    updated[index] = { ...updated[index], [field]: value } as Participant;
     emit('update:participants', updated);
   };
 
   const initializeForms = async () => {
     // Nettoyer les anciennes erreurs
     Object.keys(validationErrors).forEach((key) => {
-      delete validationErrors[parseInt(key)];
+      clearValidationErrors(validationErrors[parseInt(key)]);
     });
     Object.keys(touchedFields).forEach((key) => {
       delete touchedFields[parseInt(key)];
@@ -195,7 +221,7 @@
           email: '',
           phone: '',
           pricingId: '',
-        });
+        } as Participant);
       }
 
       // Retirer des participants si nécessaire

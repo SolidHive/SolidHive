@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { File } from './entities/file.entity';
 import { createReadStream } from 'fs';
+import { unlink } from 'fs/promises';
 import { join } from 'path';
 import { Role } from '../users/entities/role.entity';
 import { AssociationRole } from '../associations/modules/roles/entities/association-role.entity';
@@ -190,7 +191,24 @@ export class FilesService {
     }
   }
 
-  remove(relatedTo: string, relatedBy: string, index: number = 0, purpose?: string) {
+  async remove(relatedTo: string, relatedBy: string, index: number = 0, purpose?: string) {
+    // Récupérer le fichier avant de le supprimer pour avoir ses informations
+    const file = await this.findOne(relatedTo, relatedBy, index, undefined, purpose);
+
+    if (file) {
+      try {
+        // Supprimer le fichier physique du système de fichiers
+        const filePath = join(process.cwd(), 'uploads', file.userId, file.filename);
+        await unlink(filePath);
+      } catch (error) {
+        console.error(`Erreur lors de la suppression du fichier physique ${file.filename}:`, error);
+      }
+    } else {
+      console.log(
+        `Aucun fichier trouvé pour ${relatedTo}/${relatedBy}, index: ${index}, purpose: ${purpose}`
+      );
+    }
+
     const whereClause: any = { relatedTo, relatedBy, index };
     if (purpose) {
       whereClause.purpose = purpose;

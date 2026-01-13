@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import Stripe from 'stripe';
 import { TransactionsService } from '../../transactions/transactions.service';
+import { Transaction } from '../../transactions/entities/transaction.entity';
 import { Event } from '../../associations/modules/events/entities/event.entity';
 import { EventPricing } from '../../associations/modules/events/modules/pricings/entities/event-pricing.entity';
 import { EventRegister } from '../../associations/modules/events/modules/registers/entities/event-register.entity';
@@ -35,6 +36,8 @@ export class EventPaymentService {
     private readonly validationService: PaymentValidationService,
     private readonly ticketsService: TicketsService,
     private readonly invoicesService: InvoicesService,
+    @InjectRepository(Transaction)
+    private transactionsRepository: Repository<Transaction>,
     @InjectRepository(Event)
     private eventsRepository: Repository<Event>,
     @InjectRepository(EventPricing)
@@ -105,6 +108,27 @@ export class EventPaymentService {
    * Finaliser l'inscription à un événement après paiement réussi
    */
   async finalizeEventRegistration(sessionId: string): Promise<void> {
+    // Vérifier si une transaction existe déjà pour cette session
+    const invoicePathToCheck = `/invoices/event-registration-${sessionId}.pdf`;
+    this.logger.log(
+      `[FINALIZE] Recherche d'une transaction avec invoicePath: ${invoicePathToCheck}`
+    );
+
+    const existingTransaction = await this.transactionsRepository.findOne({
+      where: { invoicePath: invoicePathToCheck },
+    });
+
+    if (existingTransaction) {
+      this.logger.log(
+        `[FINALIZE] Session ${sessionId} DÉJÀ finalisée (transaction ${existingTransaction.id}), aucune action`
+      );
+      return;
+    }
+
+    this.logger.log(
+      `[FINALIZE] Aucune transaction trouvée, lancement de la finalisation complète...`
+    );
+
     const session = await this.stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== 'paid') {
@@ -390,17 +414,22 @@ export class EventPaymentService {
     sessionId: string
   ): Promise<string> {
     try {
+      const invoicePath = `/invoices/event-registration-${sessionId}.pdf`;
+      this.logger.log(`[TRANSACTION] Création transaction avec invoicePath: ${invoicePath}`);
+
       const transaction = await this.transactionsService.create(
         {
           amount: totalAmount,
           relatedTo: Categories.EVENT,
           relatedBy: eventId,
-          invoicePath: `/invoices/event-registration-${sessionId}.pdf`,
+          invoicePath,
         },
         userId
       );
 
-      this.logger.debug(`Transaction créée pour la session ${sessionId}`);
+      this.logger.log(
+        `[TRANSACTION] Transaction créée: ${transaction.id} avec path ${invoicePath}`
+      );
       return transaction.id;
     } catch (error) {
       this.logger.error(

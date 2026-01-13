@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Association } from './entities/association.entity';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { CreateAssociationDto } from './dto/create-association.dto';
 import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
@@ -12,7 +12,8 @@ import { Permissions } from '../../common/enums/permissions';
 import { AssociationRole } from './modules/roles/entities/association-role.entity';
 import { UserAssociation } from './modules/users/entities/user-association.entity';
 import { Status } from '../../common/enums/status';
-import { Like } from 'typeorm';
+import { File } from '../files/entities/file.entity';
+import { FilesService } from '../files/files.service';
 
 @Injectable()
 export class AssociationsService {
@@ -20,7 +21,10 @@ export class AssociationsService {
     @InjectRepository(Association)
     private readonly associationsRepository: Repository<Association>,
     @InjectRepository(User)
-    private readonly usersRepository: Repository<User>
+    private readonly usersRepository: Repository<User>,
+    @InjectRepository(File)
+    private readonly fileRepository: Repository<File>,
+    private readonly filesService: FilesService
   ) {}
 
   async create(createAssociationDto: CreateAssociationDto, userId: string) {
@@ -169,6 +173,12 @@ export class AssociationsService {
   }
 
   async remove(id: string) {
+    try {
+      await this.filesService.remove('Association', id, 0, 'image');
+    } catch (error) {
+      console.error(`Erreur suppression image association ${id}`, error);
+    }
+
     return this.associationsRepository.delete(id);
   }
 

@@ -2,19 +2,22 @@
   <Create
     :can-create-item="crmAccess.canCreateMember"
     :create-endpoint="`association/${associationId}/user`"
-    :form-data="formData"
+    :form-data="apiFormData"
     :on-before-submit="handleBeforeSubmit"
+    @after-create="handleAfterCreate"
+    @error="handleError"
   >
     <template #title>Inviter un membre</template>
     <template #form>
       <div class="space-y-4 p-4">
         <InputForm
-          v-model="form.email.$value"
+          v-model="formData.email"
           input-name="member-email"
           type="email"
           placeholder="exemple@email.com"
-          :error-message="form.email.$error?.message || ''"
+          :error-message="getErrorMessage('email')"
           :error-state="showError('email')"
+          @input="clearValidationErrors(validationErrors, 'email')"
           @blur="() => (touchedFields.email = true)"
         >
           <template #label>
@@ -27,11 +30,12 @@
         </InputForm>
 
         <SelectForm
-          v-model="form.roleId.$value"
+          v-model="formData.roleId"
           input-name="member-role"
           placeholder="Sélectionnez un rôle"
-          :error-message="form.roleId.$error?.message || ''"
+          :error-message="getErrorMessage('roleId')"
           :error-state="showError('roleId')"
+          @input="clearValidationErrors(validationErrors, 'roleId')"
           @blur="() => (touchedFields.roleId = true)"
         >
           <template #label>
@@ -66,11 +70,10 @@
   import type { Role } from '@/interfaces/roles.interface';
   import { useCrmStore } from '@/stores/crm';
   import Database from '@/utils/database.utils';
-  import { memberCrmErrorMessages } from '@/utils/errors/crm/members';
   import { computed, onBeforeMount, onMounted, reactive, ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
+  import { createMemberValidationSchema } from '@/utils/errors/crm/members';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
   import { useToast } from 'vue-toastification';
   import { Permissions } from '@/enums/permissions';
   import { useCrmPremiumAccess } from '@/composables/crm-premium';
@@ -85,16 +88,15 @@
   const toast = useToast();
   const formSubmitted = ref(false);
 
-  // Schéma de validation avec yup
-  const form = defineForm({
-    email: field(
-      '',
-      yup
-        .string()
-        .required(memberCrmErrorMessages.required.email)
-        .email(memberCrmErrorMessages.format.email)
-    ),
-    roleId: field('', yup.string().required(memberCrmErrorMessages.required.roleId)),
+  // États du formulaire
+  const formData = reactive({
+    email: '',
+    roleId: '',
+  });
+
+  const validationErrors = reactive({
+    email: '',
+    roleId: '',
   });
 
   // Gestion des champs touchés
@@ -104,7 +106,22 @@
   });
 
   const showError = (fieldName: keyof typeof touchedFields) =>
-    (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (fieldName: keyof typeof touchedFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
+
+  const validateForm = async () => {
+    const result = await validateWithYup(createMemberValidationSchema as any, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
+  };
 
   const roles = ref<Role[]>([]);
 
@@ -113,20 +130,35 @@
   });
 
   // Données du formulaire pour le composant Create
-  const formData = computed(() => ({
-    email: form.email.$value,
-    roleId: form.roleId.$value,
+  const apiFormData = computed(() => ({
+    email: formData.email,
+    roleId: formData.roleId,
   }));
 
   async function handleBeforeSubmit(): Promise<boolean> {
     formSubmitted.value = true;
 
-    if (!(await isValidForm(form))) {
+    if (!(await validateForm())) {
       toast.error('Veuillez corriger les erreurs du formulaire');
       return false;
     }
 
     return true;
+  }
+
+  async function handleAfterCreate(_createdItem: any): Promise<void> {
+    toast.success('Membre invité avec succès !');
+  }
+
+  function handleError(errorDetails: { field?: string; message: string }) {
+    if (errorDetails.field) {
+      // Erreur de champ spécifique
+      validationErrors[errorDetails.field as keyof typeof validationErrors] = errorDetails.message;
+      touchedFields[errorDetails.field as keyof typeof touchedFields] = true;
+    } else {
+      // Erreur générale
+      toast.error(errorDetails.message);
+    }
   }
 
   async function fetchRoles(): Promise<void> {

@@ -43,6 +43,7 @@ services:
     volumes:
       - ./server/migrations:/usr/src/app/migrations
       - ./server/package.json:/usr/src/app/package.json
+      - ./server/uploads:/usr/src/app/uploads
     depends_on:
       - db
       - mailtrap

@@ -11,13 +11,14 @@
 
             <form class="space-y-5" @submit.prevent="handleSubmit">
               <InputForm
-                v-model="form.password.$value"
+                v-model="formData.password"
                 label-value="Nouveau mot de passe"
                 input-name="password"
                 type="password"
                 placeholder="Votre nouveau mot de passe"
-                :error-message="showError('password') ? form.password.$error?.message : ''"
+                :error-message="getErrorMessage('password')"
                 :error-state="showError('password')"
+                @input="clearValidationErrors(validationErrors, 'password')"
                 @blur="touchedFields.password = true"
               >
                 <template #hint>
@@ -109,8 +110,9 @@
   import InputForm from '@/components/form/InputForm.vue';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import { Button } from '@/components/ui/button';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import { resetPasswordValidationSchema } from '@/utils/errors/auth/users';
+  import { resetPasswordValidationSchema, userErrorMessages } from '@/utils/errors/auth/users';
+  import { getApiErrorMessage } from '@/utils/error.utils';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
   import { Loader2, Check, X } from 'lucide-vue-next';
 
   // États
@@ -121,6 +123,15 @@
   const formSubmitted = ref(false);
   const token = ref('');
 
+  // États du formulaire
+  const formData = reactive({
+    password: '',
+  });
+
+  const validationErrors = reactive({
+    password: '',
+  });
+
   const touchedFields = reactive({
     password: false,
   });
@@ -129,14 +140,25 @@
   const route = useRoute();
   const toast = useToast();
 
-  const form = defineForm({
-    password: field('', resetPasswordValidationSchema.password),
-  });
-
   type FormFields = 'password';
 
   const showError = (fieldName: FormFields) =>
-    (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (fieldName: FormFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
+
+  const validateForm = async () => {
+    const result = await validateWithYup(resetPasswordValidationSchema, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
+  };
 
   // Vérifier le token au chargement
   onMounted(() => {
@@ -153,7 +175,7 @@
     formSubmitted.value = true;
     errorMessage.value = '';
 
-    if (!(await isValidForm(form))) return;
+    if (!(await validateForm())) return;
 
     isLoading.value = true;
 
@@ -161,27 +183,14 @@
       await Database.create('security/action', {
         actionType: 'RESET_PASSWORD',
         token: token.value,
-        newPassword: form.password.$value,
+        newPassword: formData.password,
       });
 
       resetSuccess.value = true;
       toast.success('Mot de passe réinitialisé avec succès');
     } catch (error: unknown) {
-      const apiError = error as {
-        response?: { data?: { message?: string }; status?: number };
-      };
-
-      if (
-        apiError.response?.status === 400 &&
-        apiError.response.data?.message?.includes('expiré')
-      ) {
-        tokenInvalid.value = true;
-        toast.error('Le lien de réinitialisation a expiré');
-      } else {
-        errorMessage.value =
-          apiError.response?.data?.message || 'Une erreur est survenue lors de la réinitialisation';
-        toast.error(errorMessage.value);
-      }
+      errorMessage.value = getApiErrorMessage(error, userErrorMessages.apiErrors);
+      toast.error(errorMessage.value);
     } finally {
       isLoading.value = false;
     }

@@ -72,6 +72,16 @@ export class PaymentsController {
     return { message: 'Inscription finalisée avec succès' };
   }
 
+  @Post('donate/:sessionId/finalize')
+  @ApiOperation({ summary: 'Finaliser le don après paiement réussi' })
+  @ApiResponse({ status: 200, description: 'Don finalisé avec succès' })
+  @ApiResponse({ status: 400, description: 'Paiement non complété ou données invalides' })
+  @ApiResponse({ status: 404, description: 'Session non trouvée' })
+  async finalizeDonation(@Param('sessionId') sessionId: string) {
+    await this.paymentsService.finalizeDonation(sessionId);
+    return { message: 'Don finalisé avec succès' };
+  }
+
   @Get('session/:sessionId')
   @ApiOperation({ summary: "Récupérer les détails d'une session Stripe Checkout" })
   @ApiResponse({ status: 200, description: 'Détails de la session récupérés avec succès' })

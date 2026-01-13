@@ -25,11 +25,13 @@ export class CreateFundraisingDto {
   @ApiProperty({ example: 1000, description: 'Montant actuel' })
   @IsNotEmpty({ message: 'Le montant actuel est requis' })
   @IsNumber({}, { message: 'Le montant actuel doit être un nombre' })
+  @Type(() => Number)
   amount: number;
 
   @ApiProperty({ example: 5000, description: 'Montant souhaité' })
   @IsNotEmpty({ message: 'Le montant souhaité est requis' })
   @IsNumber({}, { message: 'Le montant souhaité doit être un nombre' })
+  @Type(() => Number)
   wantedAmount: number;
 
   @ApiProperty({

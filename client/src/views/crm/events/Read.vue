@@ -1,19 +1,39 @@
 <template>
   <div v-if="route.name === 'CRMEvents'">
-    <Header />
-    <div class="px-2 py-4 sm:p-6 md:px-12">
-      <div class="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <h1 class="text-xl font-bold sm:text-2xl md:text-3xl">Événements</h1>
+    <Header :can-create-items="crmAccess.canCreateEvent && hasStripeAccount">
+      <template #header>Événements</template>
+      <template #description>Gérez les événements de votre association</template>
+      <template #add-button>
         <Button
-          v-if="crmAccess.canCreateEvent"
           class="w-full sm:w-auto"
           @click="router.push(`/crm/${crmStore.currentAssociationId}/events/create`)"
         >
           <Plus class="mr-2 h-4 w-4" />
           Créer un événement
         </Button>
-      </div>
+      </template>
+    </Header>
 
+    <div class="px-2 py-4 sm:p-6 md:px-12">
+      <!-- Message d'avertissement si pas de compte Stripe -->
+      <div
+        v-if="!hasStripeAccount && !loading"
+        class="mb-6 border-l-4 border-yellow-400 bg-yellow-50 p-4"
+      >
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <AlertTriangle class="h-5 w-5 text-yellow-400" />
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-yellow-700">
+              <strong class="font-medium">Compte Stripe non configuré</strong>
+              <br />
+              Pour créer des événements payants, vous devez d'abord activer votre compte Stripe dans
+              les paramètres de votre association.
+            </p>
+          </div>
+        </div>
+      </div>
       <div v-if="loading" class="flex justify-center py-12">
         <LoadingOverlay message="Chargement des événements..." />
       </div>
@@ -68,13 +88,12 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue';
+  import { onMounted, watch, ref } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
 
   const route = useRoute();
-  import { Plus, Calendar } from 'lucide-vue-next';
+  import { Calendar, AlertTriangle } from 'lucide-vue-next';
   import Header from '@/components/dashboard/Header.vue';
-  import Button from '@/components/ui/button/Button.vue';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import { useCrmStore } from '@/stores/crm';
   import { useCrmAccess } from '@/composables/crm-access';
@@ -88,6 +107,7 @@
 
   const loading = ref(true);
   const events = ref<Event[]>([]);
+  const hasStripeAccount = ref(false);
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('fr-FR', {
@@ -111,7 +131,27 @@
     }
   };
 
-  onMounted(() => {
-    loadEvents();
+  const checkStripeAccount = async () => {
+    try {
+      const association = await Database.getOne('association', crmStore.currentAssociationId!);
+      hasStripeAccount.value = !!(association.stripeAccountId && association.canReceiveDonations);
+    } catch (error) {
+      console.error('Erreur lors de la vérification du compte Stripe:', error);
+      hasStripeAccount.value = false;
+    }
+  };
+
+  onMounted(async () => {
+    await checkStripeAccount();
+    await loadEvents();
   });
+
+  watch(
+    () => route.name,
+    (newRouteName) => {
+      if (newRouteName === 'CRMEvents') {
+        loadEvents();
+      }
+    }
+  );
 </script>

@@ -45,7 +45,7 @@ export const userErrorMessages = {
   },
 };
 
-export const userValidationSchema = {
+export const registerValidationSchema = yup.object({
   name: yup
     .string()
     .required(userErrorMessages.required.name)
@@ -69,26 +69,26 @@ export const userValidationSchema = {
     .string()
     .required(userErrorMessages.required.password)
     .matches(userErrorMessages.patterns.password, userErrorMessages.password.invalid),
-};
+});
 
-export const loginValidationSchema = {
+export const loginValidationSchema = yup.object({
   email: yup
     .string()
     .required(userErrorMessages.required.email)
     .email(userErrorMessages.format.email),
   password: yup.string().required(userErrorMessages.required.password),
-};
+});
 
-export const forgotPasswordValidationSchema = {
+export const forgotPasswordValidationSchema = yup.object({
   email: yup
     .string()
     .required(userErrorMessages.required.email)
     .email(userErrorMessages.format.email),
-};
+});
 
-export const resetPasswordValidationSchema = {
+export const resetPasswordValidationSchema = yup.object({
   password: yup
     .string()
     .required(userErrorMessages.required.password)
     .matches(userErrorMessages.patterns.password, userErrorMessages.password.invalid),
-};
+});
