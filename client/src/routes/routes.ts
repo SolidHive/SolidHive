@@ -298,6 +298,12 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: 'premium-required',
+        name: 'CRMPremiumRequired',
+        component: () => import('../views/crm/PremiumRequired.vue'),
+        meta: { title: 'Premium requis - CRM' },
+      },
     ],
   },
   {
@@ -337,6 +343,32 @@ const routes: RouteRecordRaw[] = [
         name: 'AdminDashboardAssociationDetail',
         component: () => import('../views/admin-dashboard/associations/Detail.vue'),
         meta: { title: 'Détails Association - Dashboard Admin' },
+      },
+      {
+        path: 'permissions-access',
+        name: 'AdminDashboardPermissionsAccess',
+        component: () => import('../views/admin-dashboard/permissions-access/Read.vue'),
+        meta: { title: "Permissions d'accès - Dashboard Admin" },
+        children: [
+          {
+            path: 'create',
+            name: 'AdminDashboardPermissionsAccessCreate',
+            component: () => import('../views/admin-dashboard/permissions-access/Create.vue'),
+            meta: { title: 'Créer une permission - Dashboard Admin' },
+          },
+          {
+            path: 'update/:itemId',
+            name: 'AdminDashboardPermissionsAccessUpdate',
+            component: () => import('../views/admin-dashboard/permissions-access/Update.vue'),
+            meta: { title: 'Modifier une permission - Dashboard Admin' },
+          },
+          {
+            path: 'delete/:itemId',
+            name: 'AdminDashboardPermissionsAccessDelete',
+            component: () => import('../views/admin-dashboard/permissions-access/Delete.vue'),
+            meta: { title: 'Supprimer une permission - Dashboard Admin' },
+          },
+        ],
       },
     ],
   },

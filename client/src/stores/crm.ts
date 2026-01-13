@@ -8,6 +8,7 @@ import type { Member } from '@/interfaces/member.interface';
 export const useCrmStore = defineStore('crm', () => {
   const currentAssociationId = ref<string | null>(null);
   const currentRoute = ref<string | null>(null);
+  const associationPremiumUntil = ref<string | null>(null);
   const error = ref<string | null>(null);
   const isLoading = ref(false);
   const member = ref<Member | null>(null);
@@ -37,6 +38,7 @@ export const useCrmStore = defineStore('crm', () => {
       const hasAccess = !!result;
       if (hasAccess) {
         member.value = result;
+        associationPremiumUntil.value = result.association.paymentServiceValidUntil;
       }
       return hasAccess;
     } catch (err) {
@@ -62,6 +64,7 @@ export const useCrmStore = defineStore('crm', () => {
     error.value = null;
     isLoading.value = false;
     member.value = null;
+    associationPremiumUntil.value = null;
   }
 
   return {
@@ -70,6 +73,7 @@ export const useCrmStore = defineStore('crm', () => {
     currentRoute,
     error,
     isLoading,
+    associationPremiumUntil,
 
     isInCrm,
 

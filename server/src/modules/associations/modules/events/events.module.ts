@@ -7,10 +7,11 @@ import { UserAssociation } from '../users/entities/user-association.entity';
 import { EventsPricingsModule } from './modules/pricings/events-pricings.module';
 import { EventsRegistersModule } from './modules/registers/events-registers.module';
 import { File } from '../../../files/entities/file.entity';
+import { PermissionAccess } from 'src/modules/permissions-access/entities/permission-access.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Event, UserAssociation, File]),
+    TypeOrmModule.forFeature([Event, UserAssociation, File, PermissionAccess]),
     EventsPricingsModule,
     EventsRegistersModule,
   ],

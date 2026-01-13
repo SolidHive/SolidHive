@@ -136,4 +136,11 @@ export class Association {
   })
   @Column({ default: false })
   canReceiveDonations: boolean;
+
+  @ApiProperty({
+    example: '2025-02-01T00:00:00.000Z',
+    description: "Date jusqu'à laquelle l'association est abonnée au service de paiement",
+  })
+  @Column({ type: 'timestamp', nullable: true })
+  paymentServiceValidUntil?: Date;
 }

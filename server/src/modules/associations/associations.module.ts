@@ -10,6 +10,7 @@ import { AssociationsRolesModule } from './modules/roles/associations-roles.modu
 import { AssociationsAnnouncementsModule } from './modules/announcements/associations-announcements.module';
 import { UsersAssociationsModule } from './modules/users/users-associations.module';
 import { UserAssociation } from './modules/users/entities/user-association.entity';
+import { PermissionAccessModule } from '../permissions-access/permission-access.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UserAssociation } from './modules/users/entities/user-association.entit
     FundraisingsModule,
     AssociationsRolesModule,
     UsersAssociationsModule,
+    PermissionAccessModule,
   ],
   controllers: [AssociationsController],
   providers: [AssociationsService],

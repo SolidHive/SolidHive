@@ -31,6 +31,17 @@
             <Building2 :size="20" />
             <span class="hidden lg:block">Associations</span>
           </RouterLink>
+          <RouterLink
+            :to="{
+              name: 'AdminDashboardPermissionsAccess',
+              params: { locale: $route.params.locale },
+            }"
+            class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
+            active-class="bg-secondary rounded-lg font-semibold"
+          >
+            <ShieldCheck :size="20" />
+            <span class="hidden lg:block">Permissions</span>
+          </RouterLink>
         </div>
       </div>
       <div id="admin-aside-footer" class="border-accent-foreground border-t px-2 py-4 lg:px-4">
@@ -45,7 +56,7 @@
 
 <script setup lang="ts">
   import logo from '@/assets/images/logo-small-solidhive.svg';
-  import { LayoutDashboard, Building2 } from 'lucide-vue-next';
+  import { LayoutDashboard, Building2, ShieldCheck } from 'lucide-vue-next';
   import { useWindowSize } from '@vueuse/core';
 
   const { width } = useWindowSize();

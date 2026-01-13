@@ -162,7 +162,7 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted, reactive, ref, watch } from 'vue';
+  import { computed, onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import * as yup from 'yup';
   import { defineForm, field, isValidForm } from 'vue-yup-form';
@@ -175,10 +175,16 @@
   import { useCrmStore } from '@/stores/crm';
   import Database from '@/utils/database.utils';
   import { eventCrmErrorMessages } from '@/utils/errors/crm/events';
+  import { Permissions } from '@/enums/permissions';
+  import { useCrmAccess } from '@/composables/crm-access';
+  import { useCrmPremiumAccess } from '@/composables/crm-premium';
 
   const router = useRouter();
   const route = useRoute();
   const crmStore = useCrmStore();
+  const member = crmStore.getMember();
+  const crmAccess = useCrmAccess(member);
+  const crmPremiumAccess = useCrmPremiumAccess(crmStore.associationPremiumUntil);
   const eventId = route.params.eventId as string;
 
   const loading = ref(true);
@@ -388,5 +394,26 @@
 
   onMounted(() => {
     loadEvent();
+  });
+
+  onBeforeMount(async () => {
+    const hasPremiumAccess = await crmPremiumAccess.hasAccessToPremiumFeatures(
+      Permissions.EVENTS_UPDATE
+    );
+
+    if (!hasPremiumAccess) {
+      router.push({
+        name: 'CRMPremiumRequired',
+        params: {
+          id: route.params.id,
+        },
+      });
+      return;
+    }
+
+    if (!crmAccess.canUpdateEvent) {
+      router.push('/unauthorized');
+      return;
+    }
   });
 </script>

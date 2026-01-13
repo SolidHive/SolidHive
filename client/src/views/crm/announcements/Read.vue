@@ -51,13 +51,11 @@
 </template>
 
 <script setup lang="ts">
-  import { onBeforeMount } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
+  import { useRoute } from 'vue-router';
   import { useCrmStore } from '@/stores/crm';
   import { TableCell } from '@/components/ui/table';
   import { useCrmAccess } from '@/composables/crm-access';
   import { Read as ReadRaw } from '@/components/dashboard/crud';
-  import { Permissions } from '@/enums/permissions';
   import type { Announcement } from '@/interfaces';
   import Image from '@/components/dashboard/Image.vue';
   import type { TableHeader } from '@/interfaces/table-header.interface';
@@ -75,16 +73,5 @@
   const member = crmStore.getMember();
   const crmAccess = useCrmAccess(member);
   const route = useRoute();
-  const router = useRouter();
   const associationId = route.params.id as string;
-
-  onBeforeMount(async () => {
-    const canAccessToAnnouncements = member.role.permissions.some(
-      (permission) => permission === Permissions.ALL
-    );
-    if (!canAccessToAnnouncements) {
-      router.push('/unauthorized');
-      return;
-    }
-  });
 </script>
