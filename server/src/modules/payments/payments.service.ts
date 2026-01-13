@@ -66,6 +66,15 @@ export class PaymentsService {
   }
 
   /**
+   * Finalise un don après paiement réussi
+   * Délègue au service spécialisé DonationPaymentService
+   */
+  async finalizeDonation(sessionId: string): Promise<void> {
+    this.logger.log('Finalisation don', { sessionId });
+    return this.donationPaymentService.finalizeDonation(sessionId);
+  }
+
+  /**
    * Récupère les détails d'une session Stripe
    * Méthode commune utilisée par les différents flux de paiement
    */

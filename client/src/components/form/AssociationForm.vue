@@ -4,12 +4,13 @@
     <form v-if="currentStepLocal === 1" class="space-y-6" @submit.prevent="handleStep1Submit">
       <!-- Nom de l'association -->
       <InputForm
-        v-model="associationForm.name.$value"
+        v-model="formData.name"
         input-name="association-name"
         type="text"
         placeholder="Association Solidaire"
-        :error-message="associationForm.name.$error?.message || ''"
+        :error-message="getErrorMessage('name')"
         :error-state="showAssociationError('name')"
+        @input="clearValidationErrors(validationErrors, 'name')"
         @blur="() => (touchedAssociationFields.name = true)"
       >
         <template #label>
@@ -23,12 +24,13 @@
 
       <!-- Description -->
       <TextareaForm
-        v-model="associationForm.description.$value"
+        v-model="formData.description"
         input-name="association-description"
         placeholder="Décrivez votre association, ses missions, ses objectifs..."
-        rows="4"
-        :error-message="associationForm.description.$error?.message || ''"
+        :rows="4"
+        :error-message="getErrorMessage('description')"
         :error-state="showAssociationError('description')"
+        @input="clearValidationErrors(validationErrors, 'description')"
         @blur="() => (touchedAssociationFields.description = true)"
       >
         <template #label>
@@ -39,12 +41,13 @@
 
       <!-- Email de contact -->
       <InputForm
-        v-model="associationForm.contact.$value"
+        v-model="formData.contact"
         input-name="association-contact"
         type="email"
         placeholder="contact@association.fr"
-        :error-message="associationForm.contact.$error?.message || ''"
+        :error-message="getErrorMessage('contact')"
         :error-state="showAssociationError('contact')"
+        @input="clearValidationErrors(validationErrors, 'contact')"
         @blur="() => (touchedAssociationFields.contact = true)"
       >
         <template #label>
@@ -61,12 +64,13 @@
 
       <!-- SIRET -->
       <InputForm
-        v-model="associationForm.siret.$value"
+        v-model="formData.siret"
         input-name="association-siret"
         type="text"
         placeholder="12345678901234"
-        :error-message="associationForm.siret.$error?.message || ''"
+        :error-message="getErrorMessage('siret')"
         :error-state="showAssociationError('siret')"
+        @input="clearValidationErrors(validationErrors, 'siret')"
         @blur="() => (touchedAssociationFields.siret = true)"
       >
         <template #label>
@@ -89,20 +93,22 @@
         </label>
         <div class="flex items-start gap-4">
           <input
-            v-model="associationForm.primaryColor.$value"
+            v-model="formData.primaryColor"
             type="color"
             class="border-border h-12 w-12 cursor-pointer rounded border"
+            @input="clearValidationErrors(validationErrors, 'primaryColor')"
             @blur="() => (touchedAssociationFields.primaryColor = true)"
           />
           <div class="flex-1">
             <InputForm
-              v-model="associationForm.primaryColor.$value"
+              v-model="formData.primaryColor"
               input-name="association-primary-color-text"
               type="text"
               placeholder="#000000"
               maxlength="7"
-              :error-message="associationForm.primaryColor.$error?.message || ''"
+              :error-message="getErrorMessage('primaryColor')"
               :error-state="showAssociationError('primaryColor')"
+              @input="clearValidationErrors(validationErrors, 'primaryColor')"
               @blur="() => (touchedAssociationFields.primaryColor = true)"
             />
           </div>
@@ -275,11 +281,11 @@
   import TextareaForm from '@/components/form/TextareaForm.vue';
   import { Button } from '@/components/ui/button';
   import { ChevronLeft, Building2, Upload, Image } from 'lucide-vue-next';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
   import {
     associationValidationMessages,
     associationValidationSchema,
   } from '@/utils/errors/associations';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
   import { useToast } from 'vue-toastification';
 
   // Props
@@ -311,18 +317,22 @@
   const currentStepLocal = ref(1);
   const formSubmitted = ref(false);
 
+  // Données du formulaire
+  const formData = reactive({
+    name: '',
+    description: '',
+    contact: '',
+    siret: '',
+    primaryColor: '#000000',
+  });
+
+  // Erreurs de validation
+  const validationErrors = reactive<Record<string, string>>({});
+
   // Erreurs des fichiers
   const fileErrors = reactive({
     logo: '',
     background: '',
-  });
-
-  const associationForm = defineForm({
-    name: field('', associationValidationSchema.name),
-    description: field('', associationValidationSchema.description),
-    contact: field('', associationValidationSchema.contact),
-    siret: field('', associationValidationSchema.siret),
-    primaryColor: field('', associationValidationSchema.primaryColor),
   });
 
   // Fichiers
@@ -345,8 +355,26 @@
   const showAssociationError = (
     fieldName: 'name' | 'description' | 'contact' | 'siret' | 'primaryColor'
   ) =>
-    (touchedAssociationFields[fieldName] || formSubmitted.value) &&
-    !!associationForm[fieldName].$error;
+    (touchedAssociationFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (
+    fieldName: 'name' | 'description' | 'contact' | 'siret' | 'primaryColor'
+  ) =>
+    touchedAssociationFields[fieldName] || formSubmitted.value
+      ? validationErrors[fieldName] || ''
+      : '';
+
+  const validateForm = async () => {
+    const result = await validateWithYup(associationValidationSchema, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
+  };
 
   // Gestion uploads
   function handleLogoUpload(event: Event) {
@@ -412,7 +440,7 @@
     formSubmitted.value = true;
 
     // Valider le formulaire association
-    if (!(await isValidForm(associationForm))) {
+    if (!(await validateForm())) {
       toast.error('Veuillez corriger les erreurs du formulaire');
       return;
     }
@@ -444,11 +472,11 @@
 
     emit('submit', {
       associationData: {
-        name: associationForm.name.$value.trim(),
-        description: associationForm.description.$value.trim(),
-        contact: associationForm.contact.$value.trim(),
-        siret: associationForm.siret.$value.trim(),
-        primaryColor: associationForm.primaryColor.$value.trim(),
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        contact: formData.contact.trim(),
+        siret: formData.siret.trim(),
+        primaryColor: formData.primaryColor.trim(),
       },
       logoFile: logoFile.value,
       backgroundFile: backgroundFile.value,

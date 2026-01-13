@@ -7,6 +7,8 @@ import { Event } from './entities/event.entity';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { File } from '../../../files/entities/file.entity';
+import { EventPricing } from './modules/pricings/entities/event-pricing.entity';
+import { FilesService } from '../../../files/files.service';
 import { Like, Between } from 'typeorm';
 
 @Injectable()
@@ -15,7 +17,10 @@ export class EventsService {
     @InjectRepository(Event)
     private readonly eventsRepository: Repository<Event>,
     @InjectRepository(File)
-    private readonly fileRepository: Repository<File>
+    private readonly fileRepository: Repository<File>,
+    @InjectRepository(EventPricing)
+    private readonly eventPricingRepository: Repository<EventPricing>,
+    private readonly filesService: FilesService
   ) {}
 
   async create(createEventDto: CreateEventDto, userAssociation: UserAssociation) {
@@ -101,7 +106,7 @@ export class EventsService {
           },
         });
 
-        const imageUrl = imageFile ? `/files/Event/${event.id}?index=${imageFile.index}` : null; // Pas d'image par défaut, sera géré côté frontend
+        const imageUrl = imageFile ? `/files/Event/${event.id}?index=${imageFile.index}` : null;
 
         return {
           ...event,
@@ -162,6 +167,14 @@ export class EventsService {
   }
 
   async remove(id: string, associationId: string) {
+    await this.eventPricingRepository.delete({ event: { id } });
+
+    try {
+      await this.filesService.remove('Event', id, 0, 'image');
+    } catch (error) {
+      console.error(`Erreur lors de la suppression des fichiers de l'événement ${id}:`, error);
+    }
+
     return this.eventsRepository.delete({
       id,
       association: { id: associationId },

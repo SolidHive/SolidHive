@@ -7,6 +7,7 @@ import { CreateFundraisingDto } from './dto/create-fundraising.dto';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
 import { UpdateFundraisingDto } from './dto/update-fundraising.dto';
 import { File } from '../../../files/entities/file.entity';
+import { FilesService } from '../../../files/files.service';
 import { Like, Between } from 'typeorm';
 
 @Injectable()
@@ -15,7 +16,8 @@ export class FundraisingsService {
     @InjectRepository(Fundraising)
     private readonly fundraisingsRepository: Repository<Fundraising>,
     @InjectRepository(File)
-    private readonly fileRepository: Repository<File>
+    private readonly fileRepository: Repository<File>,
+    private readonly filesService: FilesService
   ) {}
 
   async create(createFundraisingDto: CreateFundraisingDto, userAssociation: UserAssociation) {
@@ -152,6 +154,12 @@ export class FundraisingsService {
   }
 
   async remove(id: string, associationId: string) {
+    try {
+      await this.filesService.remove('Fundraising', id, 0, 'image');
+    } catch (error) {
+      console.error(`Erreur lors de la suppression des fichiers de la cagnotte ${id}:`, error);
+    }
+
     return this.fundraisingsRepository.delete({
       id,
       association: { id: associationId },

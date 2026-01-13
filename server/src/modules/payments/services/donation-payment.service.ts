@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import Stripe from 'stripe';
 import { AssociationsService } from '../../associations/associations.service';
 import { TransactionsService } from '../../transactions/transactions.service';
+import { Transaction } from '../../transactions/entities/transaction.entity';
 import { Fundraising } from '../../associations/modules/fundraisings/entities/fundraising.entity';
 import { CreateDonationDto } from '../dto/create-donation.dto';
 import { Categories } from '../../../common/enums/categories';
@@ -42,6 +43,8 @@ export class DonationPaymentService {
     private readonly validationService: PaymentValidationService,
     private readonly invoicesService: InvoicesService,
     private readonly emailService: EmailService,
+    @InjectRepository(Transaction)
+    private transactionsRepository: Repository<Transaction>,
     @InjectRepository(Fundraising)
     private fundraisingsRepository: Repository<Fundraising>
   ) {
@@ -118,31 +121,6 @@ export class DonationPaymentService {
     // Créer la session
     const session = await this.stripe.checkout.sessions.create(sessionConfig);
 
-    const transactionId = await this.createTransactionRecord(
-      createDonationDto,
-      totalAmount,
-      solidHiveAmount,
-      solidHivePercentage,
-      session.id,
-      userId
-    );
-
-    if (transactionId && userId) {
-      await this.invoicesService.getInvoiceStream(transactionId, userId);
-      await this.sendDonationReceiptEmail(
-        userId,
-        transactionId,
-        association,
-        createDonationDto,
-        totalAmount,
-        solidHiveAmount
-      );
-    }
-
-    if (createDonationDto.fundraisingId) {
-      await this.updateFundraisingAmount(createDonationDto.fundraisingId, associationAmount);
-    }
-
     this.logger.log(`Session de don créée avec succès: ${session.id}`);
 
     return {
@@ -191,6 +169,90 @@ export class DonationPaymentService {
       });
 
     return sessionBuilder.build();
+  }
+
+  /**
+   * Finaliser le don après paiement réussi
+   */
+  async finalizeDonation(sessionId: string): Promise<void> {
+    this.logger.log(`Finalisation du don pour la session ${sessionId}`);
+
+    // Vérifier si une transaction existe déjà pour cette session
+    const existingTransaction = await this.transactionsRepository.findOne({
+      where: { invoicePath: `/invoices/donation-${sessionId}.pdf` },
+    });
+
+    if (existingTransaction) {
+      this.logger.log(`Session ${sessionId} déjà finalisée, aucune action nécessaire`);
+      return;
+    }
+
+    // Récupérer la session pour vérifier le paiement
+    const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status !== 'paid') {
+      throw new Error(`Le paiement n'est pas complété pour la session ${sessionId}`);
+    }
+
+    const metadata = session.metadata;
+    if (!metadata) {
+      throw new Error(`Métadonnées manquantes pour la session ${sessionId}`);
+    }
+
+    const {
+      associationId,
+      fundraisingId,
+      userId,
+      associationAmount,
+      solidHiveAmount,
+      solidHivePercentage,
+      totalAmount,
+      message,
+    } = metadata;
+
+    // Créer la transaction
+    const transactionId = await this.createTransactionRecord(
+      {
+        associationId,
+        fundraisingId,
+        amount: parseFloat(totalAmount),
+        message,
+        supportSolidHive: parseFloat(solidHiveAmount) > 0,
+        solidHivePercentage: parseFloat(solidHivePercentage),
+      } as CreateDonationDto,
+      parseFloat(totalAmount),
+      parseFloat(solidHiveAmount),
+      parseFloat(solidHivePercentage),
+      sessionId,
+      userId
+    );
+
+    // Générer et envoyer la facture
+    if (transactionId && userId) {
+      await this.invoicesService.getInvoiceStream(transactionId, userId);
+
+      const association = await this.associationsService.findOne(associationId);
+      await this.sendDonationReceiptEmail(
+        userId,
+        transactionId,
+        association,
+        {
+          associationId,
+          fundraisingId,
+          amount: parseFloat(totalAmount),
+          message,
+        } as CreateDonationDto,
+        parseFloat(totalAmount),
+        parseFloat(solidHiveAmount)
+      );
+    }
+
+    // Mettre à jour le montant de la cagnotte
+    if (fundraisingId) {
+      await this.updateFundraisingAmount(fundraisingId, parseFloat(associationAmount));
+    }
+
+    this.logger.log(`Don finalisé avec succès pour la session ${sessionId}`);
   }
 
   /**

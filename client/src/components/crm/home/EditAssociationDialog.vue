@@ -29,12 +29,13 @@
         </div>
 
         <InputForm
-          v-model="editForm.name.$value"
+          v-model="formData.name"
           input-name="association-name"
           type="text"
           placeholder="Nom de l'association"
-          :error-message="editForm.name.$error?.message || ''"
+          :error-message="getErrorMessage('name')"
           :error-state="showError('name')"
+          @input="clearValidationErrors(validationErrors, 'name')"
           @blur="() => (touchedFields.name = true)"
         >
           <template #label>
@@ -44,38 +45,41 @@
         </InputForm>
 
         <TextareaForm
-          v-model="editForm.description.$value"
+          v-model="formData.description"
           input-name="association-description"
           placeholder="Description de l'association"
-          :error-message="editForm.description.$error?.message || ''"
+          :error-message="getErrorMessage('description')"
           :error-state="showError('description')"
           :rows="3"
           :max-length="1000"
+          @input="clearValidationErrors(validationErrors, 'description')"
           @blur="() => (touchedFields.description = true)"
         >
           <template #label>Description</template>
         </TextareaForm>
 
         <TextareaForm
-          v-model="editForm.aboutText.$value"
+          v-model="formData.aboutText"
           input-name="association-about"
           placeholder="Texte à propos de l'association"
-          :error-message="editForm.aboutText.$error?.message || ''"
+          :error-message="getErrorMessage('aboutText')"
           :error-state="showError('aboutText')"
           :rows="3"
           :max-length="1000"
+          @input="clearValidationErrors(validationErrors, 'aboutText')"
           @blur="() => (touchedFields.aboutText = true)"
         >
           <template #label>À propos</template>
         </TextareaForm>
 
         <InputForm
-          v-model="editForm.contact.$value"
+          v-model="formData.contact"
           input-name="association-contact"
           type="text"
           placeholder="Email ou téléphone"
-          :error-message="editForm.contact.$error?.message || ''"
+          :error-message="getErrorMessage('contact')"
           :error-state="showError('contact')"
+          @input="clearValidationErrors(validationErrors, 'contact')"
           @blur="() => (touchedFields.contact = true)"
         >
           <template #label>Contact</template>
@@ -84,9 +88,10 @@
         <div class="flex flex-col space-y-2">
           <label class="text-sm font-medium">Couleur principale</label>
           <input
-            v-model="editForm.primaryColor.$value"
+            v-model="formData.primaryColor"
             type="color"
             class="border-input bg-background ring-offset-background h-10 w-40 rounded-md border px-1"
+            @input="clearValidationErrors(validationErrors, 'primaryColor')"
             @blur="() => (touchedFields.primaryColor = true)"
           />
         </div>
@@ -116,9 +121,8 @@
   import TextareaForm from '@/components/form/TextareaForm.vue';
   import type { Association } from '@/interfaces';
   import { ref, reactive, watch, computed } from 'vue';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
-  import { associationCrmErrorMessages } from '@/utils/errors/crm/associations';
+  import { associationValidationSchema } from '@/utils/errors/crm/associations';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
 
   const props = defineProps<{
     modelValue: boolean;
@@ -126,14 +130,14 @@
     isLoading: boolean;
     logoPreview: string;
     imagePreview: string;
-    logoFile: File | null;
-    imageFile: File | null;
+    logoFile: File | undefined;
+    imageFile: File | undefined;
   }>();
 
   const emit = defineEmits<{
     (e: 'update:modelValue', value: boolean): void;
-    (e: 'update:logoFile', value: File | null): void;
-    (e: 'update:imageFile', value: File | null): void;
+    (e: 'update:logoFile', value: File | undefined): void;
+    (e: 'update:imageFile', value: File | undefined): void;
     (e: 'update:logoPreview', value: string): void;
     (e: 'update:imagePreview', value: string): void;
     (
@@ -176,29 +180,19 @@
 
   const formSubmitted = ref(false);
 
-  // Schéma de validation avec yup
-  const editForm = defineForm({
-    name: field(
-      '',
-      yup
-        .string()
-        .required(associationCrmErrorMessages.required.name)
-        .min(3, associationCrmErrorMessages.length.name.min)
-        .max(100, associationCrmErrorMessages.length.name.max)
-    ),
-    description: field(
-      '',
-      yup.string().optional().max(1000, associationCrmErrorMessages.length.description)
-    ),
-    aboutText: field(
-      '',
-      yup.string().optional().max(1000, associationCrmErrorMessages.length.aboutText)
-    ),
-    contact: field('', yup.string().optional().email(associationCrmErrorMessages.format.email)),
-    primaryColor: field('', yup.string().optional()),
+  // Données du formulaire
+  const formData = reactive({
+    name: '',
+    description: '',
+    aboutText: '',
+    contact: '',
+    primaryColor: '#000000',
   });
 
-  // Gestion des champs touchés pour l'affichage des erreurs
+  // Erreurs de validation
+  const validationErrors = reactive<Record<string, string>>({});
+
+  // Champs touchés
   const touchedFields = reactive({
     name: false,
     description: false,
@@ -208,18 +202,22 @@
   });
 
   const showError = (fieldName: keyof typeof touchedFields) =>
-    (touchedFields[fieldName] || formSubmitted.value) && !!editForm[fieldName].$error;
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (fieldName: keyof typeof touchedFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
 
   // Fonction pour initialiser le formulaire avec les données de l'association
   const initializeForm = () => {
     if (props.association) {
-      editForm.name.$value = props.association.name || '';
-      editForm.description.$value = props.association.description || '';
-      editForm.aboutText.$value = props.association.aboutText || '';
-      editForm.contact.$value = props.association.contact || '';
-      editForm.primaryColor.$value = props.association.primaryColor || '#000000';
+      formData.name = props.association.name || '';
+      formData.description = props.association.description || '';
+      formData.aboutText = props.association.aboutText || '';
+      formData.contact = props.association.contact || '';
+      formData.primaryColor = props.association.primaryColor || '#000000';
 
-      // Réinitialiser les champs touchés et l'état de soumission
+      // Réinitialiser les erreurs et les champs touchés
+      clearValidationErrors(validationErrors);
       Object.keys(touchedFields).forEach((key) => {
         touchedFields[key as keyof typeof touchedFields] = false;
       });
@@ -237,27 +235,35 @@
     }
   );
 
-  const handleCancel = () => {
-    isOpen.value = false;
-    emit('update:logoFile', null);
-    emit('update:imageFile', null);
-    emit('update:logoPreview', '');
-    emit('update:imagePreview', '');
+  const validateForm = async () => {
+    const result = await validateWithYup(associationValidationSchema, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
   };
 
   const handleSubmit = async () => {
     formSubmitted.value = true;
 
-    if (!(await isValidForm(editForm))) {
+    if (!(await validateForm())) {
       return;
     }
 
     emit('submit', {
-      name: editForm.name.$value.trim(),
-      description: editForm.description.$value?.trim() || undefined,
-      aboutText: editForm.aboutText.$value?.trim() || undefined,
-      contact: editForm.contact.$value?.trim() || undefined,
-      primaryColor: editForm.primaryColor.$value || undefined,
+      name: formData.name.trim(),
+      description: formData.description?.trim() || undefined,
+      aboutText: formData.aboutText?.trim() || undefined,
+      contact: formData.contact?.trim() || undefined,
+      primaryColor: formData.primaryColor || undefined,
     });
+  };
+
+  const handleCancel = () => {
+    emit('update:modelValue', false);
   };
 </script>

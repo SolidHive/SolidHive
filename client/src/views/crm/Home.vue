@@ -1,19 +1,13 @@
 <template>
-  <Header />
+  <Header :can-create-items="false">
+    <template #header>
+      {{ association?.name || 'Chargement...' }}
+    </template>
+    <template #description>Gérez les informations de votre association</template>
+  </Header>
+
   <div class="px-2 py-4 sm:p-6 md:px-12">
     <div class="mx-auto max-w-4xl space-y-6">
-      <!-- En-tête -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-xl font-bold sm:text-2xl md:text-3xl">
-            {{ association?.name || 'Chargement...' }}
-          </h1>
-          <p class="text-muted-foreground mt-1 text-sm sm:text-base">
-            Gérez les informations de votre association
-          </p>
-        </div>
-      </div>
-
       <!-- Message d'avertissement selon le statut -->
       <div
         v-if="association?.status === Status.PENDING"

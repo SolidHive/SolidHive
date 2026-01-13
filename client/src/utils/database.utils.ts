@@ -1,4 +1,4 @@
-import api from './api.utils';
+import api from './api.utils.ts';
 
 export default class Database {
   /**

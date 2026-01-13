@@ -48,10 +48,12 @@
     fetchItem: string | T;
     updateEndpoint: string;
     formData?: Record<string, any>;
+    onBeforeSubmit?: () => Promise<boolean>;
   }>();
 
   const emit = defineEmits<{
     afterUpdate: [updatedItem: any];
+    error: [errorDetails: { field?: string; message: string }];
   }>();
 
   const route = useRoute();
@@ -82,14 +84,39 @@
     try {
       isLoading.value = true;
 
+      // Appeler la validation avant soumission si elle existe
+      if (props.onBeforeSubmit) {
+        const canProceed = await props.onBeforeSubmit();
+        if (!canProceed) {
+          return; // Arrêter si la validation échoue
+        }
+      }
+
       const updatedItem = await Database.patch(props.updateEndpoint, props.formData || {});
 
-      // Émettre l'événement après mise à jour
-      emit('afterUpdate', updatedItem);
+      // Émettre l'événement après mise à jour et attendre qu'il soit traité
+      await emit('afterUpdate', updatedItem);
 
       returnToView();
     } catch (error) {
       console.error("Erreur lors de la modification de l'élément:", error);
+
+      // Analyser l'erreur pour l'émettre
+      const errorDetails: { field?: string; message: string } = {
+        message: 'Une erreur inconnue est survenue.',
+      };
+      if (error && typeof error === 'object' && 'response' in error) {
+        const response = (error as any).response;
+        if (response?.data?.message) {
+          errorDetails.message = response.data.message;
+          // Si c'est une erreur d'unicité sur le nom
+          if (errorDetails.message.includes('existe déjà')) {
+            errorDetails.field = 'name';
+          }
+        }
+      }
+
+      emit('error', errorDetails);
     } finally {
       isLoading.value = false;
     }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { AssociationRole } from './entities/association-role.entity';
 import { FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +6,7 @@ import { UserAssociation } from '../users/entities/user-association.entity';
 import { CreateAssociationRoleDto } from './dto/create-association-role.dto';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
 import { UpdateAssociationRoleDto } from './dto/update-association-role.dto';
+import { QueryFailedError } from 'typeorm';
 
 @Injectable()
 export class AssociationsRolesService {
@@ -26,7 +27,15 @@ export class AssociationsRolesService {
       createdBy: userAssociation,
     });
 
-    return this.associationsRolesRepository.save(associationRole);
+    try {
+      return await this.associationsRolesRepository.save(associationRole);
+    } catch (error) {
+      if (error instanceof QueryFailedError && error.driverError?.code === '23505') {
+        // Violation de contrainte d'unicité (duplicate key)
+        throw new BadRequestException('Un rôle avec ce nom existe déjà');
+      }
+      throw error;
+    }
   }
 
   async findAll(associationId: string, options?: FindOptionsDto) {
@@ -57,8 +66,16 @@ export class AssociationsRolesService {
     associationId: string,
     updateAssociationRoleDto: UpdateAssociationRoleDto
   ) {
-    await this.associationsRolesRepository.update(id, updateAssociationRoleDto);
-    return this.findOne(id, associationId);
+    try {
+      await this.associationsRolesRepository.update(id, updateAssociationRoleDto);
+      return this.findOne(id, associationId);
+    } catch (error) {
+      if (error instanceof QueryFailedError && error.driverError?.code === '23505') {
+        // Violation de contrainte d'unicité (duplicate key)
+        throw new BadRequestException('Un rôle avec ce nom existe déjà');
+      }
+      throw error;
+    }
   }
 
   async remove(id: string, associationId: string) {

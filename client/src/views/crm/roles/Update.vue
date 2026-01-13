@@ -3,19 +3,22 @@
     :can-update-item="crmAccess.canUpdateRole"
     :fetch-item="`association/${associationId}/roles/${id}`"
     :update-endpoint="`association/${associationId}/roles/${id}`"
-    :form-data="formData"
+    :form-data="apiFormData"
     :on-before-submit="handleBeforeSubmit"
+    @after-update="handleAfterUpdate"
+    @error="handleError"
   >
     <template #title>Modifier le rôle</template>
     <template #form>
       <div class="space-y-4 p-4">
         <InputForm
-          v-model="form.name.$value"
+          v-model="formData.name"
           input-name="role-name"
           type="text"
           placeholder="Ex: Trésorier, Secrétaire..."
-          :error-message="form.name.$error?.message || ''"
+          :error-message="getErrorMessage('name')"
           :error-state="showError('name')"
+          @input="clearValidationErrors(validationErrors, 'name')"
           @blur="() => (touchedFields.name = true)"
         >
           <template #label>
@@ -25,13 +28,14 @@
         </InputForm>
 
         <TextareaForm
-          v-model="form.description.$value"
+          v-model="formData.description"
           input-name="role-description"
           placeholder="Décrivez les responsabilités de ce rôle..."
           :rows="3"
           :max-length="500"
-          :error-message="form.description.$error?.message || ''"
+          :error-message="getErrorMessage('description')"
           :error-state="showError('description')"
+          @input="clearValidationErrors(validationErrors, 'description')"
           @blur="() => (touchedFields.description = true)"
         >
           <template #label>Description</template>
@@ -67,12 +71,17 @@
                 >
                   <input
                     :id="`edit-perm-${permission.value}`"
-                    v-model="form.permissions.$value"
+                    v-model="formData.permissions"
                     type="checkbox"
                     :value="permission.value"
                     :disabled="selectAll"
                     class="border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    @change="() => (touchedFields.permissions = true)"
+                    @change="
+                      () => {
+                        touchedFields.permissions = true;
+                        clearValidationErrors(validationErrors, 'permissions');
+                      }
+                    "
                   />
                   <label
                     :for="`edit-perm-${permission.value}`"
@@ -85,7 +94,7 @@
               </div>
             </div>
             <p v-if="showError('permissions')" class="text-destructive text-sm">
-              {{ form.permissions.$error?.message || '' }}
+              {{ getErrorMessage('permissions') }}
             </p>
           </div>
         </div>
@@ -103,12 +112,11 @@
   import type { Role } from '@/interfaces/roles.interface';
   import { useCrmStore } from '@/stores/crm';
   import Database from '@/utils/database.utils';
-  import { roleCrmErrorMessages } from '@/utils/errors/crm/roles';
+  import { updateRoleValidationSchema } from '@/utils/errors/crm/roles';
   import { availablePermissions } from '@/utils/permissions.utils';
   import { computed, onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
   import { useToast } from 'vue-toastification';
   import { Permissions } from '@/enums/permissions';
   import { useCrmPremiumAccess } from '@/composables/crm-premium';
@@ -129,25 +137,17 @@
     console.error('No role ID provided in route parameters.');
   }
 
-  // Schéma de validation avec yup
-  const form = defineForm({
-    name: field(
-      '',
-      yup
-        .string()
-        .required(roleCrmErrorMessages.required.name)
-        .min(3, roleCrmErrorMessages.minLength.name)
-        .max(50, roleCrmErrorMessages.maxLength.name)
-    ),
-    description: field('', yup.string().max(500, roleCrmErrorMessages.maxLength.description)),
-    permissions: field(
-      [] as string[],
-      yup
-        .array()
-        .of(yup.string())
-        .min(1, roleCrmErrorMessages.required.permissions)
-        .required(roleCrmErrorMessages.required.permissions)
-    ),
+  // États du formulaire
+  const formData = reactive({
+    name: '',
+    description: '',
+    permissions: [] as string[],
+  });
+
+  const validationErrors = reactive({
+    name: '',
+    description: '',
+    permissions: '',
   });
 
   // Gestion des champs touchés
@@ -158,21 +158,36 @@
   });
 
   const showError = (fieldName: keyof typeof touchedFields) =>
-    (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (fieldName: keyof typeof touchedFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
+
+  const validateForm = async () => {
+    const result = await validateWithYup(updateRoleValidationSchema as any, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
+  };
 
   const selectAll = ref(false);
 
   // Données du formulaire pour le composant Update
-  const formData = computed(() => ({
-    name: form.name.$value,
-    description: form.description.$value || undefined,
-    permissions: form.permissions.$value,
+  const apiFormData = computed(() => ({
+    name: formData.name,
+    description: formData.description || undefined,
+    permissions: formData.permissions,
   }));
 
   async function handleBeforeSubmit(): Promise<boolean> {
     formSubmitted.value = true;
 
-    if (!(await isValidForm(form))) {
+    if (!(await validateForm())) {
       toast.error('Veuillez corriger les erreurs du formulaire');
       return false;
     }
@@ -180,11 +195,26 @@
     return true;
   }
 
+  async function handleAfterUpdate(_updatedItem: any): Promise<void> {
+    toast.success('Rôle mis à jour avec succès !');
+  }
+
+  function handleError(errorDetails: { field?: string; message: string }) {
+    if (errorDetails.field) {
+      // Erreur de champ spécifique
+      validationErrors[errorDetails.field as keyof typeof validationErrors] = errorDetails.message;
+      touchedFields[errorDetails.field as keyof typeof touchedFields] = true;
+    } else {
+      // Erreur générale
+      toast.error(errorDetails.message);
+    }
+  }
+
   function toggleSelectAll() {
     if (selectAll.value) {
-      form.permissions.$value = ['*'];
+      formData.permissions = ['*'];
     } else {
-      form.permissions.$value = [];
+      formData.permissions = [];
     }
     touchedFields.permissions = true;
   }
@@ -193,9 +223,9 @@
     try {
       const response = await Database.getAll(`association/${associationId}/roles/${id}`);
       if (response) {
-        form.name.$value = response.name || '';
-        form.description.$value = response.description || '';
-        form.permissions.$value = response.permissions || [];
+        formData.name = response.name || '';
+        formData.description = response.description || '';
+        formData.permissions = response.permissions || [];
         selectAll.value = response.permissions?.includes('*') || false;
       }
     } catch (err) {
@@ -204,7 +234,7 @@
   }
 
   watch(
-    () => form.permissions.$value,
+    () => formData.permissions,
     (newPerms) => {
       if (newPerms.includes('*')) {
         selectAll.value = true;

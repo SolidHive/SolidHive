@@ -12,6 +12,8 @@
     </template>
   </Header>
   <div class="relative w-full px-2 py-4 sm:p-6 md:px-12">
+    <slot name="before-table"></slot>
+
     <!-- Barre de recherche -->
     <SearchBar v-model="searchQuery" />
 

@@ -4,6 +4,8 @@
 FROM node:20-alpine AS base
 WORKDIR /usr/src/app
 
+RUN mkdir -p /usr/src/app/uploads
+
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 

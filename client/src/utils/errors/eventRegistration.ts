@@ -29,7 +29,7 @@ export const eventRegistrationErrorMessages = {
   },
 };
 
-export const contactFormValidationSchema = {
+export const contactFormValidationSchema = yup.object({
   firstName: yup
     .string()
     .required(eventRegistrationErrorMessages.contact.firstName.required)
@@ -68,7 +68,7 @@ export const contactFormValidationSchema = {
     .string()
     .required(eventRegistrationErrorMessages.contact.city.required)
     .min(2, eventRegistrationErrorMessages.contact.city.invalid),
-};
+});
 
 export const participantValidationSchema = yup.object({
   firstName: yup

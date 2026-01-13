@@ -7,6 +7,7 @@ import { UserAssociation } from '../users/entities/user-association.entity';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
 import { UpdateAssociationAnnouncementDto } from './dto/update-association-announcement.dto';
 import { File } from '../../../files/entities/file.entity';
+import { FilesService } from '../../../files/files.service';
 
 @Injectable()
 export class AssociationsAnnouncementsService {
@@ -14,7 +15,8 @@ export class AssociationsAnnouncementsService {
     @InjectRepository(AssociationAnnouncement)
     private readonly associationsAnnouncementsRepository: Repository<AssociationAnnouncement>,
     @InjectRepository(File)
-    private readonly fileRepository: Repository<File>
+    private readonly fileRepository: Repository<File>,
+    private readonly filesService: FilesService
   ) {}
 
   async create(
@@ -103,6 +105,13 @@ export class AssociationsAnnouncementsService {
   }
 
   async remove(id: string, associationId: string) {
+    // Supprimer les fichiers associés avant de supprimer l'annonce
+    try {
+      await this.filesService.remove('AssociationAnnouncement', id, 0, 'image');
+    } catch (error) {
+      console.error(`Erreur lors de la suppression des fichiers de l'annonce ${id}:`, error);
+    }
+
     return this.associationsAnnouncementsRepository.delete({
       id,
       association: { id: associationId },

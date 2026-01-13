@@ -12,24 +12,26 @@
 
         <form class="space-y-6" @submit.prevent="handleLogin">
           <InputForm
-            v-model="form.email.$value"
+            v-model="formData.email"
             label-value="Email"
             input-name="email"
             type="email"
             placeholder="votre@email.com"
-            :error-message="showError('email') ? form.email.$error?.message : ''"
+            :error-message="getErrorMessage('email')"
             :error-state="showError('email')"
+            @input="clearValidationErrors(validationErrors, 'email')"
             @blur="touchedFields.email = true"
           />
 
           <InputForm
-            v-model="form.password.$value"
+            v-model="formData.password"
             label-value="Mot de passe"
             input-name="password"
             type="password"
             placeholder="Votre mot de passe"
-            :error-message="showError('password') ? form.password.$error?.message : ''"
+            :error-message="getErrorMessage('password')"
             :error-state="showError('password')"
+            @input="clearValidationErrors(validationErrors, 'password')"
             @blur="touchedFields.password = true"
           >
             <template #hint>
@@ -87,8 +89,9 @@
   import InputForm from '@/components/form/InputForm.vue';
   import { Button } from '@/components/ui/button';
   import { Loader2 } from 'lucide-vue-next';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import { userErrorMessages, loginValidationSchema } from '@/utils/errors/auth/users';
+  import { loginValidationSchema, userErrorMessages } from '@/utils/errors/auth/users';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
+  import { getApiErrorMessage } from '@/utils/error.utils';
   import { associationValidationMessages } from '@/utils/errors/associations';
   import {
     hasPendingAssociation,
@@ -105,6 +108,16 @@
   const formError = ref('');
   const formSubmitted = ref(false);
 
+  // Données du formulaire
+  const formData = reactive({
+    email: '',
+    password: '',
+  });
+
+  // Erreurs de validation
+  const validationErrors = reactive<Record<string, string>>({});
+
+  // Gestion erreurs pour affichage
   const touchedFields = reactive({
     email: false,
     password: false,
@@ -113,38 +126,28 @@
   type FormFields = 'email' | 'password';
 
   const showError = (fieldName: FormFields) =>
-    (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
 
-  const form = defineForm({
-    email: field('', loginValidationSchema.email),
-    password: field('', loginValidationSchema.password),
-  });
+  const getErrorMessage = (fieldName: FormFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
 
-  /**
-   * Récupère le message d'erreur basé sur le statut HTTP
-   */
-  function getErrorMessage(error: unknown): string {
-    if (typeof error === 'object' && error !== null && 'response' in error) {
-      const response = (
-        error as {
-          response: { status: number; data?: { message?: string } };
-        }
-      ).response;
-      const status = response.status;
+  const validateForm = async () => {
+    const result = await validateWithYup(loginValidationSchema, formData);
 
-      if (status in userErrorMessages.apiErrors) {
-        return userErrorMessages.apiErrors[status as keyof typeof userErrorMessages.apiErrors];
-      }
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
     }
 
-    return userErrorMessages.apiErrors.unknown;
-  }
+    return result.isValid;
+  };
 
   async function handleLogin() {
     formSubmitted.value = true;
     formError.value = '';
 
-    if (!(await isValidForm(form))) return;
+    if (!(await validateForm())) return;
 
     isLoading.value = true;
 
@@ -152,8 +155,8 @@
       authStore.error = null;
 
       const result = await authStore.login({
-        email: form.email.$value.trim(),
-        password: form.password.$value,
+        email: formData.email.trim(),
+        password: formData.password,
       });
 
       if (result) {
@@ -165,7 +168,7 @@
         router.push('/');
       }
     } catch (error) {
-      formError.value = getErrorMessage(error);
+      formError.value = getApiErrorMessage(error, userErrorMessages.apiErrors);
       toast.error(formError.value);
     } finally {
       isLoading.value = false;

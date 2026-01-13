@@ -48,10 +48,12 @@
     canCreateItem: boolean;
     createEndpoint: string;
     formData?: Record<string, any>;
+    onBeforeSubmit?: () => Promise<boolean>;
   }>();
 
   const emit = defineEmits<{
     afterCreate: [createdItem: any];
+    error: [errorDetails: { field?: string; message: string }];
   }>();
 
   const isLoading = ref(false);
@@ -60,14 +62,67 @@
     try {
       isLoading.value = true;
 
+      // Appeler la validation avant soumission si elle existe
+      if (props.onBeforeSubmit) {
+        const canProceed = await props.onBeforeSubmit();
+        if (!canProceed) {
+          return; // Arrêter si la validation échoue
+        }
+      }
+
       const createdItem = await Database.create(props.createEndpoint, props.formData || {});
 
-      // Émettre l'événement après création
-      emit('afterCreate', createdItem);
+      // Émettre l'événement après création et attendre qu'il soit traité
+      await emit('afterCreate', createdItem);
 
       returnToView();
     } catch (error) {
       console.error("Erreur lors de la création de l'élément:", error);
+
+      // Analyser l'erreur pour l'émettre
+      const errorDetails: { field?: string; message: string } = {
+        message: 'Une erreur inconnue est survenue.',
+      };
+      if (error && typeof error === 'object' && 'response' in error) {
+        const response = (error as any).response;
+        let message = 'Une erreur inconnue est survenue.';
+        if (response?.data?.message) {
+          message = response.data.message;
+        } else if (response?.statusText) {
+          message = response.statusText;
+        } else if (typeof response?.data === 'string') {
+          message = response.data;
+        }
+        if (typeof message !== 'string') {
+          message = 'Une erreur inconnue est survenue.';
+        }
+        errorDetails.message = message;
+
+        // Si c'est une erreur d'unicité sur le nom
+        if (errorDetails.message.includes('existe déjà')) {
+          errorDetails.field = 'name';
+        }
+        // Si c'est une erreur d'email non trouvé
+        if (
+          errorDetails.message.includes('user not found') ||
+          errorDetails.message.includes('User not found') ||
+          (errorDetails.message.includes('email') &&
+            (errorDetails.message.includes('trouvé') || errorDetails.message.includes('existe')))
+        ) {
+          errorDetails.field = 'email';
+          errorDetails.message = 'Aucun utilisateur trouvé avec cet email';
+        }
+        // Si c'est une erreur d'utilisateur déjà membre
+        if (
+          errorDetails.message.includes('déjà membre') ||
+          errorDetails.message.includes('already member')
+        ) {
+          errorDetails.field = 'email';
+          errorDetails.message = 'Cet utilisateur est déjà membre de cette association';
+        }
+      }
+
+      emit('error', errorDetails);
     } finally {
       isLoading.value = false;
     }

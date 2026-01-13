@@ -1,4 +1,5 @@
 import { commonErrorMessages } from '../common/validation';
+import * as yup from 'yup';
 
 export const memberCrmErrorMessages = {
   required: {
@@ -26,3 +27,20 @@ export const memberCrmErrorMessages = {
     unknown: 'Une erreur inattendue est survenue',
   },
 };
+
+// Schéma commun pour les champs de membre
+const memberBaseSchema = {
+  email: yup
+    .string()
+    .required(memberCrmErrorMessages.required.email)
+    .email(memberCrmErrorMessages.format.email),
+  roleId: yup.string().required(memberCrmErrorMessages.required.roleId),
+};
+
+export const createMemberValidationSchema = yup.object({
+  ...memberBaseSchema,
+});
+
+export const updateMemberValidationSchema = yup.object({
+  ...memberBaseSchema,
+});

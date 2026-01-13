@@ -11,6 +11,7 @@ import { AssociationsAnnouncementsModule } from './modules/announcements/associa
 import { UsersAssociationsModule } from './modules/users/users-associations.module';
 import { UserAssociation } from './modules/users/entities/user-association.entity';
 import { PermissionAccessModule } from '../permissions-access/permission-access.module';
+import { FilesModule } from '../files/files.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PermissionAccessModule } from '../permissions-access/permission-access.
     AssociationsRolesModule,
     UsersAssociationsModule,
     PermissionAccessModule,
+    FilesModule,
   ],
   controllers: [AssociationsController],
   providers: [AssociationsService],

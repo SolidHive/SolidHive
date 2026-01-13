@@ -1,5 +1,8 @@
 <template>
-  <Header />
+  <Header>
+    <template #header>Modifier l'événement</template>
+  </Header>
+
   <div class="p-6 md:px-12">
     <div v-if="loading" class="flex justify-center py-12">
       <LoadingOverlay message="Chargement de l'événement..." />
@@ -8,8 +11,7 @@
     <div v-else class="mx-auto max-w-4xl">
       <div class="mb-6 flex items-start justify-between">
         <div>
-          <h1 class="text-3xl font-bold">Modifier l'événement</h1>
-          <p class="text-muted-foreground mt-1">{{ form.title.$value }}</p>
+          <p class="text-primary mt-1 font-semibold sm:text-lg lg:text-2xl">{{ formData.title }}</p>
         </div>
         <Button
           variant="outline"
@@ -25,46 +27,50 @@
           <h2 class="mb-4 text-xl font-bold">Informations de l'événement</h2>
           <div class="space-y-4">
             <InputForm
-              v-model="form.title.$value"
+              v-model="formData.title"
               input-name="title"
               label="Titre"
               placeholder="Nom de l'événement"
-              :error-message="showError('title') ? getFieldError('title') : ''"
+              :error-message="showError('title') ? getErrorMessage('title') : ''"
               :error-state="showError('title')"
               required
+              @input="clearValidationErrors(validationErrors, 'title')"
               @blur="touchedFields.title = true"
             />
 
             <TextareaForm
-              v-model="form.description.$value"
+              v-model="formData.description"
               input-name="description"
               label="Description"
               placeholder="Description de l'événement"
               :rows="4"
               :max-length="1000"
-              :error-message="showError('description') ? getFieldError('description') : ''"
+              :error-message="showError('description') ? getErrorMessage('description') : ''"
               :error-state="showError('description')"
+              @input="clearValidationErrors(validationErrors, 'description')"
               @blur="touchedFields.description = true"
             />
 
             <div class="grid gap-4 md:grid-cols-2">
               <InputForm
-                v-model="form.startDate.$value"
+                v-model="formData.startDate"
                 input-name="startDate"
                 label="Date de début"
                 type="datetime-local"
-                :error-message="showError('startDate') ? getFieldError('startDate') : ''"
+                :error-message="showError('startDate') ? getErrorMessage('startDate') : ''"
                 :error-state="showError('startDate')"
                 required
+                @input="clearValidationErrors(validationErrors, 'startDate')"
                 @blur="touchedFields.startDate = true"
               />
               <InputForm
-                v-model="form.endDate.$value"
+                v-model="formData.endDate"
                 input-name="endDate"
                 label="Date de fin"
                 type="datetime-local"
-                :error-message="showError('endDate') ? getFieldError('endDate') : ''"
+                :error-message="showError('endDate') ? getErrorMessage('endDate') : ''"
                 :error-state="showError('endDate')"
+                @input="clearValidationErrors(validationErrors, 'endDate')"
                 @blur="touchedFields.endDate = true"
               />
             </div>
@@ -74,63 +80,70 @@
               <h3 class="mb-3 font-medium">Adresse</h3>
               <div class="space-y-4">
                 <InputForm
-                  v-model="form.address.street.$value"
+                  v-model="formData.address.street"
                   input-name="street"
                   label="Rue"
                   placeholder="123 rue de la Paix"
                   :error-message="
-                    showError('address.street') ? getFieldError('address.street') : ''
+                    showError('address.street') ? getErrorMessage('address.street') : ''
                   "
                   :error-state="showError('address.street')"
                   required
+                  @input="clearValidationErrors(validationErrors, 'address.street')"
                   @blur="touchedFields['address.street'] = true"
                 />
                 <div class="grid gap-4 md:grid-cols-2">
                   <InputForm
-                    v-model="form.address.city.$value"
+                    v-model="formData.address.city"
                     input-name="city"
                     label="Ville"
                     placeholder="Paris"
-                    :error-message="showError('address.city') ? getFieldError('address.city') : ''"
+                    :error-message="
+                      showError('address.city') ? getErrorMessage('address.city') : ''
+                    "
                     :error-state="showError('address.city')"
                     required
+                    @input="clearValidationErrors(validationErrors, 'address.city')"
                     @blur="touchedFields['address.city'] = true"
                   />
                   <InputForm
-                    v-model="form.address.postcode.$value"
+                    v-model="formData.address.postcode"
                     input-name="postcode"
                     label="Code postal"
                     placeholder="75001"
                     :error-message="
-                      showError('address.postcode') ? getFieldError('address.postcode') : ''
+                      showError('address.postcode') ? getErrorMessage('address.postcode') : ''
                     "
                     :error-state="showError('address.postcode')"
                     required
+                    @input="clearValidationErrors(validationErrors, 'address.postcode')"
                     @blur="touchedFields['address.postcode'] = true"
                   />
                 </div>
                 <div class="grid gap-4 md:grid-cols-2">
                   <InputForm
-                    v-model="form.address.state.$value"
+                    v-model="formData.address.state"
                     input-name="state"
                     label="Région"
                     placeholder="Île-de-France"
                     :error-message="
-                      showError('address.state') ? getFieldError('address.state') : ''
+                      showError('address.state') ? getErrorMessage('address.state') : ''
                     "
                     :error-state="showError('address.state')"
+                    @input="clearValidationErrors(validationErrors, 'address.state')"
                     @blur="touchedFields['address.state'] = true"
                   />
                   <InputForm
-                    v-model="form.address.country.$value"
+                    v-model="formData.address.country"
                     input-name="country"
                     label="Pays"
                     placeholder="France"
                     :error-message="
-                      showError('address.country') ? getFieldError('address.country') : ''
+                      showError('address.country') ? getErrorMessage('address.country') : ''
                     "
                     :error-state="showError('address.country')"
                     required
+                    @input="clearValidationErrors(validationErrors, 'address.country')"
                     @blur="touchedFields['address.country'] = true"
                   />
                 </div>
@@ -139,8 +152,15 @@
 
             <!-- Image -->
             <div class="border-t pt-4">
-              <h3 class="mb-3 font-medium">Image</h3>
-              <ImageUpload v-model:file="imageFile" v-model:preview="imagePreview" />
+              <ImageUpload
+                v-model="imageFile"
+                v-model:preview="imagePreview"
+                label="Image de l'événement"
+                button-text="Changer l'image"
+                help-text="Format recommandé : JPG ou PNG (max 5 Mo)"
+                :error-message="showError('image') ? getErrorMessage('image') : ''"
+                :error-state="showError('image')"
+              />
             </div>
           </div>
         </div>
@@ -152,7 +172,7 @@
           >
             Annuler
           </Button>
-          <Button :disabled="!isFormValid || isLoading" @click="updateEvent">
+          <Button :disabled="isLoading" @click="updateEvent">
             {{ isLoading ? 'Enregistrement...' : 'Enregistrer les modifications' }}
           </Button>
         </div>
@@ -162,10 +182,8 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
+  import { onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import * as yup from 'yup';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
   import Header from '@/components/dashboard/Header.vue';
   import Button from '@/components/ui/button/Button.vue';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
@@ -174,10 +192,12 @@
   import TextareaForm from '@/components/form/TextareaForm.vue';
   import { useCrmStore } from '@/stores/crm';
   import Database from '@/utils/database.utils';
-  import { eventCrmErrorMessages } from '@/utils/errors/crm/events';
   import { Permissions } from '@/enums/permissions';
   import { useCrmAccess } from '@/composables/crm-access';
   import { useCrmPremiumAccess } from '@/composables/crm-premium';
+  import { eventUpdateValidationSchema } from '@/utils/errors/crm/events';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
+  import { useToast } from 'vue-toastification';
 
   const router = useRouter();
   const route = useRoute();
@@ -185,66 +205,50 @@
   const member = crmStore.getMember();
   const crmAccess = useCrmAccess(member);
   const crmPremiumAccess = useCrmPremiumAccess(crmStore.associationPremiumUntil);
+  const toast = useToast();
   const eventId = route.params.eventId as string;
 
   const loading = ref(true);
   const isLoading = ref(false);
   const formSubmitted = ref(false);
 
-  const form = defineForm({
-    title: field(
-      '',
-      yup
-        .string()
-        .required(eventCrmErrorMessages.required.title)
-        .min(5, eventCrmErrorMessages.minLength.title)
-        .max(100, eventCrmErrorMessages.maxLength.title)
-    ),
-    description: field(
-      '',
-      yup
-        .string()
-        .min(10, eventCrmErrorMessages.minLength.description)
-        .max(1000, eventCrmErrorMessages.maxLength.description)
-    ),
-    startDate: field('', yup.string().required(eventCrmErrorMessages.required.startDate)),
-    endDate: field(
-      '',
-      yup
-        .string()
-        .test('is-after-start', eventCrmErrorMessages.date.endAfterStart, function (value) {
-          if (!value) return true;
-          const startDate = this.parent.startDate;
-          if (!startDate) return true;
-          return new Date(value) > new Date(startDate);
-        })
-    ),
+  // États du formulaire
+  const formData = reactive({
+    title: '',
+    description: '',
+    startDate: '',
+    endDate: '',
     address: {
-      street: field(
-        '',
-        yup
-          .string()
-          .required(eventCrmErrorMessages.required.street)
-          .min(3, eventCrmErrorMessages.minLength.street)
-      ),
-      city: field(
-        '',
-        yup
-          .string()
-          .required(eventCrmErrorMessages.required.city)
-          .min(2, eventCrmErrorMessages.minLength.city)
-      ),
-      postcode: field('', yup.string().required(eventCrmErrorMessages.required.postcode)),
-      state: field('', yup.string()),
-      country: field('France', yup.string().required(eventCrmErrorMessages.required.country)),
+      street: '',
+      city: '',
+      postcode: '',
+      state: '',
+      country: 'France',
     },
+    image: undefined as File | undefined,
   });
 
-  const touchedFields = reactive<Record<string, boolean>>({
+  // Validation errors
+  const validationErrors = reactive({
+    title: '',
+    description: '',
+    startDate: '',
+    endDate: '',
+    image: '',
+    'address.street': '',
+    'address.city': '',
+    'address.postcode': '',
+    'address.state': '',
+    'address.country': '',
+  });
+
+  // Gestion des champs touchés
+  const touchedFields = reactive({
     title: false,
     description: false,
     startDate: false,
     endDate: false,
+    image: false,
     'address.street': false,
     'address.city': false,
     'address.postcode': false,
@@ -252,54 +256,35 @@
     'address.country': false,
   });
 
-  const getFieldError = (fieldName: string) => {
-    const parts = fieldName.split('.');
-    let field: any = form;
-    for (const part of parts) {
-      field = field[part];
-      if (!field) return '';
+  const showError = (fieldName: keyof typeof touchedFields) =>
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (fieldName: keyof typeof touchedFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
+
+  const validateForm = async () => {
+    const result = await validateWithYup(eventUpdateValidationSchema as any, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
     }
-    return field.$error?.message || '';
+
+    return result.isValid;
   };
 
-  const showError = (fieldName: string) => {
-    return (touchedFields[fieldName] || formSubmitted.value) && !!getFieldError(fieldName);
-  };
-
-  const formData = computed(() => ({
-    title: form.title.$value,
-    description: form.description.$value,
-    startDate: form.startDate.$value,
-    endDate: form.endDate.$value,
-    address: {
-      street: form.address.street.$value,
-      city: form.address.city.$value,
-      postcode: form.address.postcode.$value,
-      state: form.address.state.$value,
-      country: form.address.country.$value,
-    },
-  }));
-
-  const imageFile = ref<File | null>(null);
+  const imageFile = ref<File | undefined>(undefined);
   const imagePreview = ref<string>('');
 
-  const handleBeforeSubmit = () => {
-    formSubmitted.value = true;
-    if (!isValidForm(form)) {
-      return false;
-    }
-    return true;
-  };
-
-  const isFormValid = computed(() => {
-    return isValidForm(form);
+  watch(imageFile, (newValue) => {
+    formData.image = newValue;
+    touchedFields.image = true;
   });
 
-  watch(loading, (newVal) => {
-    if (!newVal) {
-      Object.keys(touchedFields).forEach((key) => (touchedFields[key] = false));
-      formSubmitted.value = false;
-    }
+  // Watcher pour effacer l'erreur d'image quand elle change
+  watch(imageFile, () => {
+    clearValidationErrors(validationErrors, 'image');
   });
 
   const formatDateForInput = (dateString: string) => {
@@ -324,28 +309,31 @@
       );
       const event = response;
 
-      form.title.$value = event.title;
-      form.description.$value = event.description || '';
-      form.startDate.$value = formatDateForInput(event.startDate);
-      form.endDate.$value = event.endDate ? formatDateForInput(event.endDate) : '';
-      form.address.street.$value = event.address?.street || '';
-      form.address.city.$value = event.address?.city || '';
-      form.address.postcode.$value = event.address?.postcode || '';
-      form.address.state.$value = event.address?.state || '';
-      form.address.country.$value = event.address?.country || 'France';
+      formData.title = event.title;
+      formData.description = event.description || '';
+      formData.startDate = formatDateForInput(event.startDate);
+      formData.endDate = event.endDate ? formatDateForInput(event.endDate) : '';
+      formData.address.street = event.address?.street || '';
+      formData.address.city = event.address?.city || '';
+      formData.address.postcode = event.address?.postcode || '';
+      formData.address.state = event.address?.state || '';
+      formData.address.country = event.address?.country || 'France';
 
       // Initialiser la preview avec l'image actuelle
       imagePreview.value = event.image || '';
     } catch (error) {
       console.error('Erreur lors du chargement:', error);
+      toast.error("Erreur lors du chargement de l'événement");
     } finally {
       loading.value = false;
     }
   };
 
   const updateEvent = async () => {
-    if (!handleBeforeSubmit()) {
-      console.error('Validation échouée');
+    formSubmitted.value = true;
+
+    if (!(await validateForm())) {
+      toast.error('Veuillez corriger les erreurs du formulaire');
       return;
     }
 
@@ -355,13 +343,11 @@
       isLoading.value = true;
 
       const eventData = {
-        title: formData.value.title,
-        description: formData.value.description || undefined,
-        startDate: new Date(formData.value.startDate).toISOString(),
-        endDate: formData.value.endDate
-          ? new Date(formData.value.endDate).toISOString()
-          : undefined,
-        address: formData.value.address,
+        title: formData.title,
+        description: formData.description || undefined,
+        startDate: new Date(formData.startDate).toISOString(),
+        endDate: formData.endDate ? new Date(formData.endDate).toISOString() : undefined,
+        address: formData.address,
       };
 
       await Database.update(
@@ -380,13 +366,11 @@
         });
       }
 
-      console.log('Événement modifié avec succès !');
+      toast.success('Événement modifié avec succès !');
       router.push(`/crm/${crmStore.currentAssociationId}/events/${eventId}`);
     } catch (error: any) {
       console.error('Erreur lors de la modification:', error);
-      console.error(
-        error.response?.data?.message || "Erreur lors de la modification de l'événement"
-      );
+      toast.error("Erreur lors de la modification de l'événement");
     } finally {
       isLoading.value = false;
     }

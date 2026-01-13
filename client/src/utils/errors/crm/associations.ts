@@ -1,8 +1,10 @@
 import { commonErrorMessages, validationPatterns } from '../common/validation';
+import * as yup from 'yup';
 
 export const associationCrmErrorMessages = {
   required: {
     name: "Le nom de l'association est requis",
+    description: 'La description est requise',
     siret: commonErrorMessages.siret.required,
   },
   length: {
@@ -38,3 +40,18 @@ export const associationCrmErrorMessages = {
 };
 
 export { validationPatterns };
+
+export const associationValidationSchema = yup.object({
+  name: yup
+    .string()
+    .required(associationCrmErrorMessages.required.name)
+    .min(3, associationCrmErrorMessages.length.name.min)
+    .max(100, associationCrmErrorMessages.length.name.max),
+  description: yup
+    .string()
+    .required(associationCrmErrorMessages.required.description)
+    .max(1000, associationCrmErrorMessages.length.description),
+  aboutText: yup.string().optional().max(1000, associationCrmErrorMessages.length.aboutText),
+  contact: yup.string().optional().email(associationCrmErrorMessages.format.email),
+  primaryColor: yup.string().optional(),
+});

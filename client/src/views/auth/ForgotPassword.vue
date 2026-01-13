@@ -14,13 +14,14 @@
           <div v-if="!requestSent" key="form">
             <form class="space-y-6" @submit.prevent="handleSubmit">
               <InputForm
-                v-model="form.email.$value"
+                v-model="formData.email"
                 label-value="Email"
                 input-name="email"
                 type="email"
                 placeholder="votre@email.com"
-                :error-message="showError('email') ? form.email.$error?.message : ''"
+                :error-message="getErrorMessage('email')"
                 :error-state="showError('email')"
+                @input="clearValidationErrors(validationErrors, 'email')"
                 @blur="touchedFields.email = true"
               >
                 <template #hint>
@@ -33,7 +34,7 @@
               <div
                 class="bg-accent/5 border-accent/20 text-foreground font-paragraph flex items-start rounded-[12px] border p-4"
               >
-                <div class="text-accent mt-0.5 mr-3 flex-shrink-0">
+                <div class="text-accent mt-0.5 mr-3 shrink-0">
                   <Info class="h-5 w-5" />
                 </div>
                 <div class="text-sm">
@@ -144,14 +145,22 @@
   import InputForm from '@/components/form/InputForm.vue';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import { Button } from '@/components/ui/button';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
   import { forgotPasswordValidationSchema } from '@/utils/errors/auth/users';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
   import { Info, Loader2 } from 'lucide-vue-next';
 
   // États
   const isLoading = ref(false);
   const requestSent = ref(false);
   const formSubmitted = ref(false);
+
+  // Données du formulaire
+  const formData = reactive({
+    email: '',
+  });
+
+  // Erreurs de validation
+  const validationErrors = reactive<Record<string, string>>({});
 
   const touchedFields = reactive({
     email: false,
@@ -160,27 +169,37 @@
   // Services
   const toast = useToast();
 
-  // Validation du formulaire
-  const form = defineForm({
-    email: field('', forgotPasswordValidationSchema.email),
-  });
-
   type FormFields = 'email';
 
   const showError = (fieldName: FormFields) =>
-    (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (fieldName: FormFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
+
+  const validateForm = async () => {
+    const result = await validateWithYup(forgotPasswordValidationSchema, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
+  };
 
   async function handleSubmit() {
     formSubmitted.value = true;
 
-    if (!(await isValidForm(form))) return;
+    if (!(await validateForm())) return;
 
     isLoading.value = true;
 
     try {
       await Database.create('security/action', {
         actionType: 'RESET_PASSWORD',
-        email: form.email.$value.trim(),
+        email: formData.email.trim(),
       });
 
       requestSent.value = true;
@@ -194,7 +213,7 @@
   }
 
   function resetForm() {
-    form.email.$value = '';
+    formData.email = '';
     formSubmitted.value = false;
     touchedFields.email = false;
     requestSent.value = false;

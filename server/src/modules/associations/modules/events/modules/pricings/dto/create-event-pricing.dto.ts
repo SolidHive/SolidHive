@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString, Length } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Length, Min } from 'class-validator';
 
 export class CreateEventPricingDto {
   @ApiProperty({
@@ -30,7 +31,9 @@ export class CreateEventPricingDto {
     description: 'Nombre maximum de places disponibles pour ce tarif',
     required: false,
   })
+  @Type(() => Number)
   @IsNumber({}, { message: 'Le nombre maximum de places doit être un nombre' })
+  @Min(1, { message: 'La capacité maximale doit être supérieure à 0' })
   @IsOptional()
   maxCapacity?: number;
 
@@ -38,6 +41,8 @@ export class CreateEventPricingDto {
     example: 50.0,
     description: 'Montant du tarif en euros',
   })
+  @Type(() => Number)
   @IsNumber({}, { message: 'Le montant du tarif doit être un nombre' })
+  @Min(0, { message: 'Le montant doit être supérieur ou égal à 0' })
   amount: number;
 }

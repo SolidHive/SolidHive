@@ -37,12 +37,13 @@
         <form v-if="currentStep === 1" class="space-y-6" @submit.prevent="handleStep1Submit">
           <!-- Nom -->
           <InputForm
-            v-model="userForm.name.$value"
+            v-model="userFormData.name"
             input-name="name"
             type="text"
             placeholder="Dupont"
-            :error-message="userForm.name.$error?.message || ''"
+            :error-message="getUserErrorMessage('name')"
             :error-state="showUserError('name')"
+            @input="clearValidationErrors(validationErrors, 'name')"
             @blur="() => (touchedUserFields.name = true)"
           >
             <template #label>
@@ -53,12 +54,13 @@
 
           <!-- Prénom -->
           <InputForm
-            v-model="userForm.firstname.$value"
+            v-model="userFormData.firstname"
             input-name="firstname"
             type="text"
             placeholder="Jean"
-            :error-message="userForm.firstname.$error?.message || ''"
+            :error-message="getUserErrorMessage('firstname')"
             :error-state="showUserError('firstname')"
+            @input="clearValidationErrors(validationErrors, 'firstname')"
             @blur="() => (touchedUserFields.firstname = true)"
           >
             <template #label>
@@ -69,12 +71,13 @@
 
           <!-- Email -->
           <InputForm
-            v-model="userForm.email.$value"
+            v-model="userFormData.email"
             input-name="email"
             type="email"
             placeholder="jean.dupont@example.com"
-            :error-message="userForm.email.$error?.message || ''"
+            :error-message="getUserErrorMessage('email')"
             :error-state="showUserError('email')"
+            @input="clearValidationErrors(validationErrors, 'email')"
             @blur="() => (touchedUserFields.email = true)"
           >
             <template #label>
@@ -88,13 +91,14 @@
 
           <!-- Téléphone (optionnel) -->
           <InputForm
-            v-model="userForm.phone.$value"
+            v-model="userFormData.phone"
             label-value="Téléphone (optionnel)"
             input-name="phone"
             type="tel"
             placeholder="0612345678"
-            :error-message="userForm.phone.$error?.message || ''"
+            :error-message="getUserErrorMessage('phone')"
             :error-state="showUserError('phone')"
+            @input="clearValidationErrors(validationErrors, 'phone')"
             @blur="() => (touchedUserFields.phone = true)"
           >
             <template #hint>
@@ -104,12 +108,13 @@
 
           <!-- Mot de passe -->
           <InputForm
-            v-model="userForm.password.$value"
+            v-model="userFormData.password"
             input-name="password"
             type="password"
             placeholder="••••••••••"
-            :error-message="userForm.password.$error?.message || ''"
+            :error-message="getUserErrorMessage('password')"
             :error-state="showUserError('password')"
+            @input="clearValidationErrors(validationErrors, 'password')"
             @blur="() => (touchedUserFields.password = true)"
           >
             <template #label>
@@ -182,8 +187,9 @@
   import { Button } from '@/components/ui/button';
   import { useToast } from 'vue-toastification';
   import { Loader2 } from 'lucide-vue-next';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import { userErrorMessages, userValidationSchema } from '@/utils/errors/auth/users';
+  import { userErrorMessages, registerValidationSchema } from '@/utils/errors/auth/users';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
+  import { getApiErrorMessage } from '@/utils/error.utils';
   import { associationValidationMessages } from '@/utils/errors/associations';
   import { savePendingAssociation, savePendingFile } from '@/utils/localStorage.utils';
 
@@ -194,14 +200,17 @@
   const wantsAssociation = ref(false);
   const formSubmitted = ref(false);
 
-  // Schéma de validation utilisateur avec yup
-  const userForm = defineForm({
-    name: field('', userValidationSchema.name),
-    firstname: field('', userValidationSchema.firstname),
-    email: field('', userValidationSchema.email),
-    phone: field('', userValidationSchema.phone),
-    password: field('', userValidationSchema.password),
+  // Données du formulaire utilisateur
+  const userFormData = reactive({
+    name: '',
+    firstname: '',
+    email: '',
+    phone: '',
+    password: '',
   });
+
+  // Erreurs de validation
+  const validationErrors = reactive<Record<string, string>>({});
 
   // Gestion erreurs pour affichage
   const touchedUserFields = reactive({
@@ -213,29 +222,29 @@
   });
 
   const showUserError = (fieldName: 'name' | 'firstname' | 'email' | 'phone' | 'password') =>
-    (touchedUserFields[fieldName] || formSubmitted.value) && !!userForm[fieldName].$error;
+    (touchedUserFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
 
-  // Fonction pour gérer les erreurs API
-  function getErrorMessage(error: unknown): string {
-    if (typeof error === 'object' && error !== null && 'response' in error) {
-      const response = (error as { response: { status: number; data?: { message?: string } } })
-        .response;
-      const status = response.status;
-      const message = response.data?.message;
+  const getUserErrorMessage = (fieldName: 'name' | 'firstname' | 'email' | 'phone' | 'password') =>
+    touchedUserFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
 
-      return status in userErrorMessages.apiErrors
-        ? message || userErrorMessages.apiErrors[status as keyof typeof userErrorMessages.apiErrors]
-        : userErrorMessages.apiErrors.unknown;
+  const validateUserForm = async () => {
+    const result = await validateWithYup(registerValidationSchema, userFormData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
     }
-    return userErrorMessages.apiErrors.unknown;
-  }
+
+    return result.isValid;
+  };
 
   // Soumission étape 1
   async function handleStep1Submit() {
     formSubmitted.value = true;
 
     // Valider le formulaire utilisateur
-    if (!(await isValidForm(userForm))) {
+    if (!(await validateUserForm())) {
       toast.error('Veuillez corriger les erreurs du formulaire');
       return;
     }
@@ -270,11 +279,11 @@
     isLoading.value = true;
     try {
       const userData = {
-        name: userForm.name.$value.trim(),
-        firstname: userForm.firstname.$value.trim(),
-        email: userForm.email.$value.trim(),
-        password: userForm.password.$value,
-        phone: userForm.phone.$value?.trim() || undefined,
+        name: userFormData.name.trim(),
+        firstname: userFormData.firstname.trim(),
+        email: userFormData.email.trim(),
+        password: userFormData.password,
+        phone: userFormData.phone?.trim() || undefined,
       };
 
       await Database.create('users/register', userData);
@@ -282,7 +291,7 @@
       router.push('/login');
     } catch (error: any) {
       console.error("Erreur lors de l'inscription:", error);
-      const errorMsg = getErrorMessage(error);
+      const errorMsg = getApiErrorMessage(error, userErrorMessages.apiErrors);
       toast.error(errorMsg);
     } finally {
       isLoading.value = false;
@@ -305,11 +314,11 @@
     try {
       // 1. Créer l'utilisateur
       const userData = {
-        name: userForm.name.$value.trim(),
-        firstname: userForm.firstname.$value.trim(),
-        email: userForm.email.$value.trim(),
-        password: userForm.password.$value,
-        phone: userForm.phone.$value?.trim() || undefined,
+        name: userFormData.name.trim(),
+        firstname: userFormData.firstname.trim(),
+        email: userFormData.email.trim(),
+        password: userFormData.password,
+        phone: userFormData.phone?.trim() || undefined,
       };
 
       await Database.create('users/register', userData);
@@ -330,7 +339,7 @@
       router.push('/login');
     } catch (error: any) {
       console.error('Erreur lors de la création:', error);
-      const errorMsg = getErrorMessage(error);
+      const errorMsg = getApiErrorMessage(error, userErrorMessages.apiErrors);
       toast.error(errorMsg);
     } finally {
       isLoading.value = false;
