@@ -1,6 +1,7 @@
-import { Controller, Post, Body, Get, Req, UseGuards, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req, UseGuards, Param, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { Request } from 'express';
@@ -55,5 +56,25 @@ export class UsersController {
       throw new Error('User not authenticated');
     }
     return this.usersService.hasAccessToAssociation(userId, associationId);
+  }
+
+  @Put('me')
+  @UseGuards(AuthenticatedGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User profile has been successfully updated.',
+  })
+  @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 409, description: 'Email already exists.' })
+  async updateProfile(@Req() req: Request, @Body() updateUserDto: UpdateUserDto) {
+    const userId = req.user?.['id'];
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+    return this.usersService.updateUser(userId, updateUserDto);
   }
 }

@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UserSecurityService } from '../security/user-security.service';
 import { PasswordUtils } from '../../common/utils/password.utils';
 import { UserAssociation } from '../associations/modules/users/entities/user-association.entity';
@@ -165,9 +166,7 @@ export class UsersService {
           phone: true,
         },
         status: true,
-        association: {
-          paymentServiceValidUntil: true,
-        },
+        association: {},
       },
       where: {
         userId,
@@ -177,5 +176,35 @@ export class UsersService {
     });
 
     return userAssociation;
+  }
+
+  async updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.findOne(userId);
+
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const existingUser = await this.usersRepository.findOne({
+        where: { email: updateUserDto.email },
+      });
+      if (existingUser) {
+        throw new ConflictException('Un utilisateur avec cet email existe déjà');
+      }
+    }
+
+    const updateData: Partial<User> = {};
+    if (updateUserDto.name !== undefined) updateData.name = updateUserDto.name;
+    if (updateUserDto.firstname !== undefined) updateData.firstname = updateUserDto.firstname;
+    if (updateUserDto.email !== undefined) updateData.email = updateUserDto.email;
+    if (updateUserDto.phone !== undefined) updateData.phone = updateUserDto.phone;
+
+    Object.assign(user, updateData);
+
+    try {
+      return await this.usersRepository.save(user);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de l'utilisateur:", error);
+      throw new InternalServerErrorException(
+        'Une erreur est survenue lors de la mise à jour du profil'
+      );
+    }
   }
 }

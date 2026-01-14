@@ -19,27 +19,28 @@ export const useAuthStore = defineStore('auth', () => {
   // Vérifie l'authentification
   const isAuthenticated = () => !!user.value;
 
-  // Charge le profil utilisateur au démarrage
-  async function loadUser() {
+  async function loadUser(force = false) {
+    if (user.value && !force) {
+      return;
+    }
+
     isLoading.value = true;
     try {
-      const data = await Database.getAll('auth/profile'); // Vérifie la session
+      const data = await Database.getAll('auth/profile');
       user.value = data || null;
-
-      if (user.value !== null) {
-        const associationsData = await Database.getAll('users/me/associations');
-        associations.value = associationsData || [];
-      } else {
-        associations.value = [];
-      }
+      associations.value = (await Database.getAll('users/me/associations')) || [];
     } catch (err) {
-      user.value = null;
-      associations.value = [];
+      resetUserData();
       const axiosError = err as AxiosError<{ message: string }>;
       error.value = axiosError.response?.data?.message || 'Erreur lors du chargement du profil';
     } finally {
       isLoading.value = false;
     }
+  }
+
+  function resetUserData() {
+    user.value = null;
+    associations.value = [];
   }
 
   async function login(credentials: LoginCredentials) {
@@ -78,7 +79,7 @@ export const useAuthStore = defineStore('auth', () => {
   }) {
     try {
       const result = await Database.create('association', associationData);
-      await loadUser();
+      await loadUser(true);
       return result.data;
     } catch (err) {
       const axiosError = err as AxiosError<{ message: string }>;
@@ -110,6 +111,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function updateUser(userData: Partial<User>) {
+    try {
+      await Database.put('users/me', userData);
+      await loadUser(true);
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message: string }>;
+      error.value = axiosError.response?.data?.message || 'Erreur lors de la mise à jour du profil';
+      throw err;
+    }
+  }
+
   return {
     user,
     associations,
@@ -121,5 +133,6 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     createAssociation,
     uploadAssociationFile,
+    updateUser,
   };
 });

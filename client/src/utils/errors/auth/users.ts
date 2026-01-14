@@ -61,7 +61,7 @@ export const registerValidationSchema = yup.object({
   phone: yup
     .string()
     .optional()
-    .test('phone-format', userErrorMessages.format.phone, (value) => {
+    .test('phone-format', userErrorMessages.format.phone, (value: string | undefined) => {
       if (!value) return true;
       return userErrorMessages.patterns.phone.test(value);
     }),
@@ -91,4 +91,22 @@ export const resetPasswordValidationSchema = yup.object({
     .string()
     .required(userErrorMessages.required.password)
     .matches(userErrorMessages.patterns.password, userErrorMessages.password.invalid),
+});
+
+export const updateUserValidationSchema = yup.object({
+  name: yup
+    .string()
+    .required(userErrorMessages.required.name)
+    .max(50, userErrorMessages.length.name),
+  firstname: yup
+    .string()
+    .required(userErrorMessages.required.firstname)
+    .max(50, userErrorMessages.length.firstname),
+  phone: yup
+    .string()
+    .optional()
+    .test('phone-format', userErrorMessages.format.phone, (value: string | undefined) => {
+      if (!value) return true;
+      return userErrorMessages.patterns.phone.test(value);
+    }),
 });

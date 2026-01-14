@@ -47,6 +47,16 @@ export default class Database {
     }
   }
 
+  static async put(collection: string, item: object) {
+    try {
+      const response = await api.put(`/${collection}`, item);
+      return response.data;
+    } catch (err: unknown) {
+      console.error('API Error in Database.put:', err);
+      throw err;
+    }
+  }
+
   static async patch(collection: string, item?: object, params?: object) {
     try {
       const response = await api.patch(`/${collection}`, item, {

@@ -105,6 +105,9 @@
 
   onMounted(() => {
     loadRecentDonations();
-    authStore.loadUser();
+
+    if (!authStore.user) {
+      authStore.loadUser(false);
+    }
   });
 </script>
