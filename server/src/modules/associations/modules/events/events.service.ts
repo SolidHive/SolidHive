@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserAssociation } from '../users/entities/user-association.entity';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
 import { Event } from './entities/event.entity';
 import { FindOptionsDto } from '../../../../common/dto/find-all-query.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { File } from '../../../files/entities/file.entity';
 import { EventPricing } from './modules/pricings/entities/event-pricing.entity';
+import { EventRegister } from './modules/registers/entities/event-register.entity';
 import { FilesService } from '../../../files/files.service';
 import { Like, Between } from 'typeorm';
 
@@ -20,6 +22,8 @@ export class EventsService {
     private readonly fileRepository: Repository<File>,
     @InjectRepository(EventPricing)
     private readonly eventPricingRepository: Repository<EventPricing>,
+    @InjectRepository(EventRegister)
+    private readonly eventRegisterRepository: Repository<EventRegister>,
     private readonly filesService: FilesService
   ) {}
 
@@ -167,6 +171,45 @@ export class EventsService {
   }
 
   async remove(id: string, associationId: string) {
+    // Récupérer l'événement pour vérifier sa date
+    const event = await this.eventsRepository.findOne({
+      where: { id, association: { id: associationId } },
+    });
+
+    if (!event) {
+      throw new HttpException('Événement non trouvé', HttpStatus.NOT_FOUND);
+    }
+
+    // Compter les inscriptions liées à l'événement
+    const registrationsCount = await this.eventRegisterRepository.count({
+      where: { eventPricing: { event: { id } } },
+    });
+
+    // Vérifier si l'événement est passé (date de fin dépassée ou date de début dépassée si pas de date de fin)
+    const eventDate = event.endDate || event.startDate;
+    const now = new Date();
+
+    // Si l'événement a des inscriptions, vérifier qu'il est passé
+    if (registrationsCount > 0 && eventDate > now) {
+      throw new HttpException(
+        "Impossible de supprimer un événement qui n'est pas encore passé et qui a des inscriptions.",
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    // Supprimer les inscriptions liées aux tarifs de l'événement
+    const pricings = await this.eventPricingRepository.find({
+      where: { event: { id } },
+      select: ['id'],
+    });
+
+    const pricingIds = pricings.map((p) => p.id);
+
+    if (pricingIds.length > 0) {
+      await this.eventRegisterRepository.delete({ eventPricing: { id: In(pricingIds) } });
+    }
+
+    // Supprimer les tarifs
     await this.eventPricingRepository.delete({ event: { id } });
 
     try {

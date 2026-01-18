@@ -14,18 +14,47 @@ import { UserAssociation } from './modules/users/entities/user-association.entit
 import { Status } from '../../common/enums/status';
 import { File } from '../files/entities/file.entity';
 import { FilesService } from '../files/files.service';
+import { EmailService } from '../../common/utils/email/email.service';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as Handlebars from 'handlebars';
 
 @Injectable()
 export class AssociationsService {
+  private contactTemplate: HandlebarsTemplateDelegate;
+  private newAssociationTemplate: HandlebarsTemplateDelegate;
+
   constructor(
     @InjectRepository(Association)
     private readonly associationsRepository: Repository<Association>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     @InjectRepository(File)
-    private readonly fileRepository: Repository<File>,
-    private readonly filesService: FilesService
-  ) {}
+    private readonly filesService: FilesService,
+    private readonly emailService: EmailService
+  ) {
+    const contactTemplatePath = path.join(
+      process.cwd(),
+      'src/common/utils/email/templates/association-contact.html'
+    );
+    try {
+      const content = fs.readFileSync(contactTemplatePath, 'utf8');
+      this.contactTemplate = Handlebars.compile(content);
+    } catch (error) {
+      console.error('Erreur chargement template contact association:', error);
+    }
+
+    const newAssociationTemplatePath = path.join(
+      process.cwd(),
+      'src/common/utils/email/templates/new-association-notification.html'
+    );
+    try {
+      const content = fs.readFileSync(newAssociationTemplatePath, 'utf8');
+      this.newAssociationTemplate = Handlebars.compile(content);
+    } catch (error) {
+      console.error('Erreur chargement template nouvelle association:', error);
+    }
+  }
 
   async create(createAssociationDto: CreateAssociationDto, userId: string) {
     const user: User | null = await this.usersRepository.findOne({
@@ -37,20 +66,17 @@ export class AssociationsService {
     }
 
     try {
-      return await this.associationsRepository.manager.transaction(
+      const savedAssociation: Association = await this.associationsRepository.manager.transaction(
         async (transactionalEntityManager) => {
           const addAssociation = transactionalEntityManager.create(Association, {
             ...createAssociationDto,
             createdBy: user,
           });
-          const savedAssociation = await transactionalEntityManager.save(
-            Association,
-            addAssociation
-          );
+          const association = await transactionalEntityManager.save(Association, addAssociation);
 
           const addDefaultRole = transactionalEntityManager.create(AssociationRole, {
             name: 'owner',
-            association: savedAssociation,
+            association: association,
             description: "Rôle propriétaire de l'association",
             createdBy: null,
             permissions: [Permissions.ALL],
@@ -59,15 +85,40 @@ export class AssociationsService {
 
           const addUserAssociation = transactionalEntityManager.create(UserAssociation, {
             user,
-            association: savedAssociation,
+            association: association,
             role: savedRole,
             status: Status.ACCEPTED,
           });
           await transactionalEntityManager.save(UserAssociation, addUserAssociation);
 
-          return savedAssociation;
+          return association;
         }
       );
+
+      // Envoi d'email de notification à l'équipe SolidHive
+      try {
+        if (this.newAssociationTemplate) {
+          const htmlContent = this.newAssociationTemplate({
+            associationName: savedAssociation.name,
+            siret: savedAssociation.siret,
+            email: savedAssociation.contact || 'Non fourni',
+            creatorName: `${user.firstname} ${user.name}`,
+            creatorEmail: user.email,
+            adminUrl: `${process.env.FRONTEND_URL}/admin/dashboard/association/${savedAssociation.id}`,
+          });
+
+          await this.emailService.sendEmail({
+            to: process.env.EMAIL_SUPPORT || 'support@solidhive.fr',
+            subject: `Nouvelle association créée - ${savedAssociation.name}`,
+            html: htmlContent,
+          });
+        }
+      } catch (emailError) {
+        console.error('Erreur envoi email notification nouvelle association:', emailError);
+        // Ne pas échouer la création si l'email échoue
+      }
+
+      return savedAssociation;
     } catch (error: any) {
       if (error.code === '23505' && error.constraint === 'UQ_ceee675aefe0bb8f10f54db1696') {
         throw new HttpException(
@@ -185,5 +236,28 @@ export class AssociationsService {
   async updateStripeAccount(id: string, updateStripeAccountDto: UpdateStripeAccountDto) {
     await this.associationsRepository.update(id, updateStripeAccountDto);
     return this.findOne(id);
+  }
+
+  async sendContactEmail(
+    associationId: string,
+    name: string,
+    firstname: string,
+    email: string,
+    message: string,
+    phone?: string
+  ): Promise<void> {
+    const association = await this.associationsRepository.findOne({ where: { id: associationId } });
+    if (!association || !association.contact) {
+      throw new HttpException('Association ou contact introuvable', HttpStatus.NOT_FOUND);
+    }
+    if (!this.contactTemplate) {
+      throw new HttpException('Template email non disponible', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    const htmlContent = this.contactTemplate({ name, firstname, email, phone, message });
+    await this.emailService.sendEmail({
+      to: association.contact,
+      subject: `Nouveau message de contact pour l'association ${association.name}`,
+      html: htmlContent,
+    });
   }
 }

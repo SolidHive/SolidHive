@@ -14,7 +14,7 @@ import { CreateAssociationDto } from './dto/create-association.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
 import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
-import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
+import { ApiCookieAuth, ApiResponse, ApiBody, ApiOperation } from '@nestjs/swagger';
 import { User } from '../../common/decorators/user.decorator';
 import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 import {
@@ -24,6 +24,7 @@ import {
 import { Permissions } from '../../common/enums/permissions';
 import { StatusAssociationDto } from './dto/status-association.dto';
 import { UpdateStripeAccountDto } from './dto/update-stripe-account.dto';
+import { AssociationContactDto } from './dto/association-contact.dto';
 
 @Controller()
 export class AssociationsController {
@@ -111,5 +112,24 @@ export class AssociationsController {
     @Body() updateStripeAccountDto: UpdateStripeAccountDto
   ) {
     return this.associationsService.updateStripeAccount(id, updateStripeAccountDto);
+  }
+
+  @Post('association/:associationId/contact')
+  @ApiOperation({ summary: 'Envoyer un message de contact à une association' })
+  @ApiBody({ type: AssociationContactDto })
+  async sendContactEmail(
+    @Param('associationId') associationId: string,
+    @Body() contactDto: AssociationContactDto
+  ) {
+    const { name, firstname, email, message, phone } = contactDto;
+    await this.associationsService.sendContactEmail(
+      associationId,
+      name,
+      firstname,
+      email,
+      message,
+      phone
+    );
+    return { message: 'Message envoyé à l’association.' };
   }
 }

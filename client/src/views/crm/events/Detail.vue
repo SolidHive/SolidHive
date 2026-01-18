@@ -101,7 +101,7 @@
             </div>
             <div>
               <label class="text-muted-foreground text-xs sm:text-sm">Montant récolté</label>
-              <p class="mt-1 text-sm font-medium sm:text-base">{{ event.amount }}€</p>
+              <p class="mt-1 text-sm font-medium sm:text-base">{{ totalAmount }}€</p>
             </div>
             <div v-if="event.address">
               <label class="text-muted-foreground text-xs sm:text-sm">Adresse</label>
@@ -157,7 +157,7 @@
                   v-if="crmAccess.canDeleteEvent"
                   variant="ghost"
                   size="sm"
-                  @click="deletePricing(pricing.id)"
+                  @click="confirmDeletePricing(pricing)"
                 >
                   <Trash2 class="h-4 w-4 text-red-500" />
                 </Button>
@@ -258,86 +258,75 @@
       </DialogHeader>
       <div class="space-y-4 py-4">
         <div>
-          <label class="mb-1 block text-sm font-medium">Titre *</label>
-          <input
+          <InputForm
             v-model="pricingForm.title"
+            input-name="title"
             type="text"
             required
             placeholder="Tarif normal, réduit, etc."
-            :class="[
-              'flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-              showError('title')
-                ? 'border-destructive focus-visible:ring-destructive'
-                : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
-            ]"
+            :error-message="getErrorMessage('title')"
+            :error-state="showError('title')"
             @input="clearValidationErrors(validationErrors, 'title')"
-            @blur="touchedFields.title = true"
-          />
-          <p v-if="showError('title')" class="text-destructive mt-1 text-xs">
-            {{ getErrorMessage('title') }}
-          </p>
+            @blur="() => (touchedFields.title = true)"
+          >
+            <template #label>
+              Titre
+              <span class="text-destructive">*</span>
+            </template>
+          </InputForm>
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium">Prix (€) *</label>
-          <input
-            v-model.number="pricingForm.amount"
+          <InputForm
+            v-model="pricingForm.amount"
+            input-name="amount"
             type="number"
             min="0"
             step="0.01"
             required
             placeholder="0.00"
-            :class="[
-              'flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-              showError('amount')
-                ? 'border-destructive focus-visible:ring-destructive'
-                : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
-            ]"
+            :error-message="getErrorMessage('amount')"
+            :error-state="showError('amount')"
             @input="clearValidationErrors(validationErrors, 'amount')"
-            @blur="touchedFields.amount = true"
-          />
-          <p v-if="showError('amount')" class="text-destructive mt-1 text-xs">
-            {{ getErrorMessage('amount') }}
-          </p>
+            @blur="() => (touchedFields.amount = true)"
+          >
+            <template #label>
+              Prix (€)
+              <span class="text-destructive">*</span>
+            </template>
+          </InputForm>
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium">Description *</label>
-          <textarea
+          <TextareaForm
             v-model="pricingForm.description"
-            rows="3"
+            input-name="description"
+            :rows="3"
             required
             placeholder="Description du tarif"
-            :class="[
-              'flex w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-              showError('description')
-                ? 'border-destructive focus-visible:ring-destructive'
-                : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
-            ]"
+            :error-message="getErrorMessage('description')"
+            :error-state="showError('description')"
             @input="clearValidationErrors(validationErrors, 'description')"
-            @blur="touchedFields.description = true"
-          />
-          <p v-if="showError('description')" class="text-destructive mt-1 text-xs">
-            {{ getErrorMessage('description') }}
-          </p>
+            @blur="() => (touchedFields.description = true)"
+          >
+            <template #label>
+              Description
+              <span class="text-destructive">*</span>
+            </template>
+          </TextareaForm>
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium">Capacité maximale</label>
-          <input
-            v-model.number="pricingForm.maxCapacity"
+          <InputForm
+            v-model="pricingForm.maxCapacity"
+            input-name="maxCapacity"
             type="number"
             min="1"
             placeholder="Illimité"
-            :class="[
-              'flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-              showError('maxCapacity')
-                ? 'border-destructive focus-visible:ring-destructive'
-                : 'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring',
-            ]"
+            :error-message="getErrorMessage('maxCapacity')"
+            :error-state="showError('maxCapacity')"
             @input="clearValidationErrors(validationErrors, 'maxCapacity')"
-            @blur="touchedFields.maxCapacity = true"
-          />
-          <p v-if="showError('maxCapacity')" class="text-destructive mt-1 text-xs">
-            {{ getErrorMessage('maxCapacity') }}
-          </p>
+            @blur="() => (touchedFields.maxCapacity = true)"
+          >
+            <template #label>Capacité maximale</template>
+          </InputForm>
         </div>
       </div>
       <DialogFooter>
@@ -364,6 +353,23 @@
       </DialogFooter>
     </DialogContent>
   </Dialog>
+
+  <!-- Dialog: Supprimer un tarif -->
+  <Dialog v-model:open="showDeletePricingDialog">
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Supprimer le tarif</DialogTitle>
+        <DialogDescription>
+          Êtes-vous sûr de vouloir supprimer le tarif "{{ pricingToDelete?.title }}" ? Cette action
+          est irréversible.
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter>
+        <Button variant="outline" @click="showDeletePricingDialog = false">Annuler</Button>
+        <Button variant="destructive" @click="deletePricingConfirmed">Supprimer</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -372,6 +378,8 @@
   import { ArrowLeft, ArrowRight, Calendar, Pencil, Plus, Trash2 } from 'lucide-vue-next';
   import Header from '@/components/dashboard/Header.vue';
   import Button from '@/components/ui/button/Button.vue';
+  import InputForm from '@/components/form/InputForm.vue';
+  import TextareaForm from '@/components/form/TextareaForm.vue';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import {
     Dialog,
@@ -403,7 +411,9 @@
   const currentTab = ref('details');
   const showAddPricingDialog = ref(false);
   const showDeleteDialog = ref(false);
+  const showDeletePricingDialog = ref(false);
   const editingPricing = ref<EventPricing | null>(null);
+  const pricingToDelete = ref<EventPricing | null>(null);
   const registrations = ref<any[]>([]);
   const formSubmitted = ref(false);
 
@@ -443,7 +453,16 @@
     touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
 
   const validatePricingForm = async () => {
-    const result = await validateWithYup(singlePricingValidationSchema as any, pricingForm);
+    const cleaned = {
+      title: pricingForm.title?.trim() || '',
+      description: pricingForm.description?.trim() || '',
+      amount: pricingForm.amount,
+      maxCapacity:
+        pricingForm.maxCapacity === '' || pricingForm.maxCapacity == null
+          ? undefined
+          : pricingForm.maxCapacity,
+    };
+    const result = await validateWithYup(singlePricingValidationSchema as any, cleaned);
 
     if (result.isValid) {
       clearValidationErrors(validationErrors);
@@ -552,7 +571,6 @@
 
     try {
       if (editingPricing.value) {
-        // Modifier
         await Database.update(
           `association/${crmStore.currentAssociationId}/event/${event.value.id}/pricing`,
           editingPricing.value.id,
@@ -578,19 +596,27 @@
     }
   };
 
-  const deletePricing = async (pricingId: string) => {
-    if (!crmStore.currentAssociationId || !event.value) return;
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce tarif ?')) return;
+  const confirmDeletePricing = (pricing: EventPricing) => {
+    pricingToDelete.value = pricing;
+    showDeletePricingDialog.value = true;
+  };
+
+  const deletePricingConfirmed = async () => {
+    if (!crmStore.currentAssociationId || !event.value || !pricingToDelete.value) return;
 
     try {
       await Database.delete(
-        `association/${crmStore.currentAssociationId}/event/${event.value.id}/pricing/${pricingId}`
+        `association/${crmStore.currentAssociationId}/event/${event.value.id}/pricing/${pricingToDelete.value.id}`
       );
       toast.success('Tarif supprimé avec succès');
+      showDeletePricingDialog.value = false;
+      pricingToDelete.value = null;
       await loadEvent();
     } catch (error: any) {
       console.error(error);
-      toast.error('Erreur lors de la suppression du tarif');
+      const errorMessage =
+        error.response?.data?.message || 'Erreur lors de la suppression du tarif';
+      toast.error(errorMessage);
     }
   };
 
@@ -603,7 +629,9 @@
       router.push(`/crm/${crmStore.currentAssociationId}/events`);
     } catch (error: any) {
       console.error(error);
-      toast.error("Erreur lors de la suppression de l'événement");
+      const errorMessage =
+        error.response?.data?.message || "Erreur lors de la suppression de l'événement";
+      toast.error(errorMessage);
     }
   };
   onMounted(async () => {

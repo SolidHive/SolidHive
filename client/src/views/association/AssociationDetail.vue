@@ -128,9 +128,12 @@
           />
         </div>
       </div>
+      <div v-if="currentTab === 'contact'" class="mt-8">
+        <ContactForm :association-id="association?.id || ''" />
+      </div>
     </PageContainer>
     <div class="mt-8">
-      <ContactSection @change-tab="onTabChange" />
+      <ContactSection v-if="currentTab !== 'contact'" @change-tab="onTabChange" />
     </div>
   </div>
 </template>
@@ -150,6 +153,8 @@
   import EventCard from '@/components/associations/EventCard.vue';
   import Pagination from '@/components/ui/Pagination.vue';
   import ContactSection from '@/components/associations/ContactSection.vue';
+
+  import ContactForm from '@/components/associations/ContactForm.vue';
   import PageContainer from '@/components/PageContainer.vue';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import Database from '@/utils/database.utils';

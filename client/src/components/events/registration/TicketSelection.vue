@@ -22,18 +22,35 @@
             <span class="font-title text-secondary text-lg font-bold sm:text-xl">
               {{ formatCurrency(pricing.amount) }}
             </span>
-            <span
-              v-if="pricing.availableCapacity !== undefined"
-              class="text-sm font-medium"
-              :class="getCapacityColor(pricing.availableCapacity ?? 0)"
-            >
-              <span v-if="(pricing.availableCapacity ?? 0) === 0">Complet</span>
-              <span v-else>
-                {{ pricing.availableCapacity }} place{{
-                  (pricing.availableCapacity ?? 0) > 1 ? 's' : ''
-                }}
-                disponible{{ (pricing.availableCapacity ?? 0) > 1 ? 's' : '' }}
+            <span v-if="pricing.maxCapacity !== undefined">
+              <span
+                class="text-sm font-medium"
+                :class="getCapacityColor(pricing.availableCapacity ?? 0)"
+              >
+                <span
+                  v-if="
+                    pricing.availableCapacity === 0 &&
+                    pricing.availableCapacity !== null &&
+                    pricing.availableCapacity !== undefined
+                  "
+                >
+                  Complet
+                </span>
+                <span
+                  v-else-if="
+                    pricing.availableCapacity !== null && pricing.availableCapacity !== undefined
+                  "
+                >
+                  {{ pricing.availableCapacity }} place{{
+                    (pricing.availableCapacity ?? 0) > 1 ? 's' : ''
+                  }}
+                  disponible{{ (pricing.availableCapacity ?? 0) > 1 ? 's' : '' }}
+                </span>
+                <span v-else class="font-medium text-green-600">Illimité</span>
               </span>
+            </span>
+            <span v-if="pricing.maxCapacity === undefined" class="font-medium text-green-600">
+              Illimité
             </span>
           </div>
         </div>
@@ -54,8 +71,10 @@
             variant="outline"
             size="icon"
             :disabled="
-              (pricing.availableCapacity ?? 0) === 0 ||
-              getTicketQuantity(pricing.id) >= (pricing.availableCapacity ?? 0)
+              pricing.maxCapacity !== undefined &&
+              pricing.maxCapacity !== null &&
+              ((pricing.availableCapacity ?? 0) === 0 ||
+                getTicketQuantity(pricing.id) >= (pricing.availableCapacity ?? 0))
             "
             @click="incrementQuantity(pricing.id)"
           >

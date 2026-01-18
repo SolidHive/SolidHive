@@ -12,6 +12,7 @@ import { UsersAssociationsModule } from './modules/users/users-associations.modu
 import { UserAssociation } from './modules/users/entities/user-association.entity';
 import { PermissionAccessModule } from '../permissions-access/permission-access.module';
 import { FilesModule } from '../files/files.module';
+import { EmailModule } from '../../common/utils/email/email.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { FilesModule } from '../files/files.module';
     UsersAssociationsModule,
     PermissionAccessModule,
     FilesModule,
+    EmailModule,
   ],
   controllers: [AssociationsController],
   providers: [AssociationsService],

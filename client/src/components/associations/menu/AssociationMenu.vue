@@ -16,20 +16,9 @@
             {{ tab.label }}
           </option>
         </select>
-        <svg
+        <ChevronDown
           class="pointer-events-none absolute top-1/2 right-3 h-5 w-5 -translate-y-1/2 text-gray-400"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+        />
       </div>
     </div>
 
@@ -61,6 +50,7 @@
 
 <script setup lang="ts">
   import { ref, defineEmits, onMounted, nextTick, onBeforeUnmount, watch } from 'vue';
+  import { ChevronDown } from 'lucide-vue-next';
 
   const props = defineProps<{
     currentTab?: string;

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, QueryFailedError } from 'typeorm';
 import { EventPricing } from './entities/event-pricing.entity';
 import { CreateEventPricingDto } from './dto/create-event-pricing.dto';
 import { Event } from '../../entities/event.entity';
@@ -67,6 +67,16 @@ export class EventsPricingsService {
   }
 
   async remove(id: string, eventId: string) {
-    return this.eventsPricingsRepository.delete({ id, event: { id: eventId } });
+    try {
+      return await this.eventsPricingsRepository.delete({ id, event: { id: eventId } });
+    } catch (error) {
+      if (error instanceof QueryFailedError && error.driverError?.code === '23503') {
+        throw new HttpException(
+          'Ce tarif ne peut pas être supprimé car des inscriptions y sont associées.',
+          HttpStatus.CONFLICT
+        );
+      }
+      throw error;
+    }
   }
 }

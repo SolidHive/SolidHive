@@ -6,20 +6,7 @@
       </label>
       <div v-if="$slots.hint" class="group relative ml-1.5">
         <div class="cursor-help">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="text-muted-foreground hover:text-foreground h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+          <Info class="text-muted-foreground hover:text-foreground h-4 w-4" />
         </div>
         <div
           class="bg-popover text-popover-foreground border-border absolute top-full left-1/2 z-10 mt-1 hidden w-64 -translate-x-1/2 transform rounded-md border px-3 py-2 shadow-lg group-hover:block"
@@ -56,6 +43,8 @@
 </template>
 
 <script setup lang="ts">
+  import { Info } from 'lucide-vue-next';
+
   const props = defineProps({
     labelValue: {
       type: String,

@@ -23,13 +23,22 @@
           class="font-paragraph mt-1 text-sm font-bold"
           :class="getCapacityColor(pricing.availableCapacity ?? 0)"
         >
-          <span v-if="(pricing.availableCapacity ?? 0) === 0">Complet</span>
-          <span v-else>
+          <span
+            v-if="
+              pricing.maxCapacity !== undefined &&
+              pricing.maxCapacity !== null &&
+              (pricing.availableCapacity ?? 0) === 0
+            "
+          >
+            Complet
+          </span>
+          <span v-else-if="pricing.maxCapacity !== undefined && pricing.maxCapacity !== null">
             {{ pricing.availableCapacity }} place{{
               (pricing.availableCapacity ?? 0) > 1 ? 's' : ''
             }}
             disponible{{ (pricing.availableCapacity ?? 0) > 1 ? 's' : '' }}
           </span>
+          <span v-else class="font-medium text-green-600">Illimité</span>
         </div>
       </div>
     </div>

@@ -9,11 +9,19 @@ import { EventsRegistersModule } from './modules/registers/events-registers.modu
 import { File } from '../../../files/entities/file.entity';
 import { PermissionAccess } from 'src/modules/permissions-access/entities/permission-access.entity';
 import { EventPricing } from './modules/pricings/entities/event-pricing.entity';
+import { EventRegister } from './modules/registers/entities/event-register.entity';
 import { FilesModule } from '../../../files/files.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Event, UserAssociation, File, EventPricing, PermissionAccess]),
+    TypeOrmModule.forFeature([
+      Event,
+      UserAssociation,
+      File,
+      EventPricing,
+      PermissionAccess,
+      EventRegister,
+    ]),
     EventsPricingsModule,
     EventsRegistersModule,
     FilesModule,

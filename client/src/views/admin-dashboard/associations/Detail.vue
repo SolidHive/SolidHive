@@ -140,11 +140,11 @@
       <div class="space-y-4 py-4">
         <div class="space-y-2">
           <label for="message" class="text-sm font-medium">Message (optionnel)</label>
-          <Textarea
-            id="message"
+          <TextareaForm
             v-model="statusMessage"
+            input-name="message"
             :placeholder="dialogPlaceholder"
-            rows="4"
+            :rows="4"
           />
         </div>
       </div>
@@ -181,7 +181,7 @@
     DialogHeader,
     DialogTitle,
   } from '@/components/ui/dialog';
-  import { Textarea } from '@/components/ui/textarea';
+  import TextareaForm from '@/components/form/TextareaForm.vue';
   import {
     Table,
     TableBody,
