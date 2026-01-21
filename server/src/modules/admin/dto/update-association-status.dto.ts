@@ -1,5 +1,5 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { Status } from '../../../../common/enums/status';
+import { Status } from '../../../common/enums/status';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateAssociationStatusDto {

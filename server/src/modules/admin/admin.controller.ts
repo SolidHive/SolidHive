@@ -10,11 +10,11 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
-import { Roles, RolesGuard } from '../../auth/guards/roles.guard';
+import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { Roles, RolesGuard } from '../auth/guards/roles.guard';
 import { ApiCookieAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateAssociationStatusDto } from './dto/update-association-status.dto';
-import { FindOptionsDto } from '../../../common/dto/find-all-query.dto';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
 
 @ApiTags('Admin')
 @Controller('admin')

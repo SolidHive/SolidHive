@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Association } from '../../associations/entities/association.entity';
-import { EmailService } from '../../../common/utils/email/email.service';
+import { Association } from '../associations/entities/association.entity';
+import { EmailService } from '../../common/utils/email/email.service';
 import { UpdateAssociationStatusDto } from './dto/update-association-status.dto';
-import { Status } from '../../../common/enums/status';
-import { FindOptionsDto } from '../../../common/dto/find-all-query.dto';
-import { AssociationsService } from '../../associations/associations.service';
+import { Status } from '../../common/enums/status';
+import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
+import { AssociationsService } from '../associations/associations.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';

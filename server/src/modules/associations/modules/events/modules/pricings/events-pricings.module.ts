@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Event } from '../../entities/event.entity';
 import { EventPricing } from './entities/event-pricing.entity';
 import { UserAssociation } from '../../../users/entities/user-association.entity';
-import { PermissionAccess } from 'src/modules/permissions-access/entities/permission-access.entity';
+import { PermissionAccess } from 'src/modules/admin/permissions-access/entities/permission-access.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([EventPricing, Event, UserAssociation, PermissionAccess])],

@@ -7,7 +7,7 @@ import { UserAssociation } from '../users/entities/user-association.entity';
 import { EventsPricingsModule } from './modules/pricings/events-pricings.module';
 import { EventsRegistersModule } from './modules/registers/events-registers.module';
 import { File } from '../../../files/entities/file.entity';
-import { PermissionAccess } from 'src/modules/permissions-access/entities/permission-access.entity';
+import { PermissionAccess } from 'src/modules/admin/permissions-access/entities/permission-access.entity';
 import { EventPricing } from './modules/pricings/entities/event-pricing.entity';
 import { EventRegister } from './modules/registers/entities/event-register.entity';
 import { FilesModule } from '../../../files/files.module';

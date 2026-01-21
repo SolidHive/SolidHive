@@ -6,7 +6,7 @@ import { UserAssociation } from './entities/user-association.entity';
 import { User } from '../../../users/entities/user.entity';
 import { Association } from '../../entities/association.entity';
 import { AssociationRole } from '../roles/entities/association-role.entity';
-import { PermissionAccess } from 'src/modules/permissions-access/entities/permission-access.entity';
+import { PermissionAccess } from 'src/modules/admin/permissions-access/entities/permission-access.entity';
 
 @Module({
   imports: [

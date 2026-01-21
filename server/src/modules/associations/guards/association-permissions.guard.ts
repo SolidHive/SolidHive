@@ -7,7 +7,7 @@ import { Permissions } from '../../../common/enums/permissions';
 import { UserAssociation } from '../modules/users/entities/user-association.entity';
 import { Status } from '../../../common/enums/status';
 import { Association } from '../entities/association.entity';
-import { PermissionAccess } from '../../../modules/permissions-access/entities/permission-access.entity';
+import { PermissionAccess } from '../../../modules/admin/permissions-access/entities/permission-access.entity';
 
 export const PERMISSIONS_KEY = 'associationPermissions';
 export const AssociationPermissions = (...permissions: Permissions[]) =>

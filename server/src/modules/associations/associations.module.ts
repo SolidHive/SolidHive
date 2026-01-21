@@ -10,7 +10,7 @@ import { AssociationsRolesModule } from './modules/roles/associations-roles.modu
 import { AssociationsAnnouncementsModule } from './modules/announcements/associations-announcements.module';
 import { UsersAssociationsModule } from './modules/users/users-associations.module';
 import { UserAssociation } from './modules/users/entities/user-association.entity';
-import { PermissionAccessModule } from '../permissions-access/permission-access.module';
+import { PermissionAccessModule } from '../admin/permissions-access/permission-access.module';
 import { FilesModule } from '../files/files.module';
 import { EmailModule } from '../../common/utils/email/email.module';
 

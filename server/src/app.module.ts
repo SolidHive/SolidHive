@@ -16,8 +16,8 @@ import { FilesModule } from './modules/files/files.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { TicketsModule } from './modules/associations/modules/events/modules/tickets/tickets.module';
-import { AdminModule } from './modules/users/admin/admin.module';
-import { PermissionAccessModule } from './modules/permissions-access/permission-access.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { PermissionAccessModule } from './modules/admin/permissions-access/permission-access.module';
 
 @Module({
   imports: [

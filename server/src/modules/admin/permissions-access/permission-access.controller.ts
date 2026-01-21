@@ -12,8 +12,8 @@ import {
 import { PermissionAccessService } from './permission-access.service';
 import { CreatePermissionAccessDto } from './dto/create-permission-access.dto';
 import { UpdatePermissionAccessDto } from './dto/update-permission-access.dto';
-import { Roles, RolesGuard } from '../auth/guards/roles.guard';
-import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { Roles, RolesGuard } from '../../auth/guards/roles.guard';
+import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
 import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
 import { FindOptionsDto } from 'src/common/dto/find-all-query.dto';
 
