@@ -36,16 +36,13 @@
     <!-- Montant du don -->
     <div>
       <div class="relative">
-        <input
-          id="donation-amount"
-          :value="donationAmount"
+        <InputForm
+          :model-value="donationAmount.toString()"
           type="number"
-          min="1"
-          max="100000"
-          step="0.01"
+          input-name="donation-amount"
           placeholder="Montant"
-          class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring font-paragraph w-full rounded-lg border px-3 py-2 pr-10 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:px-4 sm:py-3 sm:pr-12 sm:text-base"
-          @input="onDonationAmountInput"
+          :input-class="'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring font-paragraph w-full rounded-lg border px-3 py-2 pr-10 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:px-4 sm:py-3 sm:pr-12 sm:text-base'"
+          @update:model-value="onDonationAmountInput"
         />
         <span
           class="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-sm font-medium sm:right-4 sm:text-base"
@@ -64,16 +61,13 @@
         Pourcentage pour SolidHive (modifiable)
       </label>
       <div class="relative">
-        <input
-          id="solidhive-percentage"
-          :value="solidHivePercentage"
+        <InputForm
+          :model-value="solidHivePercentage.toString()"
           type="number"
-          min="0"
-          max="100"
-          step="0.01"
+          input-name="solidhive-percentage"
           placeholder="5"
-          class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring font-paragraph w-full rounded-lg border px-3 py-2 pr-10 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:px-4 sm:py-3 sm:pr-12 sm:text-base"
-          @input="onSolidHivePercentageInput"
+          :input-class="'border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring font-paragraph w-full rounded-lg border px-3 py-2 pr-10 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:px-4 sm:py-3 sm:pr-12 sm:text-base'"
+          @update:model-value="onSolidHivePercentageInput"
         />
         <span
           class="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-sm font-medium sm:right-4 sm:text-base"
@@ -118,6 +112,7 @@
   import { ref, computed } from 'vue';
   import { HandHeart, Check, Loader2 } from 'lucide-vue-next';
   import { Button } from '@/components/ui/button';
+  import InputForm from '@/components/form/InputForm.vue';
   import { useAuthStore } from '@/stores/auth';
   import { useRouter } from 'vue-router';
   import api from '@/utils/api.utils';
@@ -170,25 +165,23 @@
     }).format(amount);
   };
 
-  const onDonationAmountInput = (event: Event) => {
-    const input = event.target as HTMLInputElement;
-    let value = parseFloat(input.value) || 0;
+  const onDonationAmountInput = (value: string) => {
+    let numValue = parseFloat(value) || 0;
 
     // Limiter entre 1 et 100000
-    value = Math.max(1, Math.min(100000, value));
+    numValue = Math.max(1, Math.min(100000, numValue));
 
-    emit('update:donationAmount', value);
+    emit('update:donationAmount', numValue);
   };
 
-  const onSolidHivePercentageInput = (event: Event) => {
-    const input = event.target as HTMLInputElement;
-    let value = parseFloat(input.value) || 0;
+  const onSolidHivePercentageInput = (value: string) => {
+    let numValue = parseFloat(value) || 0;
 
     // Limiter entre 0 et 100
-    value = Math.max(0, Math.min(100, value));
+    numValue = Math.max(0, Math.min(100, numValue));
 
-    solidHivePercentage.value = value;
-    emit('update:solidHivePercentage', value);
+    solidHivePercentage.value = numValue;
+    emit('update:solidHivePercentage', numValue);
   };
 
   const faireUnDon = async () => {

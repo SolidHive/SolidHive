@@ -18,11 +18,12 @@
 
         <div class="space-y-2">
           <div class="flex items-center space-x-2">
-            <input
-              id="edit-requires-subscription"
-              v-model="form.requiresSubscription.$value"
+            <InputForm
+              :model-value="form.requiresSubscription.$value"
               type="checkbox"
-              class="border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2"
+              input-name="edit-requires-subscription"
+              :input-class="'border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2'"
+              @update:model-value="form.requiresSubscription.$value = $event"
               @change="() => (touchedFields.requiresSubscription = true)"
             />
             <label for="edit-requires-subscription" class="text-sm font-medium">
@@ -38,6 +39,7 @@
 
 <script setup lang="ts">
   import { Update as UpdateRaw } from '@/components/dashboard/crud';
+  import InputForm from '@/components/form/InputForm.vue';
   import type { PermissionAccess } from '@/interfaces/permission-access.interface';
   import Database from '@/utils/database.utils';
   import { formatPermissionLabel } from '@/utils/permissions.utils';

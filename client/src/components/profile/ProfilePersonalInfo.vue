@@ -13,51 +13,41 @@
     </div>
 
     <form v-if="isEditing" class="grid gap-4 sm:grid-cols-2" @submit.prevent="saveChanges">
-      <div class="group">
-        <label
-          class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium tracking-wide uppercase"
-        >
+      <InputForm
+        v-model="formData.name"
+        input-name="name"
+        type="text"
+        required
+        :disabled="isSaving"
+        placeholder="Votre nom"
+        :error-message="getErrorMessage('name')"
+        :error-state="showError('name')"
+        @input="clearValidationErrors(validationErrors, 'name')"
+        @blur="() => (touchedFields.name = true)"
+      >
+        <template #label>
           Nom
           <span class="text-destructive">*</span>
-        </label>
-        <input
-          v-model="formData.name"
-          type="text"
-          :class="[
-            'font-paragraph text-foreground bg-background border-border focus:border-primary w-full rounded-xl border px-4 py-2.5 transition-colors focus:outline-none',
-            showError('name') ? 'border-destructive' : '',
-          ]"
-          placeholder="Votre nom"
-          @input="clearValidationErrors(validationErrors, 'name')"
-          @blur="() => (touchedFields.name = true)"
-        />
-        <p v-if="showError('name')" class="text-destructive mt-1 text-xs">
-          {{ getErrorMessage('name') }}
-        </p>
-      </div>
+        </template>
+      </InputForm>
 
-      <div class="group">
-        <label
-          class="font-paragraph text-muted-foreground mb-1.5 block text-xs font-medium tracking-wide uppercase"
-        >
+      <InputForm
+        v-model="formData.firstname"
+        input-name="firstname"
+        type="text"
+        required
+        :disabled="isSaving"
+        placeholder="Votre prénom"
+        :error-message="getErrorMessage('firstname')"
+        :error-state="showError('firstname')"
+        @input="clearValidationErrors(validationErrors, 'firstname')"
+        @blur="() => (touchedFields.firstname = true)"
+      >
+        <template #label>
           Prénom
           <span class="text-destructive">*</span>
-        </label>
-        <input
-          v-model="formData.firstname"
-          type="text"
-          :class="[
-            'font-paragraph text-foreground bg-background border-border focus:border-primary w-full rounded-xl border px-4 py-2.5 transition-colors focus:outline-none',
-            showError('firstname') ? 'border-destructive' : '',
-          ]"
-          placeholder="Votre prénom"
-          @input="clearValidationErrors(validationErrors, 'firstname')"
-          @blur="() => (touchedFields.firstname = true)"
-        />
-        <p v-if="showError('firstname')" class="text-destructive mt-1 text-xs">
-          {{ getErrorMessage('firstname') }}
-        </p>
-      </div>
+        </template>
+      </InputForm>
 
       <div class="group sm:col-span-2">
         <label
@@ -80,23 +70,20 @@
         >
           Téléphone
         </label>
-        <input
+        <InputForm
           v-model="formData.phone"
+          input-name="phone"
           type="tel"
-          :class="[
-            'font-paragraph text-foreground bg-background border-border focus:border-primary w-full rounded-xl border px-4 py-2.5 transition-colors focus:outline-none',
-            showError('phone') ? 'border-destructive' : '',
-          ]"
+          :disabled="isSaving"
           placeholder="0612345678"
+          :error-message="getErrorMessage('phone')"
+          :error-state="showError('phone')"
           @input="clearValidationErrors(validationErrors, 'phone')"
           @blur="() => (touchedFields.phone = true)"
-        />
-        <p v-if="showError('phone')" class="text-destructive mt-1 text-xs">
-          {{ getErrorMessage('phone') }}
-        </p>
-        <p class="text-muted-foreground mt-1 text-xs">
-          Format attendu : 10 chiffres commençant par 0 (ex: 0612345678)
-        </p>
+        >
+          <template #label>Téléphone</template>
+          <template #hint>Format attendu : 10 chiffres commençant par 0 (ex: 0612345678)</template>
+        </InputForm>
       </div>
 
       <div class="flex gap-3 pt-2 sm:col-span-2">
@@ -184,6 +171,7 @@
   import { ref, reactive, watch } from 'vue';
   import { Edit, Mail, Loader2 } from 'lucide-vue-next';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
+  import InputForm from '@/components/form/InputForm.vue';
   import { useAuthStore } from '@/stores/auth';
   import { useToast } from 'vue-toastification';
   import { userErrorMessages, updateUserValidationSchema } from '@/utils/errors/auth/users';

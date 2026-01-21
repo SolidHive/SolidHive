@@ -9,33 +9,35 @@
     <template #form>
       <div class="space-y-4 p-4">
         <div class="space-y-2">
-          <label class="text-sm font-medium">
-            Permission
-            <span class="text-destructive">*</span>
-          </label>
-          <select
-            v-model="form.permission.$value"
-            class="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-            :class="showError('permission') ? 'border-destructive' : ''"
+          <SelectForm
+            :model-value="form.permission.$value"
+            input-name="permission"
+            :error-message="form.permission.$error?.message || ''"
+            :error-state="showError('permission')"
+            @update:model-value="form.permission.$value = $event"
             @blur="() => (touchedFields.permission = true)"
           >
-            <option value="">Sélectionnez une permission</option>
-            <option v-for="perm in availablePermissions" :key="perm.value" :value="perm.value">
-              {{ perm.label }}
-            </option>
-          </select>
-          <p v-if="showError('permission')" class="text-destructive text-sm">
-            {{ form.permission.$error?.message || '' }}
-          </p>
+            <template #label>
+              Permission
+              <span class="text-destructive">*</span>
+            </template>
+            <template #options>
+              <option value="">Sélectionnez une permission</option>
+              <option v-for="perm in availablePermissions" :key="perm.value" :value="perm.value">
+                {{ perm.label }}
+              </option>
+            </template>
+          </SelectForm>
         </div>
 
         <div class="space-y-2">
           <div class="flex items-center space-x-2">
-            <input
-              id="requires-subscription"
-              v-model="form.requiresSubscription.$value"
+            <InputForm
+              :model-value="form.requiresSubscription.$value"
               type="checkbox"
-              class="border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2"
+              input-name="requires-subscription"
+              :input-class="'border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2'"
+              @update:model-value="form.requiresSubscription.$value = $event"
               @change="() => (touchedFields.requiresSubscription = true)"
             />
             <label for="requires-subscription" class="text-sm font-medium">
@@ -53,6 +55,8 @@
 
 <script setup lang="ts">
   import { Create as CrudCreate } from '@/components/dashboard/crud';
+  import InputForm from '@/components/form/InputForm.vue';
+  import SelectForm from '@/components/form/SelectForm.vue';
   import { Permissions } from '@/enums/permissions';
   import Database from '@/utils/database.utils';
   import { computed, onMounted, reactive, ref } from 'vue';

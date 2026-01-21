@@ -25,14 +25,15 @@
         :id="inputName"
         :type="inputType"
         :placeholder="placeholder"
-        :value="modelValue"
+        :value="inputType === 'checkbox' ? undefined : modelValue"
+        :checked="inputType === 'checkbox' ? (modelValue as boolean) : undefined"
         :class="
           inputClass || [
             'font-paragraph w-full rounded-lg border px-4 py-2 pr-10',
             errorState ? 'border-destructive' : 'border-border',
           ]
         "
-        @input="handleInput"
+        @[inputEvent]="handleInput"
         @blur="$emit('blur')"
       />
       <button
@@ -66,7 +67,7 @@
       required: true,
     },
     modelValue: {
-      type: [String, Number],
+      type: [String, Number, Boolean],
       required: true,
     },
     type: {
@@ -91,7 +92,7 @@
     },
   });
 
-  const emit = defineEmits(['update:modelValue', 'blur']);
+  const emit = defineEmits(['update:modelValue', 'blur', 'change']);
 
   const showPassword = ref(false);
 
@@ -104,9 +105,16 @@
     return props.type;
   });
 
+  const inputEvent = computed(() => (inputType.value === 'checkbox' ? 'change' : 'input'));
+
   function handleInput(event: Event) {
     const target = event.target as HTMLInputElement;
-    emit('update:modelValue', target.value);
+    if (inputType.value === 'checkbox') {
+      emit('update:modelValue', target.checked);
+      emit('change', event);
+    } else {
+      emit('update:modelValue', target.value);
+    }
   }
 
   function togglePasswordVisibility() {
