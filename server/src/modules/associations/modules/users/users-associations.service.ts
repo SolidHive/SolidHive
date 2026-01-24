@@ -80,8 +80,7 @@ export class UsersAssociationsService {
       ];
     }
 
-    return this.usersAssociationsRepository.find({
-      ...options,
+    const findOptions: any = {
       relations: {
         user: true,
         role: true,
@@ -101,7 +100,38 @@ export class UsersAssociationsService {
         status: true,
       },
       where: whereConditions,
-    });
+    };
+
+    if (options?.order) {
+      findOptions.order = options.order;
+    }
+
+    if (options?.skip !== undefined) {
+      findOptions.skip = options.skip;
+    }
+
+    if (options?.take !== undefined) {
+      findOptions.take = options.take;
+    }
+
+    // Si pagination demandée, utiliser findAndCount
+    if (options?.skip !== undefined || options?.take !== undefined) {
+      const [usersAssociations, total] =
+        await this.usersAssociationsRepository.findAndCount(findOptions);
+      return {
+        data: usersAssociations,
+        meta: {
+          total,
+          page: Math.floor((options.skip || 0) / (options.take || 10)) + 1,
+          limit: options.take || 10,
+          totalPages: Math.ceil(total / (options.take || 10)),
+        },
+      };
+    } else {
+      // Sinon, retourner tous les résultats
+      const usersAssociations = await this.usersAssociationsRepository.find(findOptions);
+      return usersAssociations;
+    }
   }
 
   async findOne(id: string, associationId: string, options?: FindOptionsDto) {
@@ -135,10 +165,71 @@ export class UsersAssociationsService {
       throw new HttpException('Invalid status', HttpStatus.BAD_REQUEST);
     }
 
-    return this.usersAssociationsRepository.find({
-      ...options,
-      where: { associationId, status: status as Status },
-    });
+    let whereConditions: any = { associationId, status: status as Status };
+
+    if (options?.where !== undefined && typeof options.where === 'string' && options.where !== '') {
+      const searchTerm = `%${options.where}%`;
+      whereConditions = [
+        { associationId, status: status as Status, user: { name: ILike(searchTerm) } },
+        { associationId, status: status as Status, user: { firstname: ILike(searchTerm) } },
+        { associationId, status: status as Status, user: { email: ILike(searchTerm) } },
+        { associationId, status: status as Status, user: { phone: ILike(searchTerm) } },
+        { associationId, status: status as Status, role: { name: ILike(searchTerm) } },
+      ];
+    }
+
+    const findOptions: any = {
+      relations: {
+        user: true,
+        role: true,
+      },
+      select: {
+        id: true,
+        user: {
+          id: true,
+          firstname: true,
+          name: true,
+          email: true,
+          phone: true,
+        },
+        role: {
+          name: true,
+        },
+        status: true,
+      },
+      where: whereConditions,
+    };
+
+    if (options?.order) {
+      findOptions.order = options.order;
+    }
+
+    if (options?.skip !== undefined) {
+      findOptions.skip = options.skip;
+    }
+
+    if (options?.take !== undefined) {
+      findOptions.take = options.take;
+    }
+
+    // Si pagination demandée, utiliser findAndCount
+    if (options?.skip !== undefined || options?.take !== undefined) {
+      const [usersAssociations, total] =
+        await this.usersAssociationsRepository.findAndCount(findOptions);
+      return {
+        data: usersAssociations,
+        meta: {
+          total,
+          page: Math.floor((options.skip || 0) / (options.take || 10)) + 1,
+          limit: options.take || 10,
+          totalPages: Math.ceil(total / (options.take || 10)),
+        },
+      };
+    } else {
+      // Sinon, retourner tous les résultats
+      const usersAssociations = await this.usersAssociationsRepository.find(findOptions);
+      return usersAssociations;
+    }
   }
 
   async findOneByStatus(

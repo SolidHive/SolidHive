@@ -14,6 +14,7 @@ import { UserSecurityService } from '../security/user-security.service';
 import { PasswordUtils } from '../../common/utils/password.utils';
 import { UserAssociation } from '../associations/modules/users/entities/user-association.entity';
 import { Status } from 'src/common/enums/status';
+import { Roles } from '../../common/enums/roles';
 
 @Injectable()
 export class UsersService {
@@ -55,13 +56,13 @@ export class UsersService {
 
     // Chercher le rôle USER
     let userRole = await this.roleRepository.findOne({
-      where: { name: 'USER' },
+      where: { name: Roles.USER },
     });
 
     // Si le rôle USER n'existe pas, le créer
     if (!userRole) {
       userRole = this.roleRepository.create({
-        name: 'USER',
+        name: Roles.USER,
         description: 'Utilisateur standard',
       });
       await this.roleRepository.save(userRole);

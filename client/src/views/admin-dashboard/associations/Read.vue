@@ -116,7 +116,7 @@
       // Gérer la réponse paginée ou non paginée
       if (response.data && Array.isArray(response.data)) {
         associations.value = response.data;
-        totalItems.value = response.total || response.data.length;
+        totalItems.value = response.meta?.total || response.total || response.data.length;
       } else if (Array.isArray(response)) {
         associations.value = response;
         totalItems.value = response.length;

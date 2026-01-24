@@ -15,7 +15,43 @@ export class PermissionAccessService {
   }
 
   findAll(options?: FindOptionsDto) {
-    return this.permissionAccessRepository.find(options);
+    const findOptions: any = {};
+
+    if (options?.where) {
+      findOptions.where = options.where;
+    }
+
+    if (options?.order) {
+      findOptions.order = options.order;
+    }
+
+    if (options?.relations) {
+      findOptions.relations = options.relations;
+    }
+
+    if (options?.skip !== undefined) {
+      findOptions.skip = options.skip;
+    }
+
+    if (options?.take !== undefined) {
+      findOptions.take = options.take;
+    }
+
+    // Si pagination demandée, utiliser findAndCount
+    if (options?.skip !== undefined || options?.take !== undefined) {
+      return this.permissionAccessRepository.findAndCount(findOptions).then(([items, total]) => ({
+        data: items,
+        meta: {
+          total,
+          page: Math.floor((options.skip || 0) / (options.take || 10)) + 1,
+          limit: options.take || 10,
+          totalPages: Math.ceil(total / (options.take || 10)),
+        },
+      }));
+    } else {
+      // Sinon, retourner tous les résultats
+      return this.permissionAccessRepository.find(findOptions);
+    }
   }
 
   findOne(permission: string, options?: FindOptionsDto) {

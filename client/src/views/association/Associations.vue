@@ -190,7 +190,7 @@
 
       const response = await Database.getAll('associations', options);
       associations.value = response.data || [];
-      totalItems.value = response.total || 0;
+      totalItems.value = response.meta?.total || 0;
 
       // Load logos in parallel
       await Promise.all(

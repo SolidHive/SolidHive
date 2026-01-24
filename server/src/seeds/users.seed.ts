@@ -23,11 +23,40 @@ export async function seedUsers(dataSource: DataSource): Promise<User[]> {
     await roleRepository.save(userRole);
   }
 
+  // Ensure ADMIN role exists
+  let adminRole = await roleRepository.findOne({ where: { name: 'ADMIN' } });
+  if (!adminRole) {
+    adminRole = roleRepository.create({
+      name: 'ADMIN',
+      description: 'Administrateur du système',
+    });
+    await roleRepository.save(adminRole);
+  }
+
   const users: User[] = [];
 
-  for (let i = 0; i < 5; i++) {
+  // Create admin user first
+  const adminSalt = PasswordUtils.generateSalt();
+  const adminHashedPassword = PasswordUtils.hashPassword('Azerty123*', adminSalt);
+
+  const adminUser = userRepository.create({
+    name: 'Pagies',
+    firstname: 'Théotime',
+    email: 'tpagies@ailoop.io',
+    phone: '0123456789',
+    password: adminHashedPassword,
+    salt: adminSalt,
+    isVerified: true,
+    roles: [adminRole],
+  });
+
+  const savedAdminUser = await userRepository.save(adminUser);
+  users.push(savedAdminUser);
+
+  // Create regular users
+  for (let i = 1; i < 20; i++) {
     const salt = PasswordUtils.generateSalt();
-    const hashedPassword = PasswordUtils.hashPassword('password123', salt);
+    const hashedPassword = PasswordUtils.hashPassword('Azerty123*', salt);
 
     const user = userRepository.create({
       name: faker.person.lastName(),

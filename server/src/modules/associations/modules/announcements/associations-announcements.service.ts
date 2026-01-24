@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { AssociationAnnouncement } from './entities/association-announcement.entity';
 import { CreateAssociationAnnouncementDto } from './dto/create-association-announcement.dto';
 import { UserAssociation } from '../users/entities/user-association.entity';
@@ -33,36 +33,97 @@ export class AssociationsAnnouncementsService {
   }
 
   async findAll(associationId: string, options?: FindOptionsDto) {
-    const announcements = await this.associationsAnnouncementsRepository.find({
-      ...options,
-      where: { association: { id: associationId } },
+    let whereConditions: any = { association: { id: associationId } };
+    if (options?.where && typeof options.where === 'string') {
+      // Recherche textuelle sur title
+      const searchTerm = options.where;
+      whereConditions = {
+        ...whereConditions,
+        title: Like(`%${searchTerm}%`),
+      };
+    } else if (options?.where) {
+      whereConditions = { ...options.where, ...whereConditions };
+    }
+
+    const findOptions: any = {
+      where: whereConditions,
       relations: ['createdBy', 'association'],
-    });
+    };
 
-    // Enrichir avec les images
-    const enrichedAnnouncements = await Promise.all(
-      announcements.map(async (announcement) => {
-        const imageFile = await this.fileRepository.findOne({
-          where: {
-            relatedTo: 'AssociationAnnouncement',
-            relatedBy: announcement.id,
-            purpose: 'image',
-            index: 0,
-          },
-        });
+    if (options?.order) {
+      findOptions.order = options.order;
+    } else {
+      findOptions.order = { timestamps: { createdAt: 'DESC' } };
+    }
 
-        const imageUrl = imageFile
-          ? `/files/AssociationAnnouncement/${announcement.id}?index=${imageFile.index}`
-          : null;
+    if (options?.skip !== undefined) {
+      findOptions.skip = options.skip;
+    }
 
-        return {
-          ...announcement,
-          image: imageUrl,
-        };
-      })
-    );
+    if (options?.take !== undefined) {
+      findOptions.take = options.take;
+    }
 
-    return enrichedAnnouncements;
+    // Si pagination demandée, utiliser findAndCount
+    if (options?.skip !== undefined || options?.take !== undefined) {
+      const [announcements, total] =
+        await this.associationsAnnouncementsRepository.findAndCount(findOptions);
+      const enrichedData = await Promise.all(
+        announcements.map(async (announcement) => {
+          const imageFile = await this.fileRepository.findOne({
+            where: {
+              relatedTo: 'AssociationAnnouncement',
+              relatedBy: announcement.id,
+              purpose: 'image',
+              index: 0,
+            },
+          });
+
+          const imageUrl = imageFile
+            ? `/files/AssociationAnnouncement/${announcement.id}?index=${imageFile.index}`
+            : null;
+
+          return {
+            ...announcement,
+            image: imageUrl,
+          };
+        })
+      );
+      return {
+        data: enrichedData,
+        meta: {
+          total,
+          page: Math.floor((options.skip || 0) / (options.take || 10)) + 1,
+          limit: options.take || 10,
+          totalPages: Math.ceil(total / (options.take || 10)),
+        },
+      };
+    } else {
+      // Sinon, retourner tous les résultats
+      const announcements = await this.associationsAnnouncementsRepository.find(findOptions);
+      const enrichedAnnouncements = await Promise.all(
+        announcements.map(async (announcement) => {
+          const imageFile = await this.fileRepository.findOne({
+            where: {
+              relatedTo: 'AssociationAnnouncement',
+              relatedBy: announcement.id,
+              purpose: 'image',
+              index: 0,
+            },
+          });
+
+          const imageUrl = imageFile
+            ? `/files/AssociationAnnouncement/${announcement.id}?index=${imageFile.index}`
+            : null;
+
+          return {
+            ...announcement,
+            image: imageUrl,
+          };
+        })
+      );
+      return enrichedAnnouncements;
+    }
   }
 
   async findOne(id: string, associationId: string, options?: FindOptionsDto) {

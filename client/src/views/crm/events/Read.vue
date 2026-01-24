@@ -82,6 +82,17 @@
           </div>
         </div>
       </div>
+
+      <!-- Pagination -->
+      <Pagination
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :total-items="totalItems"
+        :items-per-page="itemsPerPage"
+        @previous="goToPreviousPage"
+        @next="goToNextPage"
+        @update:items-per-page="handleItemsPerPageChange"
+      />
     </div>
   </div>
   <router-view />
@@ -90,17 +101,17 @@
 <script setup lang="ts">
   import { onMounted, watch, ref } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
-
-  const route = useRoute();
   import { Calendar, AlertTriangle } from 'lucide-vue-next';
   import Header from '@/components/dashboard/Header.vue';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
+  import Pagination from '@/components/dashboard/Pagination.vue';
   import { useCrmStore } from '@/stores/crm';
   import { useCrmAccess } from '@/composables/crm-access';
   import Database from '@/utils/database.utils';
   import type { Event } from '@/interfaces';
 
   const router = useRouter();
+  const route = useRoute();
   const crmStore = useCrmStore();
   const member = crmStore.getMember();
   const crmAccess = useCrmAccess(member);
@@ -108,6 +119,10 @@
   const loading = ref(true);
   const events = ref<Event[]>([]);
   const hasStripeAccount = ref(false);
+  const currentPage = ref(1);
+  const itemsPerPage = ref(5);
+  const totalItems = ref(0);
+  const totalPages = ref(1);
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('fr-FR', {
@@ -117,15 +132,63 @@
     });
   };
 
-  const loadEvents = async () => {
+  const handleItemsPerPageChange = (value: number) => {
+    itemsPerPage.value = value;
+    currentPage.value = 1;
+    fetchItems();
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      fetchItems();
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value++;
+      fetchItems();
+    }
+  };
+
+  const fetchItems = async () => {
     if (!crmStore.currentAssociationId) return;
 
     try {
       loading.value = true;
-      const response = await Database.getAll(`association/${crmStore.currentAssociationId}/events`);
-      events.value = response;
-    } catch (error) {
-      console.error('Erreur lors du chargement des événements:', error);
+
+      const params: Record<string, any> = {
+        skip: (currentPage.value - 1) * itemsPerPage.value,
+        take: itemsPerPage.value,
+      };
+
+      const response = await Database.getAll(
+        `association/${crmStore.currentAssociationId}/events`,
+        params
+      );
+
+      // Si la réponse contient data et meta (format paginé)
+      if (response && typeof response === 'object' && 'data' in response && 'meta' in response) {
+        events.value = response.data;
+        totalItems.value = response.meta.total;
+        totalPages.value = response.meta.totalPages;
+        currentPage.value = response.meta.page;
+        itemsPerPage.value =
+          typeof response.meta.limit === 'string'
+            ? parseInt(response.meta.limit, 10)
+            : response.meta.limit;
+      } else {
+        // Format simple (tableau direct) - pour les endpoints sans pagination
+        events.value = Array.isArray(response) ? response : [];
+        totalItems.value = events.value.length;
+        totalPages.value = Math.ceil(totalItems.value / itemsPerPage.value) || 1;
+      }
+    } catch (err) {
+      console.error('Erreur lors du chargement des événements:', err);
+      events.value = [];
+      totalItems.value = 0;
+      totalPages.value = 1;
     } finally {
       loading.value = false;
     }
@@ -143,14 +206,14 @@
 
   onMounted(async () => {
     await checkStripeAccount();
-    await loadEvents();
+    await fetchItems();
   });
 
   watch(
     () => route.name,
     (newRouteName) => {
       if (newRouteName === 'CRMEvents') {
-        loadEvents();
+        fetchItems();
       }
     }
   );

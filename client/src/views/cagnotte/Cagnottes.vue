@@ -178,7 +178,7 @@
 
       const response = await Database.getAll('fundraisings', options);
       allFundraisings.value = response.data || [];
-      totalItems.value = response.total || 0;
+      totalItems.value = response.meta?.total || 0;
     } catch (err) {
       error.value = 'Impossible de charger les cagnottes. Veuillez réessayer.';
       console.error('Error loading fundraisings:', err);

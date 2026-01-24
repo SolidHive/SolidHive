@@ -79,7 +79,15 @@ export class EventsService {
       });
 
       const enrichedData = await this.enrichWithImages(result[0]);
-      return { data: enrichedData, total: result[1] };
+      return {
+        data: enrichedData,
+        meta: {
+          total: result[1],
+          page: Math.floor((options.skip || 0) / (options.take || 10)) + 1,
+          limit: options.take || 10,
+          totalPages: Math.ceil(result[1] / (options.take || 10)),
+        },
+      };
     }
 
     const events = await this.eventsRepository.find({
@@ -92,34 +100,94 @@ export class EventsService {
   }
 
   async findAll(associationId: string, options?: FindOptionsDto) {
-    const events = await this.eventsRepository.find({
-      ...options,
-      where: { association: { id: associationId } },
-      relations: ['createdBy', 'association'],
-    });
+    let whereConditions: any = { association: { id: associationId } };
+    if (options?.where && typeof options.where === 'string') {
+      // Recherche textuelle sur title
+      const searchTerm = options.where;
+      whereConditions = {
+        ...whereConditions,
+        title: Like(`%${searchTerm}%`),
+      };
+    } else if (options?.where) {
+      whereConditions = { ...options.where, ...whereConditions };
+    }
 
-    // Enrichir avec les images
-    const enrichedEvents = await Promise.all(
-      events.map(async (event) => {
-        const imageFile = await this.fileRepository.findOne({
-          where: {
-            relatedTo: 'Event',
-            relatedBy: event.id,
-            purpose: 'image',
-            index: 0,
-          },
-        });
+    const findOptions: any = {
+      where: whereConditions,
+      relations: ['createdBy', 'association', 'pricings'],
+    };
 
-        const imageUrl = imageFile ? `/files/Event/${event.id}?index=${imageFile.index}` : null;
+    if (options?.order) {
+      findOptions.order = options.order;
+    } else {
+      findOptions.order = { startDate: 'DESC' };
+    }
 
-        return {
-          ...event,
-          image: imageUrl,
-        };
-      })
-    );
+    if (options?.skip !== undefined) {
+      findOptions.skip = options.skip;
+    }
 
-    return enrichedEvents;
+    if (options?.take !== undefined) {
+      findOptions.take = options.take;
+    } else {
+      findOptions.take = 5; // Valeur par défaut de 5 événements par page
+    }
+
+    // Si pagination demandée, utiliser findAndCount
+    if (options?.skip !== undefined || options?.take !== undefined) {
+      const [events, total] = await this.eventsRepository.findAndCount(findOptions);
+      const enrichedData = await Promise.all(
+        events.map(async (event) => {
+          const imageFile = await this.fileRepository.findOne({
+            where: {
+              relatedTo: 'Event',
+              relatedBy: event.id,
+              purpose: 'image',
+              index: 0,
+            },
+          });
+
+          const imageUrl = imageFile ? `/files/Event/${event.id}?index=${imageFile.index}` : null;
+
+          return {
+            ...event,
+            image: imageUrl,
+          };
+        })
+      );
+      return {
+        data: enrichedData,
+        meta: {
+          total,
+          page: Math.floor((options.skip || 0) / (options.take || 10)) + 1,
+          limit: options.take || 10,
+          totalPages: Math.ceil(total / (options.take || 10)),
+        },
+      };
+    } else {
+      // Sinon, retourner tous les résultats
+      const events = await this.eventsRepository.find(findOptions);
+      const enrichedEvents = await Promise.all(
+        events.map(async (event) => {
+          const imageFile = await this.fileRepository.findOne({
+            where: {
+              relatedTo: 'Event',
+              relatedBy: event.id,
+              purpose: 'image',
+              index: 0,
+            },
+          });
+
+          const imageUrl = imageFile ? `/files/Event/${event.id}?index=${imageFile.index}` : null;
+
+          return {
+            ...event,
+            image: imageUrl,
+          };
+        })
+      );
+      return enrichedEvents;
+    }
   }
 
   async findOne(id: string, associationId: string, options?: FindOptionsDto) {

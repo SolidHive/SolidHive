@@ -181,7 +181,7 @@
 
       const response = await Database.getAll('events', options);
       allEvents.value = response.data || [];
-      totalItems.value = response.total || 0;
+      totalItems.value = response.meta?.total || 0;
     } catch (err) {
       error.value = 'Impossible de charger les événements. Veuillez réessayer.';
       console.error('Error loading events:', err);

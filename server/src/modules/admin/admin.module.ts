@@ -7,6 +7,7 @@ import { EmailModule } from '../../common/utils/email/email.module';
 import { AssociationsModule } from '../associations/associations.module';
 import { PermissionAccessModule } from './permissions-access/permission-access.module';
 import { StatisticsModule } from './statistics/statistics.module';
+import { UserManagementModule } from './user-management/user-management.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { StatisticsModule } from './statistics/statistics.module';
     AssociationsModule,
     PermissionAccessModule,
     StatisticsModule,
+    UserManagementModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],

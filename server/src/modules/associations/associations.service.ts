@@ -160,7 +160,15 @@ export class AssociationsService {
           skip: options.skip,
           take: options.take,
         })
-        .then(([data, total]) => ({ data, total }));
+        .then(([data, total]) => ({
+          data,
+          meta: {
+            total,
+            page: Math.floor((options.skip || 0) / (options.take || 10)) + 1,
+            limit: options.take || 10,
+            totalPages: Math.ceil(total / (options.take || 10)),
+          },
+        }));
     }
     return this.associationsRepository.find({
       where,
@@ -193,7 +201,15 @@ export class AssociationsService {
           skip: options.skip,
           take: options.take,
         })
-        .then(([data, total]) => ({ data, total }));
+        .then(([data, total]) => ({
+          data,
+          meta: {
+            total,
+            page: Math.floor((options.skip || 0) / (options.take || 10)) + 1,
+            limit: options.take || 10,
+            totalPages: Math.ceil(total / (options.take || 10)),
+          },
+        }));
     }
 
     return this.associationsRepository.find({

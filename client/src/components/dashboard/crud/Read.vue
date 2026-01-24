@@ -249,9 +249,22 @@
 
       const response = await Database.getAll(props.fetchItems, params);
 
-      items.value = response;
-      totalItems.value = items.value.length;
-      totalPages.value = Math.ceil(totalItems.value / itemsPerPage.value) || 1;
+      // Si la réponse contient data et meta (format paginé)
+      if (response && typeof response === 'object' && 'data' in response && 'meta' in response) {
+        items.value = response.data;
+        totalItems.value = response.meta.total;
+        totalPages.value = response.meta.totalPages;
+        currentPage.value = response.meta.page;
+        itemsPerPage.value =
+          typeof response.meta.limit === 'string'
+            ? parseInt(response.meta.limit, 10)
+            : response.meta.limit;
+      } else {
+        // Format simple (tableau direct) - pour les endpoints sans pagination
+        items.value = Array.isArray(response) ? response : [];
+        totalItems.value = items.value.length;
+        totalPages.value = Math.ceil(totalItems.value / itemsPerPage.value) || 1;
+      }
     } catch (err) {
       console.error('Erreur lors du chargement des données:', err);
       items.value = [];

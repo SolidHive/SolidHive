@@ -370,6 +370,26 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: 'users',
+        name: 'AdminDashboardUsers',
+        component: () => import('../views/admin-dashboard/users/Read.vue'),
+        meta: { title: 'Gestion des utilisateurs - Dashboard Admin' },
+        children: [
+          {
+            path: 'update/:itemId',
+            name: 'AdminDashboardUsersUpdate',
+            component: () => import('../views/admin-dashboard/users/Update.vue'),
+            meta: { title: 'Modifier un utilisateur - Dashboard Admin' },
+          },
+          {
+            path: 'delete/:itemId',
+            name: 'AdminDashboardUsersDelete',
+            component: () => import('../views/admin-dashboard/users/Delete.vue'),
+            meta: { title: 'Supprimer un utilisateur - Dashboard Admin' },
+          },
+        ],
+      },
     ],
   },
   {
