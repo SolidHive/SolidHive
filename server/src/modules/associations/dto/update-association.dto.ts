@@ -1,5 +1,5 @@
 import { ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 import { CreateAssociationDto } from './create-association.dto';
 
 export class UpdateAssociationDto extends PartialType(
@@ -8,5 +8,6 @@ export class UpdateAssociationDto extends PartialType(
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  @MaxLength(1000)
   aboutText?: string;
 }

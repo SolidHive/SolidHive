@@ -93,8 +93,11 @@
     v-model="isEditDialogOpen"
     v-model:logo-file="logoFile"
     v-model:image-file="imageFile"
+    v-model:about-image-file="aboutImageFile"
     v-model:logo-preview="logoPreview"
     v-model:image-preview="imagePreview"
+    v-model:about-image-preview="aboutImagePreview"
+    v-model:gallery-images="galleryImages"
     :association="association"
     :is-loading="isLoading"
     @submit="handleUpdate"
@@ -160,6 +163,11 @@
   const logoPreview = ref<string>('');
   const imageFile = ref<File | null>(null);
   const imagePreview = ref<string>('');
+  const aboutImageFile = ref<File | null>(null);
+  const aboutImagePreview = ref<string>('');
+  const galleryImages = ref<
+    Array<{ index?: number; url?: string; file?: File; preview?: string; isNew?: boolean }>
+  >([]);
 
   async function fetchAssociation() {
     if (!crmStore.currentAssociationId) {
@@ -179,6 +187,8 @@
         ...associationData,
         logo: getFileUrl('logo', files, crmStore.currentAssociationId),
         image: getFileUrl('banner', files, crmStore.currentAssociationId),
+        aboutImage: getFileUrl('about_image', files, crmStore.currentAssociationId),
+        images: getGalleryUrls(files, crmStore.currentAssociationId),
       };
 
       // Forcer le rechargement des images
@@ -209,6 +219,17 @@
       : undefined;
   };
 
+  const getGalleryUrls = (files: FileMetadata[], associationId: string): string[] => {
+    const galleryFiles = files
+      .filter((f) => f.purpose === 'gallery')
+      .sort((a, b) => a.index - b.index);
+
+    return galleryFiles.map((file) => {
+      const timestamp = Date.now() + Math.random();
+      return `/files/Association/${associationId}?index=${file.index}&t=${timestamp}`;
+    });
+  };
+
   const loadAssociationFiles = async (associationId: string): Promise<FileMetadata[]> => {
     const files: FileMetadata[] = [];
     let index = 0;
@@ -237,32 +258,61 @@
     return files;
   };
 
-  function openEditDialog() {
+  async function openEditDialog() {
     if (association.value) {
       logoPreview.value = association.value.logo || '';
       imagePreview.value = association.value.image || '';
+      aboutImagePreview.value = association.value.aboutImage || '';
       logoFile.value = null;
       imageFile.value = null;
+      aboutImageFile.value = null;
+
+      await loadGalleryImages();
 
       isEditDialogOpen.value = true;
     }
   }
+
+  const loadGalleryImages = async () => {
+    if (!association.value) return;
+
+    try {
+      const files = await loadAssociationFiles(association.value.id);
+      const galleryFiles = files.filter((f) => f.purpose === 'gallery');
+
+      galleryImages.value = galleryFiles.map((file) => ({
+        index: file.index,
+        url: `/files/Association/${association.value!.id}?index=${file.index}&t=${Date.now()}`,
+        isNew: false,
+      }));
+    } catch (error) {
+      console.error('Erreur lors du chargement des images de la galerie:', error);
+    }
+  };
 
   async function handleUpdate(data: {
     name: string;
     description?: string;
     aboutText?: string;
     contact?: string;
-    siret: string;
     primaryColor?: string;
+    galleryFiles?: { file: File }[];
+    imagesToDelete?: number[];
   }) {
     if (!association.value) return;
 
     try {
       isLoading.value = true;
-      await Database.update('association', association.value.id, data);
 
-      const currentFiles = await loadAssociationFiles(association.value.id);
+      const {
+        galleryFiles: filesToUpload,
+        imagesToDelete: imagesToRemove,
+        ...associationData
+      } = data;
+
+      await Database.update('association', association.value.id, associationData);
+
+      let currentFiles = await loadAssociationFiles(association.value.id);
 
       if (logoFile.value) {
         const existingLogo = currentFiles.find((f) => f.purpose === 'logo');
@@ -288,14 +338,60 @@
         });
       }
 
-      await fetchAssociation();
+      if (aboutImageFile.value) {
+        const existingAbout = currentFiles.find((f) => f.purpose === 'about_image');
+        const aboutIndex = existingAbout ? existingAbout.index : 2;
 
-      logoFile.value = null;
-      imageFile.value = null;
-      logoPreview.value = '';
-      imagePreview.value = '';
+        await Database.updateFile(aboutImageFile.value, {
+          relatedTo: 'Association',
+          relatedBy: association.value.id,
+          purpose: 'about_image',
+          index: aboutIndex,
+        });
+      }
+
+      if (imagesToRemove && imagesToRemove.length > 0) {
+        for (const imageIndex of imagesToRemove) {
+          await api.delete(
+            `/files/Association/${association.value.id}?index=${imageIndex}&purpose=gallery`
+          );
+        }
+        currentFiles = await loadAssociationFiles(association.value.id);
+      }
+
+      if (filesToUpload && filesToUpload.length > 0) {
+        const galleryFiles = currentFiles.filter((f) => f.purpose === 'gallery');
+
+        let nextAvailableIndex =
+          galleryFiles.length > 0 ? Math.max(...galleryFiles.map((f) => f.index)) + 1 : 3;
+
+        for (const { file } of filesToUpload) {
+          const renamedFile = new File([file], `gallery_${nextAvailableIndex}`, {
+            type: file.type,
+          });
+
+          await Database.updateFile(renamedFile, {
+            relatedTo: 'Association',
+            relatedBy: association.value.id,
+            purpose: 'gallery',
+            index: nextAvailableIndex,
+          });
+
+          nextAvailableIndex++;
+        }
+      }
 
       isEditDialogOpen.value = false;
+      logoFile.value = null;
+      imageFile.value = null;
+      aboutImageFile.value = null;
+      logoPreview.value = '';
+      imagePreview.value = '';
+      aboutImagePreview.value = '';
+      galleryImages.value = [];
+
+      await fetchAssociation();
+
       toast.success(associationCrmErrorMessages.update.success);
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'association:", error);

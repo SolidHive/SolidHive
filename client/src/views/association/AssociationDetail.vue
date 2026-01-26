@@ -139,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted } from 'vue';
+  import { ref, computed, onMounted, onActivated } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import AssociationHero from '@/components/associations/hero/AssociationHero.vue';
   import AssociationMenu from '@/components/associations/menu/AssociationMenu.vue';
@@ -244,8 +244,10 @@
     associationId: string
   ): string | undefined => {
     const file = files.find((f) => f.purpose === purpose);
-    console.log(file);
-    return file ? `/files/Association/${associationId}?index=${file.index}` : undefined;
+    const timestamp = Date.now() + Math.random();
+    return file
+      ? `/files/Association/${associationId}?index=${file.index}&t=${timestamp}`
+      : undefined;
   };
 
   const loadAssociationFiles = async (associationId: string): Promise<FileMetadata[]> => {
@@ -333,6 +335,10 @@
   };
 
   onMounted(() => {
+    loadAssociation();
+  });
+
+  onActivated(() => {
     loadAssociation();
   });
 </script>

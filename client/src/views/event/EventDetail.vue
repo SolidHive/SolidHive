@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, onActivated } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { useToast } from 'vue-toastification';
   import AssociationHero from '@/components/associations/hero/AssociationHero.vue';
@@ -99,7 +99,10 @@
     associationId: string
   ): string | undefined => {
     const file = files.find((f) => f.purpose === purpose);
-    return file ? `/files/Association/${associationId}?index=${file.index}` : undefined;
+    const timestamp = Date.now() + Math.random();
+    return file
+      ? `/files/Association/${associationId}?index=${file.index}&t=${timestamp}`
+      : undefined;
   };
 
   const loadAssociationFiles = async (associationId: string): Promise<FileMetadata[]> => {
@@ -137,6 +140,10 @@
   };
 
   onMounted(() => {
+    loadEvent();
+  });
+
+  onActivated(() => {
     loadEvent();
   });
 </script>

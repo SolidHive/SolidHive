@@ -10,7 +10,7 @@
         ]"
       >
         <ImageIcon v-if="!preview" class="text-muted-foreground h-12 w-12" />
-        <img v-else :src="preview" :alt="altText" class="h-full w-full rounded-lg object-cover" />
+        <img v-else :src="preview" :alt="altText" class="h-full w-full rounded-lg object-contain" />
       </div>
       <div>
         <input

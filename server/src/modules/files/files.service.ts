@@ -213,6 +213,35 @@ export class FilesService {
     if (purpose) {
       whereClause.purpose = purpose;
     }
-    return this.filesRepository.delete(whereClause);
+
+    const deleteResult = await this.filesRepository.delete(whereClause);
+
+    // Ré-indexation automatique pour les galeries uniquement
+    if (purpose === 'gallery' && file) {
+      // Récupérer toutes les images de galerie avec un index supérieur
+      const higherIndexFiles = await this.filesRepository.find({
+        where: {
+          relatedTo,
+          relatedBy,
+          purpose: 'gallery',
+        },
+        order: {
+          index: 'ASC',
+        },
+      });
+
+      // Filtrer celles qui ont un index supérieur à celui supprimé
+      const filesToReindex = higherIndexFiles.filter((f) => f.index > index);
+
+      // Décrémenter l'index de chacune
+      for (const fileToReindex of filesToReindex) {
+        await this.filesRepository.update(
+          { filename: fileToReindex.filename },
+          { index: fileToReindex.index - 1 }
+        );
+      }
+    }
+
+    return deleteResult;
   }
 }

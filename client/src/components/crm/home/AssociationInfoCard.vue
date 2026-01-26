@@ -13,7 +13,7 @@
               :key="imageKey"
               :src="association.logo"
               alt="Logo"
-              class="h-full w-full rounded-lg object-contain p-2"
+              class="max-h-full max-w-full object-contain"
             />
             <span v-else class="text-muted-foreground text-sm">Aucun logo</span>
           </div>
@@ -28,7 +28,7 @@
               :key="imageKey"
               :src="association.image"
               alt="Image de couverture"
-              class="h-full w-full rounded-lg object-cover"
+              class="max-h-full max-w-full object-contain"
             />
             <span v-else class="text-muted-foreground text-sm">Aucune image</span>
           </div>
@@ -57,9 +57,58 @@
         <p class="mt-1 text-sm break-all sm:text-base">{{ association.contact }}</p>
       </div>
 
-      <div v-if="association.aboutText">
+      <div>
         <label class="text-muted-foreground text-xs sm:text-sm">À propos</label>
-        <p class="mt-1 text-sm break-words sm:text-base">{{ association.aboutText }}</p>
+        <p class="mt-1 text-sm break-words sm:text-base">
+          {{ association.aboutText || 'Aucun texte à propos défini' }}
+        </p>
+      </div>
+
+      <!-- Image à propos -->
+      <div>
+        <label class="text-sm font-medium">Image à propos</label>
+        <div
+          class="bg-muted mt-2 flex aspect-video items-center justify-center overflow-hidden rounded-lg border-2 border-dashed md:w-2/3 lg:w-1/2"
+        >
+          <img
+            v-if="association.aboutImage"
+            :key="imageKey"
+            :src="association.aboutImage"
+            alt="Image à propos"
+            class="max-h-full max-w-full object-contain"
+          />
+          <span v-else class="text-muted-foreground text-sm">Aucune image à propos</span>
+        </div>
+      </div>
+
+      <!-- Galerie d'images -->
+      <div>
+        <label class="text-sm font-medium">Galerie d'images</label>
+        <div
+          v-if="association.images && association.images.length > 0"
+          class="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
+        >
+          <div
+            v-for="(imageUrl, index) in association.images"
+            :key="`${imageUrl}-${index}`"
+            class="aspect-square overflow-hidden rounded-lg border"
+          >
+            <img
+              :src="imageUrl"
+              :alt="`Image de galerie ${index + 1}`"
+              class="h-full w-full object-cover"
+            />
+          </div>
+        </div>
+        <div v-else class="mt-2">
+          <div
+            class="bg-muted flex h-32 items-center justify-center rounded-lg border-2 border-dashed"
+          >
+            <span class="text-muted-foreground text-sm">
+              Aucune image pour la galerie pour le moment
+            </span>
+          </div>
+        </div>
       </div>
 
       <div v-if="association.siret">
