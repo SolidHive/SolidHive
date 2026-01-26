@@ -135,7 +135,6 @@
   import { useCrmStore } from '@/stores/crm';
   import { useAuthStore } from '@/stores/auth';
   import Database from '@/utils/database.utils';
-  import api from '@/utils/api.utils';
   import { onMounted, onActivated, ref } from 'vue';
   import { useRouter } from 'vue-router';
   import { associationCrmErrorMessages } from '@/utils/errors/crm/associations';
@@ -236,11 +235,11 @@
 
     while (true) {
       try {
-        const response = await api.get(`/files/Association/${associationId}/metadata`, {
-          params: { index },
+        const response = await Database.getOne(`files/Association/${associationId}/metadata`, '', {
+          index,
         });
-        if (response.data) {
-          files.push(response.data);
+        if (response) {
+          files.push(response);
           index++;
         } else {
           break;
@@ -352,8 +351,8 @@
 
       if (imagesToRemove && imagesToRemove.length > 0) {
         for (const imageIndex of imagesToRemove) {
-          await api.delete(
-            `/files/Association/${association.value.id}?index=${imageIndex}&purpose=gallery`
+          await Database.delete(
+            `files/Association/${association.value.id}?index=${imageIndex}&purpose=gallery`
           );
         }
         currentFiles = await loadAssociationFiles(association.value.id);
@@ -408,7 +407,7 @@
       isStripeLoading.value = true;
       stripeMessage.value = '';
 
-      const response = await api.post('/stripe-accounts', {
+      const response = await Database.create('stripe-accounts', {
         associationId: association.value.id,
       });
 
@@ -444,7 +443,11 @@
       isStripeLoading.value = true;
       stripeMessage.value = '';
 
-      const response = await api.put(`/stripe-accounts/${association.value.id}/check-status`);
+      const response = await Database.update(
+        `stripe-accounts/${association.value.id}/check-status`,
+        '',
+        {}
+      );
 
       stripeMessage.value = response.data.message || 'Statut vérifié';
       stripeMessageType.value = response.data.canReceiveDonations ? 'success' : 'warning';

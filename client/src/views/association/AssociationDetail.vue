@@ -7,7 +7,12 @@
         <div v-if="loadingAnnonces">
           <LoadingOverlay message="Chargement des annonces..." />
         </div>
-        <AnnouncementsSlider v-else :items="annonces" :color="association?.primaryColor" />
+        <AnnouncementsSlider
+          v-else
+          :items="annonces"
+          :color="association?.primaryColor"
+          @view-details="viewAnnouncementDetails"
+        />
 
         <div class="mt-8">
           <div v-if="loadingCagnottes">
@@ -58,6 +63,7 @@
               :key="`annonce-${annoncesPage}-${index}`"
               :item="annonce"
               :color="association?.primaryColor"
+              @view-details="viewAnnouncementDetails"
             />
           </div>
           <Pagination
@@ -158,7 +164,6 @@
   import PageContainer from '@/components/PageContainer.vue';
   import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import Database from '@/utils/database.utils';
-  import api from '@/utils/api.utils';
   import type { Association } from '@/interfaces/association.interface';
   import type { Announcement } from '@/interfaces/announcement.interface';
   import type { Event } from '@/interfaces/event.interface';
@@ -256,11 +261,11 @@
 
     while (true) {
       try {
-        const response = await api.get(`/files/Association/${associationId}/metadata`, {
-          params: { index },
+        const response = await Database.getOne(`files/Association/${associationId}/metadata`, '', {
+          index,
         });
-        if (response.data) {
-          files.push(response.data);
+        if (response) {
+          files.push(response);
           index++;
         } else {
           break;
@@ -278,8 +283,8 @@
   const loadAssociationAnnouncements = async (associationId: string) => {
     try {
       loadingAnnonces.value = true;
-      const response = await api.get(`/association/${associationId}/announcements`);
-      annonces.value = response.data || [];
+      const response = await Database.getAll(`association/${associationId}/announcements`);
+      annonces.value = (response || []).filter((annonce: Announcement) => annonce.isActive);
     } catch (err) {
       console.error('Error loading announcements:', err);
       annonces.value = [];
@@ -291,8 +296,8 @@
   const loadAssociationFundraisings = async (associationId: string) => {
     try {
       loadingCagnottes.value = true;
-      const response = await api.get(`/association/${associationId}/fundraisings`);
-      cagnottes.value = response.data || [];
+      const response = await Database.getAll(`association/${associationId}/fundraisings`);
+      cagnottes.value = response || [];
     } catch (err) {
       console.error('Error loading fundraisings:', err);
       cagnottes.value = [];
@@ -304,8 +309,8 @@
   const loadAssociationEvents = async (associationId: string) => {
     try {
       loadingEvents.value = true;
-      const response = await api.get(`/association/${associationId}/events`);
-      eventsList.value = response.data || [];
+      const response = await Database.getAll(`association/${associationId}/events`);
+      eventsList.value = response || [];
     } catch (err) {
       console.error('Error loading events:', err);
       eventsList.value = [];
@@ -324,6 +329,10 @@
 
   const viewEventDetails = (event: Event) => {
     router.push(`/association/${route.params.id}/event/${event.id}`);
+  };
+
+  const viewAnnouncementDetails = (announcement: Announcement) => {
+    router.push(`/association/${route.params.id}/announcement/${announcement.id}`);
   };
 
   const onTabChange = (tab: string) => {

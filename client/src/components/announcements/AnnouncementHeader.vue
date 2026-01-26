@@ -1,0 +1,31 @@
+<template>
+  <div class="relative aspect-4/2 w-full overflow-hidden rounded-xl bg-gray-200">
+    <img v-if="image" :src="image" :alt="title" class="h-full w-full object-cover" />
+    <div
+      v-else
+      class="flex h-full w-full items-center justify-center bg-linear-to-br from-gray-100 to-gray-200"
+    >
+      <Megaphone class="h-12 w-12 text-gray-400" />
+    </div>
+  </div>
+
+  <h1 class="font-title text-secondary text-xl uppercase sm:text-2xl lg:text-3xl">
+    {{ title }}
+  </h1>
+
+  <div>
+    <p class="text-sm leading-relaxed whitespace-pre-wrap sm:text-base">
+      {{ content }}
+    </p>
+  </div>
+</template>
+
+<script setup lang="ts">
+  import { Megaphone } from 'lucide-vue-next';
+
+  defineProps<{
+    title: string;
+    content: string;
+    image?: string | null;
+  }>();
+</script>

@@ -130,6 +130,7 @@ export class AssociationsAnnouncementsService {
     const announcement = await this.associationsAnnouncementsRepository.findOne({
       ...options,
       where: { id, association: { id: associationId } },
+      relations: ['association'],
     });
 
     if (!announcement) {

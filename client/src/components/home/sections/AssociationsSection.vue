@@ -77,7 +77,6 @@
 
   // Utility imports
   import Database from '@/utils/database.utils';
-  import api from '@/utils/api.utils';
 
   // Type imports
   import type { FileMetadata } from '@/interfaces/file.interface';
@@ -137,11 +136,11 @@
 
     while (true) {
       try {
-        const response = await api.get(`/files/Association/${associationId}/metadata`, {
-          params: { index },
+        const response = await Database.getOne(`files/Association/${associationId}/metadata`, '', {
+          index,
         });
-        if (response.data) {
-          files.push(response.data);
+        if (response) {
+          files.push(response);
           index++;
         } else {
           break;

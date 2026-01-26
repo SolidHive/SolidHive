@@ -115,7 +115,7 @@
   import InputForm from '@/components/form/InputForm.vue';
   import { useAuthStore } from '@/stores/auth';
   import { useRouter } from 'vue-router';
-  import api from '@/utils/api.utils';
+  import Database from '@/utils/database.utils';
   import { useToast } from 'vue-toastification';
 
   interface Props {
@@ -198,7 +198,7 @@
     isLoading.value = true;
 
     try {
-      const response = await api.post('/payments/donate', {
+      const response = await Database.create('payments/donate', {
         amount: props.donationAmount,
         associationId: props.associationId,
         fundraisingId: props.fundraisingId,

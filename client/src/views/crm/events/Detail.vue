@@ -392,7 +392,6 @@
   import { useCrmStore } from '@/stores/crm';
   import { useCrmAccess } from '@/composables/crm-access';
   import Database from '@/utils/database.utils';
-  import api from '@/utils/api.utils';
   import { singlePricingValidationSchema } from '@/utils/errors/crm/events';
   import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
   import { useToast } from 'vue-toastification';
@@ -539,10 +538,10 @@
 
     try {
       loadingRegistrations.value = true;
-      const response = await api.get(
-        `/association/${crmStore.currentAssociationId}/event/${event.value.id}/registers`
+      const response = await Database.getAll(
+        `association/${crmStore.currentAssociationId}/event/${event.value.id}/registers`
       );
-      registrations.value = response.data || [];
+      registrations.value = response || [];
     } catch (error) {
       console.error('Erreur lors du chargement des inscriptions:', error);
     } finally {

@@ -1,8 +1,9 @@
 <template>
   <div
-    class="relative h-56 w-full overflow-hidden rounded-xl bg-gray-200 bg-cover bg-center shadow-md md:h-64 xl:h-72 2xl:h-96"
+    class="relative h-56 w-full cursor-pointer overflow-hidden rounded-xl bg-gray-200 bg-cover bg-center shadow-md md:h-64 xl:h-72 2xl:h-96"
     :class="{ 'bg-gray-300': !item.image }"
     :style="item.image ? { backgroundImage: `url(${item.image})` } : {}"
+    @click="$emit('view-details', item)"
   >
     <div
       class="absolute inset-0 z-10 h-full w-full"
@@ -29,5 +30,9 @@
   defineProps<{
     item: Announcement;
     color?: string;
+  }>();
+
+  defineEmits<{
+    'view-details': [announcement: Announcement];
   }>();
 </script>

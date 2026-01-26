@@ -18,7 +18,7 @@
       <div
         class="relative z-20 flex h-full w-full flex-col items-start justify-center p-4 sm:px-8 md:px-16 lg:px-24"
       >
-        <BackHomeButton @click="goHome" />
+        <BackButton />
         <div
           v-if="association.logo"
           class="mb-6 flex h-18 w-18 items-center justify-center rounded-full bg-white md:h-24 md:w-24 2xl:h-28 2xl:w-28"
@@ -39,33 +39,37 @@
         >
           {{ association.description }}
         </p>
-        <!-- Bouton don -->
-        <Button
-          v-if="canReceiveDonations"
-          class="bg-accent hover:bg-accent/90 w-full px-8 text-white transition-colors sm:w-auto"
-          @click="$emit('don')"
-        >
-          Faire un don
-        </Button>
+        <!-- Boutons -->
+        <div class="flex flex-col gap-4 sm:flex-row sm:gap-4">
+          <Button
+            v-if="canReceiveDonations"
+            class="bg-accent hover:bg-accent/90 w-full px-8 text-white transition-colors sm:w-auto"
+            @click="$emit('don')"
+          >
+            Faire un don
+          </Button>
+          <Button
+            class="bg-secondary hover:bg-secondary/90 w-full px-8 text-white transition-colors sm:w-auto"
+            @click="sharePage"
+          >
+            {{ isCopied ? 'Copié' : 'Partager' }}
+            <Check v-if="isCopied" class="mr-2" />
+          </Button>
+        </div>
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue';
+  import { computed, ref } from 'vue';
   import { Button } from '@/components/ui/button';
-  import BackHomeButton from '@/components/ui/BackHomeButton.vue';
-  import { useRouter } from 'vue-router';
+  import BackButton from '@/components/ui/BackButton.vue';
   import { usePaymentsStore } from '@/stores/payments';
+  import { Check } from 'lucide-vue-next';
   import type { Association } from '@/interfaces/association.interface';
 
-  const router = useRouter();
   const paymentsStore = usePaymentsStore();
-
-  function goHome() {
-    router.push('/');
-  }
 
   const props = defineProps<{
     association: Association;
@@ -74,6 +78,20 @@
   const canReceiveDonations = computed(() =>
     paymentsStore.canAssociationReceiveDonations(props.association)
   );
+
+  const isCopied = ref(false);
+
+  const sharePage = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      isCopied.value = true;
+      setTimeout(() => {
+        isCopied.value = false;
+      }, 2000);
+    } catch (err) {
+      console.error('Error copying link:', err);
+    }
+  };
 
   defineEmits(['don']);
 </script>

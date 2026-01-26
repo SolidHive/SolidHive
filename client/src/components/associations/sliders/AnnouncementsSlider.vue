@@ -5,7 +5,7 @@
     item-class="relative snap-start flex-shrink-0 w-[90%] sm:w-[60%] md:w-[45%] lg:w-[38%] xl:w-[32%] 2xl:w-[28%]"
   >
     <template #item="{ item }">
-      <AnnouncementCard :item="item" :color="color" />
+      <AnnouncementCard :item="item" :color="color" @view-details="$emit('view-details', $event)" />
     </template>
     <template #empty-message>Aucune annonce n'a été publiée pour le moment.</template>
   </Carousel>
@@ -21,6 +21,11 @@
     items?: Announcement[];
     color?: string;
   }>();
+
+  defineEmits<{
+    'view-details': [announcement: Announcement];
+  }>();
+
   const items = toRef(props, 'items');
   const color = toRef(props, 'color');
 </script>

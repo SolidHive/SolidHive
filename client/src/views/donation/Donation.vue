@@ -21,7 +21,6 @@
   import DonationHeader from '@/components/donation/DonationHeader.vue';
   import DonationForm from '@/components/donation/DonationForm.vue';
   import Database from '@/utils/database.utils';
-  import api from '@/utils/api.utils';
   import { useToast } from 'vue-toastification';
   import type { Association } from '@/interfaces/association.interface';
   import type { FileMetadata } from '@/interfaces/file.interface';
@@ -51,7 +50,7 @@
 
       // Vérifier le statut du compte Stripe
       try {
-        await api.put(`/payments/stripe-account/${id}/check-status`);
+        await Database.update(`payments/stripe-account/${id}/check-status`, '', {});
         // Recharger l'association mise à jour
         const updatedAssociationData = await Database.getOne('association', id);
         association.value = {
@@ -85,11 +84,11 @@
 
     while (true) {
       try {
-        const response = await api.get(`/files/Association/${associationId}/metadata`, {
-          params: { index },
+        const response = await Database.getOne(`files/Association/${associationId}/metadata`, '', {
+          index,
         });
-        if (response.data) {
-          files.push(response.data);
+        if (response) {
+          files.push(response);
           index++;
         } else {
           break;
@@ -113,7 +112,7 @@
     try {
       submitting.value = true;
 
-      const response = await api.post('/payments/donate', {
+      const response = await Database.create('/payments/donate', {
         amount: donationData.amount,
         associationId: association.value.id,
         message: donationData.message,

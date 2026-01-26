@@ -58,7 +58,6 @@
   import CagnotteOrganizer from '@/components/cagnottes/CagnotteOrganizer.vue';
   import CagnotteDonationSidebar from '@/components/cagnottes/CagnotteDonationSidebar.vue';
   import Database from '@/utils/database.utils';
-  import api from '@/utils/api.utils';
   import { useToast } from 'vue-toastification';
   import type { Fundraising } from '@/interfaces/fundraising.interface';
   import type { FileMetadata } from '@/interfaces/file.interface';
@@ -129,11 +128,11 @@
 
     while (true) {
       try {
-        const response = await api.get(`/files/Association/${associationId}/metadata`, {
-          params: { index },
+        const response = await Database.getOne(`files/Association/${associationId}/metadata`, '', {
+          index,
         });
-        if (response.data) {
-          files.push(response.data);
+        if (response) {
+          files.push(response);
           index++;
         } else {
           break;
