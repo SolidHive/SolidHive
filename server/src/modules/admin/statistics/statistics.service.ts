@@ -27,16 +27,18 @@ export class StatisticsService {
     // Nombre d'utilisateurs
     const usersCount = await this.userRepository.count();
 
-    // Nombre de dons (transactions de type Fundraising)
+    // Nombre de dons (transactions de type Fundraising et Association)
     const donationsCount = await this.transactionRepository.count({
-      where: { relatedTo: Categories.FUNDRAISING },
+      where: [{ relatedTo: Categories.FUNDRAISING }, { relatedTo: Categories.ASSOCIATION }],
     });
 
     // Montant total collecté
     const totalAmountResult = await this.transactionRepository
       .createQueryBuilder('transaction')
       .select('SUM(transaction.amount)', 'total')
-      .where('transaction.relatedTo = :category', { category: Categories.FUNDRAISING })
+      .where('transaction.relatedTo IN (:...categories)', {
+        categories: [Categories.FUNDRAISING, Categories.ASSOCIATION],
+      })
       .getRawOne();
     const totalAmountCollected = parseFloat(totalAmountResult?.total || 0);
 
@@ -44,7 +46,9 @@ export class StatisticsService {
     const solidHiveRevenueResult = await this.transactionRepository
       .createQueryBuilder('transaction')
       .select('SUM(transaction.solidHiveAmount)', 'total')
-      .where('transaction.relatedTo = :category', { category: Categories.FUNDRAISING })
+      .where('transaction.relatedTo IN (:...categories)', {
+        categories: [Categories.FUNDRAISING, Categories.ASSOCIATION],
+      })
       .andWhere('transaction.solidHiveAmount IS NOT NULL')
       .getRawOne();
     const solidHiveRevenue = parseFloat(solidHiveRevenueResult?.total || 0);
@@ -52,26 +56,56 @@ export class StatisticsService {
     // Don moyen
     const averageDonation = donationsCount > 0 ? totalAmountCollected / donationsCount : 0;
 
-    // Top 5 associations avec le plus de dons
-    const top5Associations = await this.transactionRepository
+    // Top 5 associations avec le plus de dons (cagnottes + dons directs)
+    const top5AssociationsFromFundraisings = await this.transactionRepository
       .createQueryBuilder('transaction')
       .select('fundraising.associationId', 'associationId')
       .addSelect('SUM(transaction.amount)', 'totalAmount')
       .innerJoin(Fundraising, 'fundraising', 'fundraising.id = "transaction"."relatedBy"::uuid')
-      .where('transaction.relatedTo = :category', { category: Categories.FUNDRAISING })
+      .where('transaction.relatedTo = :fundraisingCategory', {
+        fundraisingCategory: Categories.FUNDRAISING,
+      })
       .groupBy('fundraising.associationId')
-      .orderBy('SUM(transaction.amount)', 'DESC')
-      .limit(5)
       .getRawMany();
 
+    const top5AssociationsFromDirect = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .select('transaction.relatedBy', 'associationId')
+      .addSelect('SUM(transaction.amount)', 'totalAmount')
+      .where('transaction.relatedTo = :associationCategory', {
+        associationCategory: Categories.ASSOCIATION,
+      })
+      .groupBy('transaction.relatedBy')
+      .getRawMany();
+
+    // Combiner et agréger les résultats
+    const associationTotals = new Map<string, number>();
+
+    // Ajouter les montants des cagnottes
+    top5AssociationsFromFundraisings.forEach((item) => {
+      const current = associationTotals.get(item.associationId) || 0;
+      associationTotals.set(item.associationId, current + parseFloat(item.totalAmount));
+    });
+
+    // Ajouter les montants des dons directs
+    top5AssociationsFromDirect.forEach((item) => {
+      const current = associationTotals.get(item.associationId) || 0;
+      associationTotals.set(item.associationId, current + parseFloat(item.totalAmount));
+    });
+
+    // Trier et prendre le top 5
+    const sortedAssociations = Array.from(associationTotals.entries())
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5);
+
     const top5AssociationsData = await Promise.all(
-      top5Associations.map(async (item) => {
+      sortedAssociations.map(async ([associationId, totalAmount]) => {
         const association = await this.associationRepository.findOne({
-          where: { id: item.associationId },
+          where: { id: associationId },
         });
         return {
           association,
-          totalAmount: parseFloat(item.totalAmount),
+          totalAmount,
         };
       })
     );
@@ -86,14 +120,18 @@ export class StatisticsService {
     const currentMonthDonations = await this.transactionRepository
       .createQueryBuilder('transaction')
       .select('COUNT(transaction.id)', 'count')
-      .where('transaction.relatedTo = :category', { category: Categories.FUNDRAISING })
+      .where('transaction.relatedTo IN (:...categories)', {
+        categories: [Categories.FUNDRAISING, Categories.ASSOCIATION],
+      })
       .andWhere('transaction.timestamps.createdAt >= :date', { date: oneMonthAgo })
       .getRawOne();
 
     const previousMonthDonations = await this.transactionRepository
       .createQueryBuilder('transaction')
       .select('COUNT(transaction.id)', 'count')
-      .where('transaction.relatedTo = :category', { category: Categories.FUNDRAISING })
+      .where('transaction.relatedTo IN (:...categories)', {
+        categories: [Categories.FUNDRAISING, Categories.ASSOCIATION],
+      })
       .andWhere('transaction.timestamps.createdAt >= :startDate', { startDate: twoMonthsAgo })
       .andWhere('transaction.timestamps.createdAt < :endDate', { endDate: oneMonthAgo })
       .getRawOne();
@@ -132,30 +170,58 @@ export class StatisticsService {
     // Association avec le plus de dons (pour compatibilité)
     const topDonationAssociation = top5AssociationsData.length > 0 ? top5AssociationsData[0] : null;
 
-    // Association la plus active dans le mois
-    const mostActiveAssociation = await this.transactionRepository
+    // Association la plus active dans le mois (combine cagnottes et dons directs)
+    const mostActiveFromFundraisings = await this.transactionRepository
       .createQueryBuilder('transaction')
       .select('fundraising.associationId', 'associationId')
       .addSelect('COUNT(transaction.id)', 'donationCount')
       .innerJoin(Fundraising, 'fundraising', 'fundraising.id = "transaction"."relatedBy"::uuid')
-      .where('transaction.relatedTo = :category', { category: Categories.FUNDRAISING })
+      .where('transaction.relatedTo = :fundraisingCategory', {
+        fundraisingCategory: Categories.FUNDRAISING,
+      })
       .andWhere('transaction.timestamps.createdAt >= :date', { date: oneMonthAgo })
       .groupBy('fundraising.associationId')
-      .orderBy('COUNT(transaction.id)', 'DESC')
-      .limit(1)
-      .getRawOne();
+      .getRawMany();
+
+    const mostActiveFromDirect = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .select('transaction.relatedBy', 'associationId')
+      .addSelect('COUNT(transaction.id)', 'donationCount')
+      .where('transaction.relatedTo = :associationCategory', {
+        associationCategory: Categories.ASSOCIATION,
+      })
+      .andWhere('transaction.timestamps.createdAt >= :date', { date: oneMonthAgo })
+      .groupBy('transaction.relatedBy')
+      .getRawMany();
+
+    // Combiner les résultats
+    const associationActivity = new Map<string, number>();
+
+    mostActiveFromFundraisings.forEach((item) => {
+      const current = associationActivity.get(item.associationId) || 0;
+      associationActivity.set(item.associationId, current + parseInt(item.donationCount));
+    });
+
+    mostActiveFromDirect.forEach((item) => {
+      const current = associationActivity.get(item.associationId) || 0;
+      associationActivity.set(item.associationId, current + parseInt(item.donationCount));
+    });
+
+    const mostActiveAssociationId = Array.from(associationActivity.entries()).sort(
+      ([, a], [, b]) => b - a
+    )[0]?.[0];
 
     let mostActiveAssociationData: {
       association: Association | null;
       donationCount: number;
     } | null = null;
-    if (mostActiveAssociation) {
+    if (mostActiveAssociationId) {
       const association = await this.associationRepository.findOne({
-        where: { id: mostActiveAssociation.associationId },
+        where: { id: mostActiveAssociationId },
       });
       mostActiveAssociationData = {
         association,
-        donationCount: parseInt(mostActiveAssociation.donationCount),
+        donationCount: associationActivity.get(mostActiveAssociationId) || 0,
       };
     }
 
@@ -174,7 +240,9 @@ export class StatisticsService {
 
       const monthCount = await this.transactionRepository
         .createQueryBuilder('transaction')
-        .where('transaction.relatedTo = :category', { category: Categories.FUNDRAISING })
+        .where('transaction.relatedTo IN (:...categories)', {
+          categories: [Categories.FUNDRAISING, Categories.ASSOCIATION],
+        })
         .andWhere('transaction.timestamps.createdAt >= :startDate', { startDate: monthStart })
         .andWhere('transaction.timestamps.createdAt <= :endDate', { endDate: monthEnd })
         .getCount();

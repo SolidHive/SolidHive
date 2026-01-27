@@ -6,6 +6,8 @@ import * as session from 'express-session';
 import * as passport from 'passport';
 import * as crypto from 'crypto';
 import helmet from 'helmet';
+import { RedisStore } from 'connect-redis';
+import { createClient } from 'redis';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -34,9 +36,25 @@ async function bootstrap() {
     process.exit(1);
   }
 
-  // 4. Configuration de session sécurisée
+  // 5. Configuration Redis pour les sessions
+  const redisClient = createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379',
+    password: process.env.REDIS_PASSWORD,
+  });
+
+  redisClient.on('error', (err) => console.error('Redis Client Error', err));
+  await redisClient.connect();
+
+  const redisStore = new RedisStore({
+    client: redisClient,
+    prefix: 'solidhive:sess:',
+    ttl: 3600, // 1 heure en secondes
+  });
+
+  // 6. Configuration de session sécurisée avec Redis
   app.use(
     session({
+      store: redisStore,
       secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
@@ -50,11 +68,11 @@ async function bootstrap() {
     })
   );
 
-  // 5. Configuration de Passport
+  // 7. Configuration de Passport
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // 6. Configuration CORS sécurisée
+  // 8. Configuration CORS sécurisée
   app.enableCors({
     origin: process.env.FRONTEND_URL,
     credentials: true,
@@ -62,7 +80,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // 7. Configuration Swagger
+  // 9. Configuration Swagger
   const config = new DocumentBuilder()
     .setTitle('solidhive API')
     .setDescription('The solidhive API documentation')

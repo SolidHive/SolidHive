@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { RedisModule } from './common/redis/redis.module';
 import { EmailModule } from './common/utils/email/email.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -43,6 +44,7 @@ import { PermissionAccessModule } from './modules/admin/permissions-access/permi
     TicketsModule,
     AdminModule,
     PermissionAccessModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [

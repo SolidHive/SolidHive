@@ -2,7 +2,7 @@
   <CrudCreate
     :can-create-item="true"
     :create-endpoint="`permission-access`"
-    :form-data="formData"
+    :form-data="apiFormData"
     :on-before-submit="handleBeforeSubmit"
   >
     <template #title>Créer une nouvelle permission d'accès</template>
@@ -10,11 +10,12 @@
       <div class="space-y-4 p-4">
         <div class="space-y-2">
           <SelectForm
-            :model-value="form.permission.$value"
+            :model-value="formData.permission"
             input-name="permission"
-            :error-message="form.permission.$error?.message || ''"
+            :error-message="getErrorMessage('permission')"
             :error-state="showError('permission')"
-            @update:model-value="form.permission.$value = $event"
+            @update:model-value="formData.permission = $event"
+            @change="clearValidationErrors(validationErrors, 'permission')"
             @blur="() => (touchedFields.permission = true)"
           >
             <template #label>
@@ -33,11 +34,11 @@
         <div class="space-y-2">
           <div class="flex items-center space-x-2">
             <InputForm
-              :model-value="form.requiresSubscription.$value"
+              :model-value="formData.requiresSubscription"
               type="checkbox"
               input-name="requires-subscription"
               :input-class="'border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2'"
-              @update:model-value="form.requiresSubscription.$value = $event"
+              @update:model-value="formData.requiresSubscription = $event"
               @change="() => (touchedFields.requiresSubscription = true)"
             />
             <label for="requires-subscription" class="text-sm font-medium">
@@ -60,18 +61,23 @@
   import { Permissions } from '@/enums/permissions';
   import Database from '@/utils/database.utils';
   import { computed, onMounted, reactive, ref } from 'vue';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
   import { useToast } from 'vue-toastification';
+  import { createPermissionAccessValidationSchema } from '@/utils/errors/admin/permissions-access';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
 
   const toast = useToast();
   const formSubmitted = ref(false);
   const usedPermissions = ref<string[]>([]);
 
-  // Schéma de validation avec yup
-  const form = defineForm({
-    permission: field('', yup.string().required('La permission est requise')),
-    requiresSubscription: field(false, yup.boolean()),
+  // États du formulaire
+  const formData = reactive({
+    permission: '',
+    requiresSubscription: false,
+  });
+
+  const validationErrors = reactive({
+    permission: '',
+    requiresSubscription: '',
   });
 
   // Gestion des champs touchés
@@ -81,7 +87,22 @@
   });
 
   const showError = (fieldName: keyof typeof touchedFields) =>
-    (touchedFields[fieldName] || formSubmitted.value) && !!form[fieldName].$error;
+    (touchedFields[fieldName] || formSubmitted.value) && !!validationErrors[fieldName];
+
+  const getErrorMessage = (fieldName: keyof typeof touchedFields) =>
+    touchedFields[fieldName] || formSubmitted.value ? validationErrors[fieldName] || '' : '';
+
+  const validateForm = async () => {
+    const result = await validateWithYup(createPermissionAccessValidationSchema as any, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
+  };
 
   const allPermissions = [
     { value: Permissions.REGISTERS_VIEW, label: 'Voir membres' },
@@ -103,6 +124,7 @@
     { value: Permissions.FUNDRAISINGS_DELETE, label: 'Supprimer cagnottes' },
     { value: Permissions.ASSOCIATION_UPDATE, label: 'Modifier association' },
     { value: Permissions.ASSOCIATION_REMOVE, label: 'Supprimer association' },
+    { value: Permissions.STATISTICS_VIEW, label: 'Voir statistiques' },
   ];
 
   // Filtre les permissions déjà utilisées
@@ -111,15 +133,15 @@
   );
 
   // Données du formulaire pour le composant Create
-  const formData = computed(() => ({
-    permission: form.permission.$value,
-    requiresSubscription: form.requiresSubscription.$value,
+  const apiFormData = computed(() => ({
+    permission: formData.permission,
+    requiresSubscription: formData.requiresSubscription,
   }));
 
   async function handleBeforeSubmit(): Promise<boolean> {
     formSubmitted.value = true;
 
-    if (!(await isValidForm(form))) {
+    if (!(await validateForm())) {
       toast.error('Veuillez corriger les erreurs du formulaire');
       return false;
     }

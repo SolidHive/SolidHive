@@ -5,9 +5,10 @@ import { AuthService } from './auth.service';
 import { LocalStrategy } from './strategies/local.strategy';
 import { SessionSerializer } from './session.serializer';
 import { AuthController } from './auth.controller';
+import { RedisModule } from '../../common/redis/redis.module';
 
 @Module({
-  imports: [UsersModule, PassportModule.register({ session: true })],
+  imports: [UsersModule, PassportModule.register({ session: true }), RedisModule],
   providers: [AuthService, LocalStrategy, SessionSerializer],
   controllers: [AuthController],
 })

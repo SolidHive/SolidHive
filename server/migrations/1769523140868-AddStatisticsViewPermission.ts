@@ -1,0 +1,32 @@
+import { MigrationInterface, QueryRunner } from "typeorm";
+
+export class AddStatisticsViewPermission1769523140868 implements MigrationInterface {
+    name = 'AddStatisticsViewPermission1769523140868'
+
+    public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`ALTER TYPE "public"."association_role_permissions_enum" RENAME TO "association_role_permissions_enum_old"`);
+        await queryRunner.query(`CREATE TYPE "public"."association_role_permissions_enum" AS ENUM('*', 'roles_create', 'roles_delete', 'roles_update', 'roles_view', 'events_create', 'events_delete', 'events_update', 'registers_create', 'registers_delete', 'registers_update', 'registers_view', 'fundraisings_create', 'fundraisings_delete', 'fundraisings_update', 'announcements_create', 'announcements_delete', 'announcements_update', 'association_update', 'association_remove', 'statistics_view')`);
+        await queryRunner.query(`ALTER TABLE "association_role" ALTER COLUMN "permissions" DROP DEFAULT`);
+        await queryRunner.query(`ALTER TABLE "association_role" ALTER COLUMN "permissions" TYPE "public"."association_role_permissions_enum"[] USING "permissions"::"text"::"public"."association_role_permissions_enum"[]`);
+        await queryRunner.query(`ALTER TABLE "association_role" ALTER COLUMN "permissions" SET DEFAULT '{}'`);
+        await queryRunner.query(`DROP TYPE "public"."association_role_permissions_enum_old"`);
+        await queryRunner.query(`ALTER TYPE "public"."permission_access_permission_enum" RENAME TO "permission_access_permission_enum_old"`);
+        await queryRunner.query(`CREATE TYPE "public"."permission_access_permission_enum" AS ENUM('*', 'roles_create', 'roles_delete', 'roles_update', 'roles_view', 'events_create', 'events_delete', 'events_update', 'registers_create', 'registers_delete', 'registers_update', 'registers_view', 'fundraisings_create', 'fundraisings_delete', 'fundraisings_update', 'announcements_create', 'announcements_delete', 'announcements_update', 'association_update', 'association_remove', 'statistics_view')`);
+        await queryRunner.query(`ALTER TABLE "permission_access" ALTER COLUMN "permission" TYPE "public"."permission_access_permission_enum" USING "permission"::"text"::"public"."permission_access_permission_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."permission_access_permission_enum_old"`);
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`CREATE TYPE "public"."permission_access_permission_enum_old" AS ENUM('*', 'roles_create', 'roles_delete', 'roles_update', 'roles_view', 'events_create', 'events_delete', 'events_update', 'registers_create', 'registers_delete', 'registers_update', 'registers_view', 'fundraisings_create', 'fundraisings_delete', 'fundraisings_update', 'announcements_create', 'announcements_delete', 'announcements_update', 'association_update', 'association_remove')`);
+        await queryRunner.query(`ALTER TABLE "permission_access" ALTER COLUMN "permission" TYPE "public"."permission_access_permission_enum_old" USING "permission"::"text"::"public"."permission_access_permission_enum_old"`);
+        await queryRunner.query(`DROP TYPE "public"."permission_access_permission_enum"`);
+        await queryRunner.query(`ALTER TYPE "public"."permission_access_permission_enum_old" RENAME TO "permission_access_permission_enum"`);
+        await queryRunner.query(`CREATE TYPE "public"."association_role_permissions_enum_old" AS ENUM('*', 'roles_create', 'roles_delete', 'roles_update', 'roles_view', 'events_create', 'events_delete', 'events_update', 'registers_create', 'registers_delete', 'registers_update', 'registers_view', 'fundraisings_create', 'fundraisings_delete', 'fundraisings_update', 'announcements_create', 'announcements_delete', 'announcements_update', 'association_update', 'association_remove')`);
+        await queryRunner.query(`ALTER TABLE "association_role" ALTER COLUMN "permissions" DROP DEFAULT`);
+        await queryRunner.query(`ALTER TABLE "association_role" ALTER COLUMN "permissions" TYPE "public"."association_role_permissions_enum_old"[] USING "permissions"::"text"::"public"."association_role_permissions_enum_old"[]`);
+        await queryRunner.query(`ALTER TABLE "association_role" ALTER COLUMN "permissions" SET DEFAULT '{}'`);
+        await queryRunner.query(`DROP TYPE "public"."association_role_permissions_enum"`);
+        await queryRunner.query(`ALTER TYPE "public"."association_role_permissions_enum_old" RENAME TO "association_role_permissions_enum"`);
+    }
+
+}

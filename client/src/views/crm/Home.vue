@@ -8,83 +8,87 @@
 
   <div class="px-2 py-4 sm:p-6 md:px-12">
     <div class="mx-auto max-w-4xl space-y-6">
-      <!-- Message d'avertissement selon le statut -->
-      <div
-        v-if="association?.status === Status.PENDING"
-        class="rounded-lg border border-amber-500/30 bg-amber-50 p-3 sm:p-4"
-      >
-        <div class="flex items-start gap-2 sm:gap-3">
-          <div class="mt-0.5 flex-shrink-0">
-            <AlertTriangle class="h-5 w-5 text-amber-600" />
-          </div>
-          <div>
-            <h3 class="text-sm font-semibold text-amber-900">
-              Association en attente de validation
-            </h3>
-            <p class="mt-1 text-sm text-amber-800">
-              Votre association est en cours de validation par un administrateur. Vous pouvez
-              modifier les informations de base, mais l'accès complet au CRM sera disponible une
-              fois l'association acceptée.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div
-        v-else-if="association?.status === Status.ADDITIONAL_REQUEST"
-        class="rounded-lg border border-blue-500/30 bg-blue-50 p-3 sm:p-4"
-      >
-        <div class="flex items-start gap-2 sm:gap-3">
-          <div class="mt-0.5 flex-shrink-0">
-            <Info class="h-5 w-5 text-blue-600" />
-          </div>
-          <div>
-            <h3 class="text-sm font-semibold text-blue-900">
-              Informations supplémentaires requises
-            </h3>
-            <p class="mt-1 text-sm text-blue-800">
-              L'administrateur a demandé des informations complémentaires. Veuillez mettre à jour
-              les informations de votre association pour que votre demande soit réexaminée.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div
-        v-else-if="association?.status === Status.REJECTED"
-        class="rounded-lg border border-red-500/30 bg-red-50 p-3 sm:p-4"
-      >
-        <div class="flex items-start gap-2 sm:gap-3">
-          <div class="mt-0.5 flex-shrink-0">
-            <XCircle class="h-5 w-5 text-red-600" />
-          </div>
-          <div>
-            <h3 class="text-sm font-semibold text-red-900">Association rejetée</h3>
-            <p class="mt-1 text-sm text-red-800">
-              Votre demande d'enregistrement a été rejetée. Vous pouvez consulter les informations
-              de votre association mais l'accès complet au CRM n'est pas disponible.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card avec les informations de l'association -->
-      <AssociationInfoCard
-        v-if="association"
-        :association="association"
-        :image-key="imageKey"
-        :can-update="crmAccess.canUpdateAssociation"
-        :can-delete="crmAccess.canRemoveAssociation"
-        :show-stripe-for-owner="crmAccess.isOwner"
-        @edit="openEditDialog"
-        @delete="isDeleteDialogOpen = true"
-        @manage-stripe="isStripeDialogOpen = true"
+      <!-- Loading -->
+      <LoadingOverlay
+        v-if="isLoadingAssociation"
+        :show="true"
+        message="Chargement des informations de l'association..."
       />
 
-      <!-- Message de chargement -->
-      <div v-else class="bg-card rounded-lg border p-12 text-center shadow-sm">
-        <p class="text-muted-foreground">Chargement des informations...</p>
-      </div>
+      <template v-else>
+        <!-- Message d'avertissement selon le statut -->
+        <div
+          v-if="association?.status === Status.PENDING"
+          class="rounded-lg border border-amber-500/30 bg-amber-50 p-3 sm:p-4"
+        >
+          <div class="flex items-start gap-2 sm:gap-3">
+            <div class="mt-0.5 flex-shrink-0">
+              <AlertTriangle class="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-amber-900">
+                Association en attente de validation
+              </h3>
+              <p class="mt-1 text-sm text-amber-800">
+                Votre association est en cours de validation par un administrateur. Vous pouvez
+                modifier les informations de base, mais l'accès complet au CRM sera disponible une
+                fois l'association acceptée.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-else-if="association?.status === Status.ADDITIONAL_REQUEST"
+          class="rounded-lg border border-blue-500/30 bg-blue-50 p-3 sm:p-4"
+        >
+          <div class="flex items-start gap-2 sm:gap-3">
+            <div class="mt-0.5 flex-shrink-0">
+              <Info class="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-blue-900">
+                Informations supplémentaires requises
+              </h3>
+              <p class="mt-1 text-sm text-blue-800">
+                L'administrateur a demandé des informations complémentaires. Veuillez mettre à jour
+                les informations de votre association pour que votre demande soit réexaminée.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-else-if="association?.status === Status.REJECTED"
+          class="rounded-lg border border-red-500/30 bg-red-50 p-3 sm:p-4"
+        >
+          <div class="flex items-start gap-2 sm:gap-3">
+            <div class="mt-0.5 flex-shrink-0">
+              <XCircle class="h-5 w-5 text-red-600" />
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-red-900">Association rejetée</h3>
+              <p class="mt-1 text-sm text-red-800">
+                Votre demande d'enregistrement a été rejetée. Vous pouvez consulter les informations
+                de votre association mais l'accès complet au CRM n'est pas disponible.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card avec les informations de l'association -->
+        <AssociationInfoCard
+          v-if="association"
+          :association="association"
+          :image-key="imageKey"
+          :can-update="crmAccess.canUpdateAssociation"
+          :can-delete="crmAccess.canRemoveAssociation"
+          :show-stripe-for-owner="crmAccess.isOwner"
+          @edit="openEditDialog"
+          @delete="isDeleteDialogOpen = true"
+          @manage-stripe="isStripeDialogOpen = true"
+        />
+      </template>
     </div>
   </div>
 
@@ -124,6 +128,7 @@
 
 <script setup lang="ts">
   import Header from '@/components/dashboard/Header.vue';
+  import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import AssociationInfoCard from '@/components/crm/home/AssociationInfoCard.vue';
   import EditAssociationDialog from '@/components/crm/home/EditAssociationDialog.vue';
   import DeleteAssociationDialog from '@/components/crm/home/DeleteAssociationDialog.vue';
@@ -154,6 +159,7 @@
   const isDeleteDialogOpen = ref(false);
   const isStripeDialogOpen = ref(false);
   const isLoading = ref(false);
+  const isLoadingAssociation = ref(true);
   const isStripeLoading = ref(false);
   const stripeMessage = ref<string>('');
   const stripeMessageType = ref<'success' | 'warning'>('success');
@@ -175,6 +181,7 @@
     }
 
     try {
+      isLoadingAssociation.value = true;
       // Récupérer les données de l'association
       const associationData = await Database.getOne('association', crmStore.currentAssociationId);
 
@@ -203,6 +210,8 @@
       }
     } catch (error) {
       console.error("Erreur lors du chargement de l'association:", error);
+    } finally {
+      isLoadingAssociation.value = false;
     }
   }
 

@@ -15,6 +15,7 @@ import { PasswordUtils } from '../../common/utils/password.utils';
 import { UserAssociation } from '../associations/modules/users/entities/user-association.entity';
 import { Status } from 'src/common/enums/status';
 import { Roles } from '../../common/enums/roles';
+import { RedisService } from '../../common/redis/redis.service';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +26,8 @@ export class UsersService {
     private roleRepository: Repository<Role>,
     @InjectRepository(UserAssociation)
     private userAssociationRepository: Repository<UserAssociation>,
-    private userSecurityService: UserSecurityService
+    private userSecurityService: UserSecurityService,
+    private redisService: RedisService
   ) {}
 
   async findByEmail(email: string): Promise<User> {
@@ -200,7 +202,13 @@ export class UsersService {
     Object.assign(user, updateData);
 
     try {
-      return await this.usersRepository.save(user);
+      const updatedUser = await this.usersRepository.save(user);
+
+      // Invalider le cache Redis pour ce profil utilisateur
+      const cacheKey = `user:profile:${userId}`;
+      await this.redisService.del(cacheKey);
+
+      return updatedUser;
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'utilisateur:", error);
       throw new InternalServerErrorException(

@@ -112,7 +112,7 @@
     try {
       submitting.value = true;
 
-      const response = await Database.create('/payments/donate', {
+      const response = await Database.create('payments/donate', {
         amount: donationData.amount,
         associationId: association.value.id,
         message: donationData.message,

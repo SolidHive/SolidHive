@@ -177,6 +177,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'Accueil - CRM' },
       },
       {
+        path: 'statistics',
+        name: 'CRMStatistics',
+        component: () => import('../views/crm/Statistics.vue'),
+        meta: { title: 'Statistiques - CRM' },
+      },
+      {
         path: 'members',
         name: 'CRMMembers',
         component: () => import('../views/crm/members/Read.vue'),

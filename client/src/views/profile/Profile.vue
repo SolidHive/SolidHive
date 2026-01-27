@@ -63,7 +63,7 @@
       isLoadingDonations.value = true;
       const transactions = await Database.getAll('transactions', {
         order: JSON.stringify({ 'timestamps.createdAt': 'DESC' }),
-        take: 9,
+        relations: JSON.stringify(['association', 'fundraising', 'event']),
       });
 
       const classicDonations = transactions.filter(

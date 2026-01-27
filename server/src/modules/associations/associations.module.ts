@@ -13,10 +13,15 @@ import { UserAssociation } from './modules/users/entities/user-association.entit
 import { PermissionAccessModule } from '../admin/permissions-access/permission-access.module';
 import { FilesModule } from '../files/files.module';
 import { EmailModule } from '../../common/utils/email/email.module';
+import { AssociationStatisticsService } from './modules/statistics/association-statistics.service';
+import { AssociationStatisticsController } from './modules/statistics/association-statistics.controller';
+import { Transaction } from '../transactions/entities/transaction.entity';
+import { Fundraising } from './modules/fundraisings/entities/fundraising.entity';
+import { Event } from './modules/events/entities/event.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Association, User, UserAssociation]),
+    TypeOrmModule.forFeature([Association, User, UserAssociation, Transaction, Fundraising, Event]),
     EventsModule,
     AssociationsAnnouncementsModule,
     FundraisingsModule,
@@ -26,8 +31,8 @@ import { EmailModule } from '../../common/utils/email/email.module';
     FilesModule,
     EmailModule,
   ],
-  controllers: [AssociationsController],
-  providers: [AssociationsService],
+  controllers: [AssociationsController, AssociationStatisticsController],
+  providers: [AssociationsService, AssociationStatisticsService],
   exports: [AssociationsService],
 })
 export class AssociationsModule {}

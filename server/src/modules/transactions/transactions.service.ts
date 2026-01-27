@@ -64,6 +64,31 @@ export class TransactionsService {
     if (options?.skip) findOptions.skip = options.skip;
     if (options?.take) findOptions.take = options.take;
 
+    if (options?.take) {
+      const [rawTransactions, total] = await this.transactionsRepository.findAndCount({
+        where: whereCondition,
+        order: options?.order,
+        skip: options?.skip,
+        take: options?.take,
+      });
+
+      // Charger les entités liées si demandé
+      let transactions = rawTransactions;
+      if (options?.relations && options.relations.length > 0) {
+        transactions = await this.loadRelatedEntities(rawTransactions, options.relations);
+      }
+
+      return {
+        data: transactions,
+        meta: {
+          total,
+          page: Math.floor((options.skip || 0) / (options.take || 10)) + 1,
+          limit: options.take || 10,
+          totalPages: Math.ceil(total / (options.take || 10)),
+        },
+      };
+    }
+
     const transactions = await this.transactionsRepository.find(findOptions);
 
     // Charger les entités liées si demandé
@@ -167,6 +192,31 @@ export class TransactionsService {
     if (options?.order) findOptions.order = options.order;
     if (options?.skip) findOptions.skip = options.skip;
     if (options?.take) findOptions.take = options.take;
+
+    if (options?.take) {
+      const [rawTransactions, total] = await this.transactionsRepository.findAndCount({
+        where: whereCondition,
+        order: options?.order,
+        skip: options?.skip,
+        take: options?.take,
+      });
+
+      // Charger les entités liées si demandé
+      let transactions = rawTransactions;
+      if (options?.relations && options.relations.length > 0) {
+        transactions = await this.loadRelatedEntities(rawTransactions, options.relations);
+      }
+
+      return {
+        data: transactions,
+        meta: {
+          total,
+          page: Math.floor((options.skip || 0) / (options.take || 10)) + 1,
+          limit: options.take || 10,
+          totalPages: Math.ceil(total / (options.take || 10)),
+        },
+      };
+    }
 
     const transactions = await this.transactionsRepository.find(findOptions);
 

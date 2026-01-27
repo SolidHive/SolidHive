@@ -5,12 +5,14 @@
     <div v-else-if="donations.length > 0" class="space-y-4">
       <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h2 class="font-subtitle text-foreground text-base sm:text-lg">
-          {{ donations.length }} don{{ donations.length > 1 ? 's' : '' }}
+          {{ totalCount || donations.length }} don{{
+            (totalCount || donations.length) > 1 ? 's' : ''
+          }}
         </h2>
         <div class="text-right">
           <p class="font-paragraph text-muted-foreground text-sm">Total donné</p>
           <p class="font-title text-foreground text-xl font-bold">
-            {{ formatCurrency(totalAmount) }}
+            {{ formatCurrency(totalAmount || 0) }}
           </p>
         </div>
       </div>
@@ -141,7 +143,7 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, ref } from 'vue';
+  import { ref } from 'vue';
   import { Button } from '@/components/ui/button';
   import type { Transaction } from '@/interfaces';
   import { Heart, Receipt, Loader2 } from 'lucide-vue-next';
@@ -153,13 +155,11 @@
   interface Props {
     donations: Transaction[];
     isLoading: boolean;
+    totalCount?: number;
+    totalAmount?: number;
   }
 
-  const props = defineProps<Props>();
-
-  const totalAmount = computed(() =>
-    props.donations.reduce((total: number, donation: Transaction) => total + donation.amount, 0)
-  );
+  defineProps<Props>();
 
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('fr-FR', {

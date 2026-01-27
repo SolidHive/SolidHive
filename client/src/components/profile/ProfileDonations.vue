@@ -31,7 +31,7 @@
               <h3
                 class="font-subtitle text-foreground group-hover:text-primary truncate text-sm transition-colors sm:text-base"
               >
-                {{ getAssociationName(donation.relatedBy) }}
+                {{ getAssociationName(donation) }}
               </h3>
               <p class="font-paragraph text-muted-foreground text-sm">
                 {{ formatDate(donation.timestamps.createdAt) }}
@@ -115,7 +115,7 @@
               <h3
                 class="font-subtitle text-foreground group-hover:text-secondary truncate text-sm transition-colors sm:text-base"
               >
-                {{ getFundraisingName(donation.relatedBy) }}
+                {{ getFundraisingName(donation) }}
               </h3>
               <p class="font-paragraph text-muted-foreground text-sm">
                 {{ formatDate(donation.timestamps.createdAt) }}
@@ -199,7 +199,7 @@
               <h3
                 class="font-subtitle text-foreground group-hover:text-accent truncate text-sm transition-colors sm:text-base"
               >
-                {{ getEventName(registration.relatedBy) }}
+                {{ getEventName(registration) }}
               </h3>
               <p class="font-paragraph text-muted-foreground text-sm">
                 {{ formatDate(registration.timestamps.createdAt) }}
@@ -288,19 +288,16 @@
     }).format(amount);
   }
 
-  function getAssociationName(associationId: string): string {
-    // Pour l'instant, on affiche juste l'ID jusqu'à ce que les transactions contiennent les noms
-    return `Association ${associationId.slice(-8)}`;
+  function getAssociationName(donation: Transaction): string {
+    return donation.association?.name || `Association ${donation.relatedBy.slice(-8)}`;
   }
 
-  function getFundraisingName(fundraisingId: string): string {
-    // Pour l'instant, on affiche juste l'ID jusqu'à ce que les transactions contiennent les noms
-    return `Cagnotte ${fundraisingId.slice(-8)}`;
+  function getFundraisingName(donation: Transaction): string {
+    return donation.fundraising?.title || `Cagnotte ${donation.relatedBy.slice(-8)}`;
   }
 
-  function getEventName(eventId: string): string {
-    // Pour l'instant, on affiche juste l'ID jusqu'à ce que les transactions contiennent les noms
-    return `Événement ${eventId.slice(-8)}`;
+  function getEventName(registration: Transaction): string {
+    return registration.event?.title || `Événement ${registration.relatedBy.slice(-8)}`;
   }
 
   async function downloadInvoice(transactionId: string): Promise<void> {

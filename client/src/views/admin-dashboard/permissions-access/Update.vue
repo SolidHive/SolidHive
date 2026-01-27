@@ -3,7 +3,7 @@
     :can-update-item="true"
     :fetch-item="`permission-access/${permission}`"
     :update-endpoint="`permission-access/${permissionId}`"
-    :form-data="formData"
+    :form-data="apiFormData"
     :on-before-submit="handleBeforeSubmit"
   >
     <template #title>Modifier la permission d'accès</template>
@@ -12,18 +12,18 @@
         <div class="space-y-2">
           <label class="text-sm font-medium">Permission</label>
           <div class="bg-muted text-muted-foreground rounded-md border px-3 py-2 text-sm">
-            {{ formatPermissionLabel(form.permission.$value) }}
+            {{ formatPermissionLabel(formData.permission) }}
           </div>
         </div>
 
         <div class="space-y-2">
           <div class="flex items-center space-x-2">
             <InputForm
-              :model-value="form.requiresSubscription.$value"
+              :model-value="formData.requiresSubscription"
               type="checkbox"
               input-name="edit-requires-subscription"
               :input-class="'border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2'"
-              @update:model-value="form.requiresSubscription.$value = $event"
+              @update:model-value="formData.requiresSubscription = $event"
               @change="() => (touchedFields.requiresSubscription = true)"
             />
             <label for="edit-requires-subscription" class="text-sm font-medium">
@@ -45,9 +45,9 @@
   import { formatPermissionLabel } from '@/utils/permissions.utils';
   import { computed, onMounted, reactive, ref } from 'vue';
   import { useRoute } from 'vue-router';
-  import { defineForm, field, isValidForm } from 'vue-yup-form';
-  import * as yup from 'yup';
   import { useToast } from 'vue-toastification';
+  import { updatePermissionAccessValidationSchema } from '@/utils/errors/admin/permissions-access';
+  import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
 
   const Update = UpdateRaw<PermissionAccess>;
   const route = useRoute();
@@ -60,10 +60,14 @@
     console.error('No permission provided in route parameters.');
   }
 
-  // Schéma de validation avec yup
-  const form = defineForm({
-    permission: field('', yup.string()), // Juste pour stocker la valeur, pas de validation car non modifiable
-    requiresSubscription: field(false, yup.boolean()),
+  // États du formulaire
+  const formData = reactive({
+    permission: '',
+    requiresSubscription: false,
+  });
+
+  const validationErrors = reactive({
+    requiresSubscription: '',
   });
 
   // Gestion des champs touchés
@@ -71,15 +75,27 @@
     requiresSubscription: false,
   });
 
+  const validateForm = async () => {
+    const result = await validateWithYup(updatePermissionAccessValidationSchema as any, formData);
+
+    if (result.isValid) {
+      clearValidationErrors(validationErrors);
+    } else {
+      Object.assign(validationErrors, result.errors);
+    }
+
+    return result.isValid;
+  };
+
   // Données du formulaire pour le composant Update
-  const formData = computed(() => ({
-    requiresSubscription: form.requiresSubscription.$value,
+  const apiFormData = computed(() => ({
+    requiresSubscription: formData.requiresSubscription,
   }));
 
   async function handleBeforeSubmit(): Promise<boolean> {
     formSubmitted.value = true;
 
-    if (!(await isValidForm(form))) {
+    if (!(await validateForm())) {
       toast.error('Veuillez corriger les erreurs du formulaire');
       return false;
     }
@@ -92,8 +108,8 @@
       const response = await Database.getAll(`permission-access/${permission}`);
       if (response) {
         permissionId.value = response.id; // Stocke l'UUID pour l'update
-        form.permission.$value = response.permission || '';
-        form.requiresSubscription.$value = response.requiresSubscription || false;
+        formData.permission = response.permission || '';
+        formData.requiresSubscription = response.requiresSubscription || false;
       }
     } catch (err) {
       console.error('Erreur lors du chargement de la permission:', err);

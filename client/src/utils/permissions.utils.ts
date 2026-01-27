@@ -20,6 +20,7 @@ const PERMISSION_LABELS: Record<string, string> = {
   [Permissions.ANNOUNCEMENTS_DELETE]: 'Supprimer annonces',
   [Permissions.ASSOCIATION_UPDATE]: 'Modifier association',
   [Permissions.ASSOCIATION_REMOVE]: 'Supprimer association',
+  [Permissions.STATISTICS_VIEW]: 'Voir statistiques',
 };
 
 function formatPermissionLabel(permission: string): string {

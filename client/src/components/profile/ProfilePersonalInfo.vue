@@ -82,7 +82,9 @@
           @blur="() => (touchedFields.phone = true)"
         >
           <template #label>Téléphone</template>
-          <template #hint>Format attendu : 10 chiffres commençant par 0 (ex: 0612345678)</template>
+          <template #hint>
+            <div>Format attendu : 10 chiffres commençant par 0 (ex: 0612345678)</div>
+          </template>
         </InputForm>
       </div>
 

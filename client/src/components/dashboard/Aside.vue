@@ -24,6 +24,15 @@
             <span class="hidden lg:block">Accueil</span>
           </RouterLink>
           <RouterLink
+            v-if="crmAccess.canAccessToStatistics && isAssociationAccepted"
+            :to="{ name: 'CRMStatistics', params: { locale: $route.params.locale } }"
+            class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
+            active-class="bg-secondary rounded-lg font-semibold"
+          >
+            <BarChart3 :size="20" />
+            <span class="hidden lg:block">Statistiques</span>
+          </RouterLink>
+          <RouterLink
             v-if="crmAccess.canAccessToMembers && isAssociationAccepted"
             :to="{ name: 'CRMMembers', params: { locale: $route.params.locale } }"
             class="text-accent-foreground flex flex-row items-center justify-center px-2 py-3 hover:opacity-75 lg:justify-start lg:gap-2"
@@ -81,7 +90,7 @@
 </template>
 <script setup lang="ts">
   import logo from '@/assets/images/logo-small-solidhive.svg';
-  import { Home, Users, ShieldCheck, Megaphone, Heart, Calendar } from 'lucide-vue-next';
+  import { Home, Users, ShieldCheck, Megaphone, Heart, Calendar, BarChart3 } from 'lucide-vue-next';
   import { useWindowSize } from '@vueuse/core';
   import { useCrmStore } from '@/stores/crm';
   import { useAuthStore } from '@/stores/auth';

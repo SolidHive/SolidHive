@@ -19,4 +19,5 @@ export enum Permissions {
   ANNOUNCEMENTS_UPDATE = 'announcements_update',
   ASSOCIATION_UPDATE = 'association_update',
   ASSOCIATION_REMOVE = 'association_remove',
+  STATISTICS_VIEW = 'statistics_view',
 }
