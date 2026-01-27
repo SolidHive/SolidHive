@@ -43,9 +43,13 @@
       </div>
     </div>
 
-    <div class="mt-6 flex gap-3">
-      <Button class="bg-accent hover:bg-accent/90 flex-1 text-white" @click="participer">
-        Participer
+    <div class="mt-6 flex flex-col gap-3 sm:flex-row xl:flex-row">
+      <Button
+        class="bg-accent hover:bg-accent/90 flex-1 text-white"
+        :disabled="!authStore.isAuthenticated()"
+        @click="participer"
+      >
+        {{ authStore.isAuthenticated() ? 'Participer' : 'Se connecter pour participer' }}
       </Button>
       <Button
         variant="outline"
@@ -66,6 +70,7 @@
   import { useRouter, useRoute } from 'vue-router';
   import { Check, HandHeart } from 'lucide-vue-next';
   import { Button } from '@/components/ui/button';
+  import { useAuthStore } from '@/stores/auth';
   import type { EventPricing } from '@/interfaces';
 
   defineProps<{
@@ -74,6 +79,7 @@
 
   const router = useRouter();
   const route = useRoute();
+  const authStore = useAuthStore();
   const shareButtonText = ref<string>('Partager');
 
   const formatCurrency = (amount: number) => {

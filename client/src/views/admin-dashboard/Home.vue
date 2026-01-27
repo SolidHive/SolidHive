@@ -3,7 +3,13 @@
     <template #header>Dashboard Admin</template>
   </Header>
   <div class="px-3 py-3 sm:px-4 sm:py-4 md:px-8 lg:px-12">
-    <div class="mx-auto max-w-[1600px] space-y-3 sm:space-y-4 md:space-y-6">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="flex min-h-[400px] items-center justify-center">
+      <LoadingOverlay :show="true" message="Chargement du dashboard..." />
+    </div>
+
+    <!-- Content -->
+    <div v-else class="mx-auto max-w-[1600px] space-y-3 sm:space-y-4 md:space-y-6">
       <!-- Header avec statistiques principales -->
       <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 md:gap-4 lg:grid-cols-4">
         <EnhancedStatCard
@@ -49,10 +55,7 @@
           <CardTitle class="font-title text-base sm:text-lg">Gestion des Associations</CardTitle>
         </CardHeader>
         <CardContent class="px-3 py-4 sm:px-6">
-          <div
-            v-if="!isLoadingAssociations"
-            class="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5"
-          >
+          <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
             <div
               class="flex flex-col items-center justify-center rounded-lg border p-2 sm:p-3 md:p-4"
             >
@@ -98,9 +101,6 @@
               </span>
               <span class="text-muted-foreground text-[10px] sm:text-xs">Info supp.</span>
             </div>
-          </div>
-          <div v-else class="p-8 text-center">
-            <p class="text-muted-foreground">Chargement...</p>
           </div>
         </CardContent>
       </Card>
@@ -210,6 +210,7 @@
   import ActiveAssociationChart from '@/components/admin-dashboard/statistics/ActiveAssociationChart.vue';
   import DonationsEvolutionChart from '@/components/admin-dashboard/statistics/DonationsEvolutionChart.vue';
   import MetricsRadarChart from '@/components/admin-dashboard/statistics/MetricsRadarChart.vue';
+  import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
   import {
     Building2,
@@ -230,6 +231,9 @@
   const associations = ref<Association[]>([]);
   const isLoadingAssociations = ref(false);
   const isLoadingStats = ref(false);
+
+  // État de chargement global pour l'overlay
+  const isLoading = computed(() => isLoadingAssociations.value || isLoadingStats.value);
 
   interface Statistics {
     associationsCount: number;

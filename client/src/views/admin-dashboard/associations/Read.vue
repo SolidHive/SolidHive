@@ -52,7 +52,7 @@
     />
 
     <!-- Loading -->
-    <LoadingSpinner :is-loading="isLoading" />
+    <LoadingOverlay :show="isLoading" message="Chargement des associations..." />
   </div>
 </template>
 
@@ -64,7 +64,7 @@
   import SearchBar from '@/components/dashboard/SearchBar.vue';
   import AssociationCard from '@/components/admin-dashboard/AssociationCard.vue';
   import Pagination from '@/components/dashboard/Pagination.vue';
-  import LoadingSpinner from '@/components/dashboard/LoadingSpinner.vue';
+  import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import { Button } from '@/components/ui/button';
   import type { Association } from '@/interfaces/association.interface';
   import { Status } from '@/enums/status';

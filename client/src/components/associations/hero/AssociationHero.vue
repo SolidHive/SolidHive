@@ -49,6 +49,34 @@
             Faire un don
           </Button>
           <Button
+            v-if="isAuthenticated"
+            :class="[
+              'w-full px-8 text-white transition-all duration-200 sm:w-auto',
+              isFavorite
+                ? 'bg-red-500 hover:bg-red-600'
+                : 'border border-white/30 bg-white/20 backdrop-blur-sm hover:bg-white/30',
+            ]"
+            :disabled="isLoadingFavorite"
+            @click="toggleFavorite"
+          >
+            <Heart
+              :class="[
+                'mr-2 transition-all duration-200',
+                isFavorite ? 'scale-110 fill-current' : 'scale-100',
+              ]"
+              :size="20"
+            />
+            <span class="font-medium">
+              {{
+                isLoadingFavorite
+                  ? 'Chargement...'
+                  : isFavorite
+                    ? 'En favoris'
+                    : 'Ajouter en favoris'
+              }}
+            </span>
+          </Button>
+          <Button
             class="bg-secondary hover:bg-secondary/90 w-full px-8 text-white transition-colors sm:w-auto"
             @click="sharePage"
           >
@@ -62,14 +90,18 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, ref } from 'vue';
+  import { computed, ref, onMounted } from 'vue';
   import { Button } from '@/components/ui/button';
   import BackButton from '@/components/ui/BackButton.vue';
   import { usePaymentsStore } from '@/stores/payments';
-  import { Check } from 'lucide-vue-next';
+  import { useAuthStore } from '@/stores/auth';
+  import { Check, Heart } from 'lucide-vue-next';
   import type { Association } from '@/interfaces/association.interface';
+  import Database from '@/utils/database.utils';
+  import { Categories } from '@/enums/categories';
 
   const paymentsStore = usePaymentsStore();
+  const authStore = useAuthStore();
 
   const props = defineProps<{
     association: Association;
@@ -79,6 +111,9 @@
     paymentsStore.canAssociationReceiveDonations(props.association)
   );
 
+  const isAuthenticated = computed(() => authStore.isAuthenticated());
+  const isFavorite = ref(false);
+  const isLoadingFavorite = ref(false);
   const isCopied = ref(false);
 
   const sharePage = async () => {
@@ -92,6 +127,49 @@
       console.error('Error copying link:', err);
     }
   };
+
+  const checkFavoriteStatus = async () => {
+    if (!isAuthenticated.value || !props.association?.id) return;
+
+    try {
+      const favorite = await Database.getAll(
+        `favorites/${Categories.ASSOCIATION}/${props.association.id}`
+      );
+      isFavorite.value = !!favorite;
+    } catch (error) {
+      console.error('Erreur lors de la vérification des favoris:', error);
+      isFavorite.value = false;
+    }
+  };
+
+  const toggleFavorite = async () => {
+    if (!isAuthenticated.value || !props.association?.id) return;
+
+    isLoadingFavorite.value = true;
+
+    try {
+      if (isFavorite.value) {
+        // Retirer des favoris
+        await Database.delete(`favorites/${Categories.ASSOCIATION}/${props.association.id}`);
+        isFavorite.value = false;
+      } else {
+        // Ajouter aux favoris
+        await Database.create('favorites', {
+          relatedTo: Categories.ASSOCIATION,
+          relatedBy: props.association.id,
+        });
+        isFavorite.value = true;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la gestion des favoris:', error);
+    } finally {
+      isLoadingFavorite.value = false;
+    }
+  };
+
+  onMounted(() => {
+    checkFavoriteStatus();
+  });
 
   defineEmits(['don']);
 </script>

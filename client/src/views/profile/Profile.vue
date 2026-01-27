@@ -21,7 +21,14 @@
           />
         </div>
 
-        <ProfileSidebar :profile="profile" :is-logging-out="isLoggingOut" @logout="handleLogout" />
+        <ProfileSidebar
+          :profile="profile"
+          :is-logging-out="isLoggingOut"
+          :favorite-associations="favoriteAssociations"
+          :is-loading-favorites="isLoadingFavorites"
+          @logout="handleLogout"
+          @remove-favorite="handleRemoveFavorite"
+        />
       </div>
     </div>
   </PageContainer>
@@ -33,7 +40,7 @@
   import { useToast } from 'vue-toastification';
   import { useAuthStore } from '@/stores/auth';
   import Database from '@/utils/database.utils';
-  import type { Transaction } from '@/interfaces';
+  import type { Transaction, Association } from '@/interfaces';
 
   import PageContainer from '@/components/PageContainer.vue';
   import ProfileHeader from '@/components/profile/ProfileHeader.vue';
@@ -53,8 +60,10 @@
   const recentDonations = ref<Transaction[]>([]);
   const recentFundraisingDonations = ref<Transaction[]>([]);
   const recentEventRegistrations = ref<Transaction[]>([]);
+  const favoriteAssociations = ref<Association[]>([]);
   const isLoadingAssociations = ref(false);
   const isLoadingDonations = ref(true);
+  const isLoadingFavorites = ref(true);
   const isLoggingOut = ref(false);
 
   // Chargement des données
@@ -84,9 +93,43 @@
     }
   }
 
+  async function loadFavoriteAssociations(): Promise<void> {
+    try {
+      isLoadingFavorites.value = true;
+      const favorites = await Database.getAll('favorites');
+
+      // Filtrer les favoris d'associations
+      const associationFavorites = favorites.filter(
+        (favorite: any) => favorite.relatedTo === 'Association'
+      );
+
+      if (associationFavorites.length === 0) {
+        favoriteAssociations.value = [];
+        return;
+      }
+
+      const associationPromises = associationFavorites.map((favorite: any) =>
+        Database.getAll(`association/${favorite.relatedBy}`)
+      );
+
+      const associations = await Promise.all(associationPromises);
+      favoriteAssociations.value = associations;
+    } catch (error) {
+      console.error('Erreur lors du chargement des favoris:', error);
+    } finally {
+      isLoadingFavorites.value = false;
+    }
+  }
+
   // Actions
   function createAssociation(): void {
     router.push('/create-association');
+  }
+
+  function handleRemoveFavorite(associationId: string): void {
+    favoriteAssociations.value = favoriteAssociations.value.filter(
+      (assoc) => assoc.id !== associationId
+    );
   }
 
   async function handleLogout(): Promise<void> {
@@ -105,6 +148,7 @@
 
   onMounted(() => {
     loadRecentDonations();
+    loadFavoriteAssociations();
 
     if (!authStore.user) {
       authStore.loadUser(false);

@@ -29,6 +29,13 @@
       </div>
     </div>
 
+    <!-- Associations Favorites -->
+    <ProfileFavorites
+      :favorite-associations="favoriteAssociations || []"
+      :is-loading="isLoadingFavorites"
+      @remove-favorite="emit('removeFavorite', $event)"
+    />
+
     <!-- Actions dangereuses -->
     <div class="bg-card border-border rounded-3xl border p-4 shadow-sm sm:p-6">
       <h2 class="font-subtitle text-foreground mb-4 text-base sm:text-lg">Actions</h2>
@@ -61,17 +68,21 @@
 <script setup lang="ts">
   import { Button } from '@/components/ui/button';
   import { LogOut, Trash2 } from 'lucide-vue-next';
-  import type { User } from '@/interfaces';
+  import ProfileFavorites from '@/components/profile/ProfileFavorites.vue';
+  import type { User, Association } from '@/interfaces';
 
   interface Props {
     profile: User | null;
     isLoggingOut: boolean;
+    favoriteAssociations?: Association[];
+    isLoadingFavorites: boolean;
   }
 
   defineProps<Props>();
 
-  defineEmits<{
+  const emit = defineEmits<{
     logout: [];
+    removeFavorite: [associationId: string];
   }>();
 
   function formatDate(dateString: string): string {

@@ -117,14 +117,14 @@
     />
 
     <!-- Loading -->
-    <LoadingSpinner :is-loading="isLoading" />
+    <LoadingOverlay :show="isLoading" message="Chargement des données..." />
   </div>
 </template>
 
 <script setup lang="ts" generic="T extends HasId">
   import type { HasId } from '@/interfaces/has_id.interface';
   import { onMounted, ref, watch, type Ref } from 'vue';
-  import LoadingSpinner from '../LoadingSpinner.vue';
+  import LoadingOverlay from '@/components/LoadingOverlay.vue';
   import Pagination from '../Pagination.vue';
   import SearchBar from '../SearchBar.vue';
   import Table from '../Table.vue';

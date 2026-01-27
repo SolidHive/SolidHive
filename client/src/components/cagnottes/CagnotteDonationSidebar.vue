@@ -114,7 +114,6 @@
   import { Button } from '@/components/ui/button';
   import InputForm from '@/components/form/InputForm.vue';
   import { useAuthStore } from '@/stores/auth';
-  import { useRouter } from 'vue-router';
   import Database from '@/utils/database.utils';
   import { useToast } from 'vue-toastification';
 
@@ -139,7 +138,6 @@
 
   // Auth store
   const authStore = useAuthStore();
-  const router = useRouter();
   const toast = useToast();
 
   // Reactive data
@@ -185,11 +183,6 @@
   };
 
   const faireUnDon = async () => {
-    if (!authStore.isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-
     if (!props.donationAmount || props.donationAmount <= 0) {
       toast.error('Veuillez saisir un montant valide');
       return;

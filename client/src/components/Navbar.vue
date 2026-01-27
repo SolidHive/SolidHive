@@ -149,7 +149,7 @@
             Cagnottes
           </router-link>
           <router-link
-            to="/evenements"
+            to="/events"
             class="text-secondary font-paragraph py-2 text-base"
             @click="closeMenu"
           >

@@ -6,6 +6,10 @@ import { Status } from '../enums/status';
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior() {
+    // Scroll to top on route change
+    return { top: 0 };
+  },
 });
 
 router.beforeEach(async (to, _from, next) => {
