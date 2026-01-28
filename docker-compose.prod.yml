@@ -31,8 +31,6 @@ services:
       - ./server/package.json:/usr/src/app/package.json
       - ./server/logs:/usr/src/app/logs
       - ./server/uploads:/usr/src/app/uploads
-      - ./server/logs:/usr/src/app/logs
-      - ./server/uploads:/usr/src/app/uploads
     depends_on:
       - db
     networks:
