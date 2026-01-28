@@ -7,8 +7,6 @@ services:
       target: prod-runner
       args:
         NODE_ENV: production
-    env_file:
-      - ./client/.env.production
     environment:
       - VITE_HOST=0.0.0.0
     volumes:
@@ -27,10 +25,12 @@ services:
       args:
         NODE_ENV: production
     env_file:
-      - ./server/.env.production
+      - ./server/.env.prod
     volumes:
       - ./server/migrations:/usr/src/app/migrations
       - ./server/package.json:/usr/src/app/package.json
+      - ./server/logs:/usr/src/app/logs
+      - ./server/uploads:/usr/src/app/uploads
       - ./server/logs:/usr/src/app/logs
       - ./server/uploads:/usr/src/app/uploads
     depends_on:
@@ -52,6 +52,15 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
+
+  redis:
+    container_name: solidhive-redis
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
     networks:
       - app-network
 
@@ -82,6 +91,7 @@ services:
 
 volumes:
   db_data:
+  redis_data:
 
 networks:
   app-network:
