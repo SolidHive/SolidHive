@@ -1,48 +1,49 @@
 services:
-  frontend:
-    container_name: frontend
+  client:
+    container_name: solidhive-client
     build:
       context: ./client
       dockerfile: Dockerfile
       target: prod-runner
-    ports:
-      - '5173:5173'
+      args:
+        NODE_ENV: production
+    env_file:
+      - ./client/.env.production
     environment:
       - VITE_HOST=0.0.0.0
     volumes:
       - ./client/package.json:/usr/src/app/package.json
     depends_on:
-      - backend
+      - server
     networks:
       - app-network
 
-  backend:
-    container_name: backend
+  server:
+    container_name: solidhive-server
     build:
       context: ./server
       dockerfile: Dockerfile
       target: prod-runner
-    ports:
-      - '3001:3000'
+      args:
+        NODE_ENV: production
     env_file:
-      - ./server/.env
+      - ./server/.env.production
     volumes:
       - ./server/migrations:/usr/src/app/migrations
       - ./server/package.json:/usr/src/app/package.json
+      - ./server/logs:/usr/src/app/logs
+      - ./server/uploads:/usr/src/app/uploads
     depends_on:
       - db
-      - mailtrap
     networks:
       - app-network
 
   db:
-    container_name: solidhive-db-1
+    container_name: solidhive-db
     image: postgres:16
-    ports:
-      - '5432:5432'
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=solidhive
     volumes:
       - db_data:/var/lib/postgresql/data
@@ -51,58 +52,37 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-  pgadmin:
-    container_name: solidhive-pgadmin-1
-    image: dpage/pgadmin4
-    ports:
-      - '8080:80'
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
-      - PGADMIN_DEFAULT_PASSWORD=admin
-      - PGADMIN_CONFIG_SERVER_MODE=False
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - db
-
-  mailtrap:
-    container_name: solidhive-mailtrap-1
-    image: eaudeweb/mailtrap
-    ports:
-      - "1080:80"   # Interface web : identifiant et mot de passe => mailtrap
-      - "1025:25"   # SMTP
+    networks:
+      - app-network
 
   nginx:
     image: nginx:alpine
-    container_name: nginx
+    container_name: solidhive-nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - ./nginx/conf:/etc/nginx/conf.d
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
     depends_on:
-      - frontend
-      - backend
+      - client
+      - server
     networks:
       - app-network
 
   certbot:
     image: certbot/certbot
-    container_name: certbot
+    container_name: solidhive-certbot
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
     networks:
       - app-network
 
-
 volumes:
   db_data:
-  pgadmin_data:
 
 networks:
   app-network:
-    external: true
+    driver: bridge
