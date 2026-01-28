@@ -34,7 +34,7 @@ COPY . .
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
 
-RUN if [ "$NODE_ENV" = "production" ]; then npm run build; fi
+RUN if [ "$NODE_ENV" = "production" ]; then echo "Building NestJS application..." && npm run build && echo "Build completed. Checking dist folder:" && ls -la dist/; fi
 
 # =====================
 # Dev runner
@@ -62,6 +62,7 @@ COPY package*.json ./
 RUN npm install --omit=dev
 
 COPY --from=builder /usr/src/app/dist ./dist
+RUN echo "Contents of dist folder:" && ls -la dist/ && echo "Checking for index.js:" && ls -la dist/index.js || echo "index.js not found"
 
 ENV NODE_ENV=production
 EXPOSE 3000
