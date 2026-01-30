@@ -25,6 +25,19 @@ jobs:
         echo "Building server image..."
         docker build -t solidhive-server:latest ./server
 
+    - name: Update VPS code
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        port: 22
+        timeout: 30s
+        script: |
+          cd ~/SolidHive
+          echo "Pulling latest changes from repository..."
+          git pull origin develop || echo "Git pull failed, continuing with current code"
+
     - name: Deploy to VPS
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -35,10 +48,6 @@ jobs:
         timeout: 60s
         script: |
           cd ~/SolidHive
-
-          # Pull latest changes from repository
-          echo "Pulling latest changes from repository..."
-          git pull origin develop || echo "Git pull failed, continuing with current code"
 
           # Stop current services
           echo "Stopping current services..."
