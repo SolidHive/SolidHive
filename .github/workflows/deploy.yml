@@ -17,56 +17,15 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Log in to Docker Hub (optional)
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-      if: env.DOCKER_USERNAME != ''
-
-    - name: Build and push Docker images
+    - name: Build Docker images
       run: |
-        # Build client image
+        echo "Building client image..."
         docker build -t solidhive-client:latest ./client
 
-        # Build server image
+        echo "Building server image..."
         docker build -t solidhive-server:latest ./server
 
-        # Save images as tar files for transfer
-        docker save solidhive-client:latest > client-image.tar
-        docker save solidhive-server:latest > server-image.tar
-
     - name: Deploy to VPS
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        password: ${{ secrets.VPS_PASSWORD }}
-        port: 22
-        timeout: 30s
-        script: |
-          # Create backup directory
-          mkdir -p ~/backup
-
-          # Stop current services
-          cd ~/SolidHive
-          docker-compose -f docker-compose.prod.yml down || true
-
-          # Backup current .env.prod
-          cp server/.env.prod ~/backup/.env.prod.$(date +%Y%m%d_%H%M%S) 2>/dev/null || true
-
-    - name: Transfer Docker images and configs
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        password: ${{ secrets.VPS_PASSWORD }}
-        port: 22
-        source: "client-image.tar,server-image.tar,docker-compose.prod.yml,nginx/,server/.env.prod"
-        target: "~/SolidHive"
-        strip_components: 0
-
-    - name: Complete deployment on VPS
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.VPS_HOST }}
@@ -77,34 +36,31 @@ jobs:
         script: |
           cd ~/SolidHive
 
-          # Load Docker images
-          echo "Loading Docker images..."
-          docker load < client-image.tar
-          docker load < server-image.tar
+          # Stop current services
+          echo "Stopping current services..."
+          docker-compose -f docker-compose.prod.yml down || true
 
-          # Clean up image files
-          rm client-image.tar server-image.tar
-
-          # Start services
+          # Start services with new images
           echo "Starting services..."
-          docker-compose -f docker-compose.prod.yml up -d
+          docker-compose -f docker-compose.prod.yml up -d --build
 
-          # Wait for services to be healthy
-          echo "Waiting for services to start..."
+          # Wait for services to start
+          echo "Waiting for services to be ready..."
           sleep 30
 
+          # Run database migrations
+          echo "Running database migrations..."
+          docker-compose -f docker-compose.prod.yml exec -T server npm run migration:run || echo "No migrations to run or migration command failed"
+
           # Check service status
+          echo "Checking service status..."
           docker-compose -f docker-compose.prod.yml ps
 
-          # Clean up old images
-          echo "Cleaning up old images..."
-          docker image prune -f
-
-          echo "Deployment completed successfully!"
+          echo "✅ Deployment completed successfully!"
 
     - name: Health check
       run: |
-        # Wait a bit for services to fully start
+        echo "Performing health check..."
         sleep 10
 
         # Check if the application is responding
