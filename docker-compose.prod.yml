@@ -15,13 +15,14 @@ services:
       - server
     networks:
       - app-network
+    restart: unless-stopped
 
   server:
     container_name: solidhive-server
     build:
       context: ./server
       dockerfile: Dockerfile
-      target: dev-runner
+      target: prod-runner
       args:
         NODE_ENV: production
     env_file:
@@ -32,6 +33,7 @@ services:
       - NODE_ENV=production
     ports:
       - "3000:3000"
+    command: ["npx", "nest", "start", "--watch"]
     volumes:
       - ./server/migrations:/usr/src/app/migrations
       - ./server/package.json:/usr/src/app/package.json
@@ -41,6 +43,7 @@ services:
       - db
     networks:
       - app-network
+    restart: unless-stopped
 
   db:
     container_name: solidhive-db
@@ -56,8 +59,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    command: >
+      postgres
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
     networks:
       - app-network
+    restart: unless-stopped
 
   redis:
     container_name: solidhive-redis
@@ -67,6 +80,7 @@ services:
       - redis_data:/data
     networks:
       - app-network
+    restart: unless-stopped
 
   nginx:
     image: nginx:alpine
@@ -83,6 +97,7 @@ services:
       - server
     networks:
       - app-network
+    restart: unless-stopped
 
   certbot:
     image: certbot/certbot
@@ -92,10 +107,27 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     networks:
       - app-network
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: solidhive-pgadmin
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@theotime.pagies.lille.mds-project.fr
+      - PGADMIN_DEFAULT_PASSWORD=admin123
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - app-network
+    restart: unless-stopped
 
 volumes:
   db_data:
   redis_data:
+  pgadmin_data:
 
 networks:
   app-network:

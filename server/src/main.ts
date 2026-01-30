@@ -63,7 +63,7 @@ async function bootstrap() {
         maxAge: 3600000, // 1 heure en millisecondes
         secure: process.env.COOKIE_SECURE === 'true', // Utiliser HTTPS en production
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: process.env.COOKIE_SECURE === 'true' ? 'none' : 'lax', // 'none' requis pour HTTPS cross-origin
       },
     })
   );

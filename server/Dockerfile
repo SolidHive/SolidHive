@@ -59,10 +59,13 @@ RUN apk add --no-cache \
     ttf-freefont
 
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm install --omit=dev && npm install @nestjs/cli
 
 COPY --from=builder /usr/src/app/dist ./dist
 RUN echo "Contents of dist folder:" && ls -la dist/ && echo "Checking for index.js:" && ls -la dist/index.js || echo "index.js not found"
+
+# Copy source files for development mode
+COPY . .
 
 ENV NODE_ENV=production
 EXPOSE 3000
