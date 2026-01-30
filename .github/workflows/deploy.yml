@@ -36,6 +36,10 @@ jobs:
         script: |
           cd ~/SolidHive
 
+          # Pull latest changes from repository
+          echo "Pulling latest changes from repository..."
+          git pull origin develop || echo "Git pull failed, continuing with current code"
+
           # Stop current services
           echo "Stopping current services..."
           docker-compose -f docker-compose.prod.yml down || true
