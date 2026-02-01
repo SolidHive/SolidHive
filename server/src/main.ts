@@ -8,12 +8,37 @@ import * as crypto from 'crypto';
 import helmet from 'helmet';
 import { RedisStore } from 'connect-redis';
 import { createClient } from 'redis';
+import { join } from 'path';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 1. Protection des en-têtes HTTP
-  app.use(helmet());
+  // 1. Servir les fichiers statiques du dossier uploads (avant les autres middlewares)
+  console.log('Setting up static files for uploads at:', join(process.cwd(), 'uploads'));
+  app.use('/uploads', (req, res, next) => {
+    console.log('Request to /uploads:', req.path);
+    next();
+  }, express.static(join(process.cwd(), 'uploads')));
+
+  // 2. Protection des en-têtes HTTP
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", 'data:', 'https:', 'http:'],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'", 'https:', 'data:'],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'self'"],
+        },
+      },
+    })
+  );
 
   // 2. Validation des entrées améliorée
   app.useGlobalPipes(

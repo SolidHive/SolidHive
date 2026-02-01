@@ -25,8 +25,11 @@ import { PermissionAccessModule } from './modules/admin/permissions-access/permi
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
+      serveStaticOptions: {
+        index: false,
+      },
     }),
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot(getNestConfig()),
