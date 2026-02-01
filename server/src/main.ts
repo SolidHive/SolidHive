@@ -16,10 +16,14 @@ async function bootstrap() {
 
   // 1. Servir les fichiers statiques du dossier uploads (avant les autres middlewares)
   console.log('Setting up static files for uploads at:', join(process.cwd(), 'uploads'));
-  app.use('/uploads', (req, res, next) => {
-    console.log('Request to /uploads:', req.path);
-    next();
-  }, express.static(join(process.cwd(), 'uploads')));
+  app.use(
+    '/uploads',
+    (req, res, next) => {
+      console.log('Request to /uploads:', req.path);
+      next();
+    },
+    express.static(join(process.cwd(), 'uploads'))
+  );
 
   // 2. Protection des en-têtes HTTP
   app.use(
