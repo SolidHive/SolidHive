@@ -4,95 +4,36 @@ on:
   push:
     branches:
       - develop
-  workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy_vps:
     runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/develop' }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - name: Build Docker images
-      run: |
-        echo "Building client image..."
-        docker build -t solidhive-client:latest ./client
-
-        echo "Building server image..."
-        docker build -t solidhive-server:latest ./server
-
-    - name: Update VPS code
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        password: ${{ secrets.VPS_PASSWORD }}
-        port: 22
-        timeout: 30s
-        script: |
-          cd ~/SolidHive
-          echo "Pulling latest changes from repository..."
-          git pull origin develop || echo "Git pull failed, continuing with current code"
-
-    - name: Deploy to VPS
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        password: ${{ secrets.VPS_PASSWORD }}
-        port: 22
-        timeout: 60s
-        script: |
-          cd ~/SolidHive
-
-          # Stop current services
-          echo "Stopping current services..."
-          docker-compose -f docker-compose.prod.yml down || true
-
-          # Start services with new images
-          echo "Starting services..."
-          docker-compose -f docker-compose.prod.yml up -d --build
-
-          # Wait for services to start
-          echo "Waiting for services to be ready..."
-          sleep 30
-
-          # Run database migrations
-          echo "Running database migrations..."
-          docker-compose -f docker-compose.prod.yml exec -T server npm run migration:run || echo "No migrations to run or migration command failed"
-
-          # Check service status
-          echo "Checking service status..."
-          docker-compose -f docker-compose.prod.yml ps
-
-          echo "✅ Deployment completed successfully!"
-
-    - name: Health check
-      run: |
-        echo "Performing health check..."
-        sleep 10
-
-        # Check if the application is responding
-        if curl -f -s --max-time 30 https://theotime.pagies.lille.mds-project.fr > /dev/null; then
-          echo "✅ Application is responding correctly"
-        else
-          echo "❌ Application health check failed"
-          exit 1
-        fi
-
-    - name: Notify on failure
-      if: failure()
-      uses: actions/github-script@v7
-      with:
-        script: |
-          github.rest.issues.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title: '🚨 Deployment Failed',
-            body: `The deployment to production failed. Check the [workflow run](${context.payload.repository.html_url}/actions/runs/${context.runId}) for details.`,
-            labels: ['bug', 'deployment']
-          })
+      - name: Déploiement SSH sur VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          script: |
+            set -euo pipefail
+            cd ~/SolidHive
+            git pull
+            
+            # Arrêter les conteneurs sans supprimer les images
+            docker-compose -f docker-compose.prod.yml down
+            
+            # Build uniquement ce qui a changé, réutilisation maximale du cache
+            docker-compose -f docker-compose.prod.yml build
+            
+            # Lancer les conteneurs
+            docker-compose -f docker-compose.prod.yml up -d
+            
+            # Attendre que le serveur démarre
+            sleep 10
+            
+            # Exécuter les migrations si nécessaire
+            docker-compose -f docker-compose.prod.yml exec -T server npm run migration:run || echo "No migrations to run"
