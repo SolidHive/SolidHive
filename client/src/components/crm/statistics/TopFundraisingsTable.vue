@@ -64,8 +64,8 @@
       </tbody>
     </table>
   </div>
-  <div v-else class="text-muted-foreground py-6 text-center text-xs sm:py-8 sm:text-sm">
-    Aucune cagnotte pour le moment
+  <div v-else class="flex h-32 items-center justify-center sm:h-40">
+    <p class="text-muted-foreground text-xs sm:text-sm">Il n'y a pas de données pour le moment</p>
   </div>
 </template>
 

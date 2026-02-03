@@ -3,28 +3,22 @@
     <template #header>Modifier l'événement</template>
   </Header>
 
-  <div class="p-6 md:px-12">
+  <div class="px-2 py-4 sm:p-6 md:px-12">
     <div v-if="loading" class="flex justify-center py-12">
       <LoadingOverlay message="Chargement de l'événement..." />
     </div>
 
     <div v-else class="mx-auto max-w-4xl">
-      <div class="mb-6 flex items-start justify-between">
-        <div>
-          <p class="text-primary mt-1 font-semibold sm:text-lg lg:text-2xl">{{ formData.title }}</p>
-        </div>
-        <Button
-          variant="outline"
-          @click="router.push(`/crm/${crmStore.currentAssociationId}/events/${eventId}`)"
-        >
-          Annuler
-        </Button>
+      <div class="mb-4 sm:mb-6">
+        <p class="text-primary line-clamp-2 font-semibold break-words sm:text-lg lg:text-2xl">
+          {{ formData.title }}
+        </p>
       </div>
 
       <!-- Formulaire -->
-      <div class="bg-card space-y-6 rounded-lg border p-6 shadow-sm">
+      <div class="bg-card space-y-4 rounded-lg border p-3 shadow-sm sm:space-y-6 sm:p-6">
         <div>
-          <h2 class="mb-4 text-xl font-bold">Informations de l'événement</h2>
+          <h2 class="mb-3 text-lg font-bold sm:mb-4 sm:text-xl">Informations de l'événement</h2>
           <div class="space-y-4">
             <InputForm
               v-model="formData.title"
@@ -51,7 +45,7 @@
               @blur="touchedFields.description = true"
             />
 
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-4 sm:grid-cols-2">
               <InputForm
                 v-model="formData.startDate"
                 input-name="startDate"
@@ -76,8 +70,8 @@
             </div>
 
             <!-- Adresse -->
-            <div class="border-t pt-4">
-              <h3 class="mb-3 font-medium">Adresse</h3>
+            <div class="border-t pt-3 sm:pt-4">
+              <h3 class="mb-2 text-sm font-medium sm:mb-3 sm:text-base">Adresse</h3>
               <div class="space-y-4">
                 <InputForm
                   v-model="formData.address.street"
@@ -151,7 +145,7 @@
             </div>
 
             <!-- Image -->
-            <div class="border-t pt-4">
+            <div class="border-t pt-3 sm:pt-4">
               <ImageUpload
                 v-model="imageFile"
                 v-model:preview="imagePreview"
@@ -165,14 +159,17 @@
           </div>
         </div>
 
-        <div class="flex justify-end gap-3 border-t pt-6">
+        <div
+          class="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end sm:gap-3 sm:pt-6"
+        >
           <Button
             variant="outline"
+            class="w-full sm:w-auto"
             @click="router.push(`/crm/${crmStore.currentAssociationId}/events/${eventId}`)"
           >
             Annuler
           </Button>
-          <Button :disabled="isLoading" @click="updateEvent">
+          <Button :disabled="isLoading" class="w-full sm:w-auto" @click="updateEvent">
             {{ isLoading ? 'Enregistrement...' : 'Enregistrer les modifications' }}
           </Button>
         </div>

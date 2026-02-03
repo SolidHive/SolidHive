@@ -6,6 +6,11 @@
     <CardContent>
       <div class="h-[300px]">
         <Bar v-if="chartData" :data="chartData" :options="chartOptions" />
+        <div v-else class="flex h-full items-center justify-center">
+          <p class="text-muted-foreground text-xs sm:text-sm">
+            Il n'y a pas de données pour le moment
+          </p>
+        </div>
       </div>
     </CardContent>
   </Card>

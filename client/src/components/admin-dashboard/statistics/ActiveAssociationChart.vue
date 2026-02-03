@@ -27,7 +27,9 @@
         </div>
       </div>
       <div v-else class="flex h-[200px] items-center justify-center sm:h-[230px] md:h-[250px]">
-        <p class="text-muted-foreground text-xs sm:text-sm">Aucune donnée disponible</p>
+        <p class="text-muted-foreground text-xs sm:text-sm">
+          Il n'y a pas de données pour le moment
+        </p>
       </div>
     </CardContent>
   </Card>

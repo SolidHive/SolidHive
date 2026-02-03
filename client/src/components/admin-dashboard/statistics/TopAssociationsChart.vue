@@ -4,8 +4,13 @@
       <CardTitle class="text-sm sm:text-base md:text-lg">Top 5 Associations</CardTitle>
     </CardHeader>
     <CardContent class="px-2 pb-4 sm:px-4 md:px-6">
-      <div class="h-[250px] sm:h-[350px] md:h-[400px]">
-        <Bar v-if="chartData" :data="chartData" :options="chartOptions" />
+      <div v-if="chartData" class="h-[250px] sm:h-[350px] md:h-[400px]">
+        <Bar :data="chartData" :options="chartOptions" />
+      </div>
+      <div v-else class="flex h-[250px] items-center justify-center sm:h-[350px] md:h-[400px]">
+        <p class="text-muted-foreground text-xs sm:text-sm">
+          Il n'y a pas de données pour le moment
+        </p>
       </div>
     </CardContent>
   </Card>

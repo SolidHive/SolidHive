@@ -64,186 +64,256 @@
         </div>
       </div>
 
-      <!-- Image -->
-      <div v-if="event.image" class="mb-4 aspect-video overflow-hidden rounded-lg sm:mb-6">
-        <img :src="event.image" :alt="event.title" class="h-full w-full object-cover" />
-      </div>
-
-      <!-- Tabs -->
-      <div class="mb-4 sm:mb-6">
-        <div class="border-b">
-          <div class="flex gap-2 overflow-x-auto sm:gap-4">
-            <button
-              v-for="tab in tabs"
-              :key="tab.id"
-              class="border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:px-4 sm:py-3 sm:text-base"
-              :class="
-                currentTab === tab.id
-                  ? 'border-primary text-primary'
-                  : 'text-muted-foreground hover:text-foreground border-transparent'
-              "
-              @click="currentTab = tab.id"
-            >
-              {{ tab.label }}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab: Détails -->
-      <div v-show="currentTab === 'details'" class="space-y-4 sm:space-y-6">
-        <div class="bg-card overflow-hidden rounded-lg border p-3 sm:p-4 md:p-6">
-          <h2 class="mb-3 text-lg font-bold sm:mb-4 sm:text-xl">Informations</h2>
-          <div class="space-y-3">
-            <div v-if="event.description">
-              <label class="text-muted-foreground text-xs sm:text-sm">Description</label>
-              <p class="mt-1 text-sm break-words sm:text-base">{{ event.description }}</p>
-            </div>
-            <div>
-              <label class="text-muted-foreground text-xs sm:text-sm">Montant récolté</label>
-              <p class="mt-1 text-sm font-medium sm:text-base">{{ totalAmount }}€</p>
-            </div>
-            <div v-if="event.address">
-              <label class="text-muted-foreground text-xs sm:text-sm">Adresse</label>
-              <div class="mt-1 text-sm break-words sm:text-base">
-                <p>{{ event.address.street }}</p>
-                <p>{{ event.address.postcode }} {{ event.address.city }}</p>
-                <p v-if="event.address.state">{{ event.address.state }}</p>
-                <p>{{ event.address.country }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab: Tarifs -->
-      <div v-show="currentTab === 'pricings'" class="space-y-4">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h2 class="text-lg font-bold sm:text-xl">Tarifs de participation</h2>
-          <Button
-            v-if="crmAccess.canCreateEvent"
-            class="w-full sm:w-auto"
-            @click="showAddPricingDialog = true"
-          >
-            <Plus class="mr-2 h-4 w-4" />
-            Ajouter un tarif
-          </Button>
-        </div>
-
-        <div
-          v-if="event.pricings && event.pricings.length > 0"
-          class="grid gap-3 sm:gap-4 md:grid-cols-2"
-        >
-          <div
-            v-for="pricing in event.pricings"
-            :key="pricing.id"
-            class="bg-card overflow-hidden rounded-lg border p-3 sm:p-4"
-          >
-            <div class="mb-2 flex items-start justify-between gap-2">
-              <div class="min-w-0 flex-1">
-                <h3 class="text-sm font-bold break-words sm:text-base">{{ pricing.title }}</h3>
-                <p class="text-primary text-lg font-bold sm:text-xl">{{ pricing.amount }}€</p>
-              </div>
-              <div class="flex flex-shrink-0 gap-1">
-                <Button
-                  v-if="crmAccess.canUpdateEvent"
-                  variant="ghost"
-                  size="sm"
-                  @click="editPricing(pricing)"
+      <!-- Layout Image + Tabs/Content -->
+      <div class="flex flex-col gap-4 sm:gap-6 xl:flex-row">
+        <!-- Content -->
+        <div class="flex-1">
+          <!-- Tabs -->
+          <div class="mb-4 sm:mb-6">
+            <div class="border-b">
+              <div class="flex gap-2 overflow-x-auto sm:gap-4">
+                <button
+                  v-for="tab in tabs"
+                  :key="tab.id"
+                  class="border-b-2 px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:px-4 sm:py-3 sm:text-base"
+                  :class="
+                    currentTab === tab.id
+                      ? 'border-primary text-primary'
+                      : 'text-muted-foreground hover:text-foreground border-transparent'
+                  "
+                  @click="currentTab = tab.id"
                 >
-                  <Pencil class="h-4 w-4" />
-                </Button>
-                <Button
-                  v-if="crmAccess.canDeleteEvent"
-                  variant="ghost"
-                  size="sm"
-                  @click="confirmDeletePricing(pricing)"
-                >
-                  <Trash2 class="h-4 w-4 text-red-500" />
-                </Button>
+                  {{ tab.label }}
+                </button>
               </div>
             </div>
-            <p
-              v-if="pricing.description"
-              class="text-muted-foreground mb-2 text-xs break-words sm:text-sm"
-            >
-              {{ pricing.description }}
-            </p>
-            <div v-if="pricing.maxCapacity" class="text-muted-foreground text-xs sm:text-sm">
-              <span class="font-medium">Capacité :</span>
-              {{ pricing.availableCapacity ?? pricing.maxCapacity }} / {{ pricing.maxCapacity }}
+          </div>
+
+          <!-- Tab: Détails -->
+          <div v-show="currentTab === 'details'" class="space-y-4 sm:space-y-6">
+            <div class="bg-card overflow-hidden rounded-lg border p-3 sm:p-4 md:p-6">
+              <h2 class="mb-3 text-lg font-bold sm:mb-4 sm:text-xl">Informations</h2>
+              <div class="space-y-3">
+                <div v-if="event.description">
+                  <label class="text-muted-foreground text-xs sm:text-sm">Description</label>
+                  <p class="mt-1 text-sm break-words sm:text-base">{{ event.description }}</p>
+                </div>
+                <div>
+                  <label class="text-muted-foreground text-xs sm:text-sm">Montant récolté</label>
+                  <p class="mt-1 text-sm font-medium sm:text-base">{{ totalAmount }}€</p>
+                </div>
+                <div v-if="event.address">
+                  <label class="text-muted-foreground text-xs sm:text-sm">Adresse</label>
+                  <div class="mt-1 text-sm break-words sm:text-base">
+                    <p>{{ event.address.street }}</p>
+                    <p>{{ event.address.postcode }} {{ event.address.city }}</p>
+                    <p v-if="event.address.state">{{ event.address.state }}</p>
+                    <p>{{ event.address.country }}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div v-else class="bg-muted rounded-lg p-12 text-center">
-          <p class="text-muted-foreground">Aucun tarif défini</p>
-        </div>
-      </div>
+          <!-- Tab: Tarifs -->
+          <div v-show="currentTab === 'pricings'" class="space-y-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h2 class="text-lg font-bold sm:text-xl">Tarifs de participation</h2>
+              <Button
+                v-if="crmAccess.canCreateEvent"
+                class="w-full sm:w-auto"
+                @click="showAddPricingDialog = true"
+              >
+                <Plus class="mr-2 h-4 w-4" />
+                Ajouter un tarif
+              </Button>
+            </div>
 
-      <!-- Tab: Inscrits -->
-      <div v-show="currentTab === 'registrations'" class="space-y-4">
-        <h2 class="text-xl font-bold">Participants inscrits</h2>
+            <div
+              v-if="event.pricings && event.pricings.length > 0"
+              class="grid gap-3 sm:gap-4 md:grid-cols-2"
+            >
+              <div
+                v-for="pricing in event.pricings"
+                :key="pricing.id"
+                class="bg-card overflow-hidden rounded-lg border p-3 sm:p-4"
+              >
+                <div class="mb-2 flex items-start justify-between gap-2">
+                  <div class="min-w-0 flex-1">
+                    <h3 class="text-sm font-bold break-words sm:text-base">{{ pricing.title }}</h3>
+                    <p class="text-primary text-lg font-bold sm:text-xl">{{ pricing.amount }}€</p>
+                  </div>
+                  <div class="flex flex-shrink-0 gap-1">
+                    <Button
+                      v-if="crmAccess.canUpdateEvent"
+                      variant="ghost"
+                      size="sm"
+                      @click="editPricing(pricing)"
+                    >
+                      <Pencil class="h-4 w-4" />
+                    </Button>
+                    <Button
+                      v-if="crmAccess.canDeleteEvent"
+                      variant="ghost"
+                      size="sm"
+                      @click="confirmDeletePricing(pricing)"
+                    >
+                      <Trash2 class="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </div>
+                <p
+                  v-if="pricing.description"
+                  class="text-muted-foreground mb-2 text-xs break-words sm:text-sm"
+                >
+                  {{ pricing.description }}
+                </p>
+                <div v-if="pricing.maxCapacity" class="text-muted-foreground text-xs sm:text-sm">
+                  <span class="font-medium">Capacité :</span>
+                  {{ pricing.availableCapacity ?? pricing.maxCapacity }} / {{ pricing.maxCapacity }}
+                </div>
+              </div>
+            </div>
 
-        <div v-if="loadingRegistrations" class="flex justify-center py-12">
-          <LoadingOverlay message="Chargement des inscriptions..." />
-        </div>
+            <div v-else class="bg-muted rounded-lg p-12 text-center">
+              <p class="text-muted-foreground">Aucun tarif défini</p>
+            </div>
+          </div>
 
-        <div v-else-if="registrations.length === 0" class="bg-muted rounded-lg p-12 text-center">
-          <p class="text-muted-foreground">Aucune inscription pour le moment</p>
-        </div>
+          <!-- Tab: Inscrits -->
+          <div v-show="currentTab === 'registrations'" class="space-y-4">
+            <h2 class="text-lg font-bold sm:text-xl">Participants inscrits</h2>
 
-        <div v-else class="bg-card rounded-lg border">
-          <table class="w-full">
-            <thead class="border-b">
-              <tr>
-                <th class="p-4 text-left text-sm font-medium">Participant</th>
-                <th class="p-4 text-left text-sm font-medium">Email</th>
-                <th class="p-4 text-left text-sm font-medium">Tarif</th>
-                <th class="p-4 text-left text-sm font-medium">Date d'inscription</th>
-                <th class="p-4 text-right text-sm font-medium">Montant</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
+            <div v-if="loadingRegistrations" class="flex justify-center py-12">
+              <LoadingOverlay message="Chargement des inscriptions..." />
+            </div>
+
+            <div
+              v-else-if="registrations.length === 0"
+              class="bg-muted rounded-lg p-12 text-center"
+            >
+              <p class="text-muted-foreground">Aucune inscription pour le moment</p>
+            </div>
+
+            <!-- Mobile: Cards View -->
+            <div v-else class="space-y-3 md:hidden">
+              <div
                 v-for="registration in registrations"
                 :key="registration.id"
-                class="border-b last:border-b-0"
+                class="bg-card rounded-lg border p-3"
               >
-                <td class="p-4">
-                  <div>
-                    {{ getParticipantName(registration) }}
+                <div class="mb-2 flex items-start justify-between">
+                  <div class="min-w-0 flex-1">
+                    <p class="font-medium break-words">{{ getParticipantName(registration) }}</p>
+                    <p class="text-muted-foreground mt-0.5 text-xs break-words">
+                      {{ getParticipantEmail(registration) }}
+                    </p>
                   </div>
                   <div
                     v-if="!registration.user"
-                    class="text-muted-foreground mt-1 flex items-center gap-1 text-xs"
+                    class="bg-muted text-muted-foreground ml-2 rounded px-1.5 py-0.5 text-xs"
                   >
-                    <span class="bg-muted rounded px-1.5 py-0.5">Invité</span>
+                    Invité
                   </div>
-                </td>
-                <td class="text-muted-foreground p-4 text-sm">
-                  {{ getParticipantEmail(registration) }}
-                </td>
-                <td class="p-4 text-sm">{{ registration.eventPricing?.title || '-' }}</td>
-                <td class="text-muted-foreground p-4 text-sm">
-                  {{ formatDate(registration.registeredAt) }}
-                </td>
-                <td class="p-4 text-right font-medium">
-                  {{ Number(registration.eventPricing?.amount || 0).toFixed(2) }} €
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </div>
+                <div class="space-y-1 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-muted-foreground">Tarif:</span>
+                    <span>{{ registration.eventPricing?.title || '-' }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-muted-foreground">Montant:</span>
+                    <span class="font-medium">
+                      {{ Number(registration.eventPricing?.amount || 0).toFixed(2) }} €
+                    </span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-muted-foreground">Inscription:</span>
+                    <span class="text-xs">{{ formatDate(registration.registeredAt) }}</span>
+                  </div>
+                </div>
+              </div>
 
-          <div class="border-t p-4">
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-medium">Total des inscriptions</span>
-              <span class="text-lg font-bold">{{ registrations.length }}</span>
+              <div class="bg-card space-y-2 rounded-lg border p-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">Total des inscriptions</span>
+                  <span class="text-lg font-bold">{{ registrations.length }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">Montant total collecté</span>
+                  <span class="text-primary text-lg font-bold">{{ totalAmount }} €</span>
+                </div>
+              </div>
             </div>
-            <div class="mt-1 flex items-center justify-between">
-              <span class="text-sm font-medium">Montant total collecté</span>
-              <span class="text-primary text-lg font-bold">{{ totalAmount }} €</span>
+
+            <!-- Desktop: Table View -->
+            <div
+              v-if="registrations.length > 0"
+              class="bg-card hidden overflow-hidden rounded-lg border md:block"
+            >
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="border-b">
+                    <tr>
+                      <th class="p-3 text-left text-sm font-medium lg:p-4">Participant</th>
+                      <th class="p-3 text-left text-sm font-medium lg:p-4">Email</th>
+                      <th class="p-3 text-left text-sm font-medium lg:p-4">Tarif</th>
+                      <th class="p-3 text-left text-sm font-medium lg:p-4">Date d'inscription</th>
+                      <th class="p-3 text-right text-sm font-medium lg:p-4">Montant</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="registration in registrations"
+                      :key="registration.id"
+                      class="border-b last:border-b-0"
+                    >
+                      <td class="p-3 lg:p-4">
+                        <div>
+                          {{ getParticipantName(registration) }}
+                        </div>
+                        <div
+                          v-if="!registration.user"
+                          class="text-muted-foreground mt-1 flex items-center gap-1 text-xs"
+                        >
+                          <span class="bg-muted rounded px-1.5 py-0.5">Invité</span>
+                        </div>
+                      </td>
+                      <td class="text-muted-foreground p-3 text-sm lg:p-4">
+                        {{ getParticipantEmail(registration) }}
+                      </td>
+                      <td class="p-3 text-sm lg:p-4">
+                        {{ registration.eventPricing?.title || '-' }}
+                      </td>
+                      <td class="text-muted-foreground p-3 text-sm lg:p-4">
+                        {{ formatDate(registration.registeredAt) }}
+                      </td>
+                      <td class="p-3 text-right font-medium lg:p-4">
+                        {{ Number(registration.eventPricing?.amount || 0).toFixed(2) }} €
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="border-t p-3 lg:p-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">Total des inscriptions</span>
+                  <span class="text-lg font-bold">{{ registrations.length }}</span>
+                </div>
+                <div class="mt-1 flex items-center justify-between">
+                  <span class="text-sm font-medium">Montant total collecté</span>
+                  <span class="text-primary text-lg font-bold">{{ totalAmount }} €</span>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Image -->
+        <div v-if="event.image" class="lg:flex-shrink-0 xl:w-2/5">
+          <div class="max-h-80 overflow-hidden rounded-lg lg:sticky lg:top-6 lg:max-h-none">
+            <img :src="event.image" :alt="event.title" class="w-full rounded-lg object-contain" />
           </div>
         </div>
       </div>

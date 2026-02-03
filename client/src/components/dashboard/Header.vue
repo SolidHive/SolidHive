@@ -9,7 +9,7 @@
       >
         <slot name="header"></slot>
       </h1>
-      <p class="text-muted-foreground mt-1 text-xs font-normal sm:text-sm">
+      <p class="text-muted-foreground mt-1 hidden text-xs font-normal sm:block sm:text-sm">
         <slot name="description"></slot>
       </p>
     </div>

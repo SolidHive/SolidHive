@@ -1,6 +1,9 @@
 <template>
-  <div class="h-48 sm:h-56 md:h-64">
+  <div v-if="direct + fundraisings > 0" class="h-48 sm:h-56 md:h-64">
     <canvas ref="chartCanvas"></canvas>
+  </div>
+  <div v-else class="flex h-48 items-center justify-center sm:h-56 md:h-64">
+    <p class="text-muted-foreground text-xs sm:text-sm">Il n'y a pas de données pour le moment</p>
   </div>
 </template>
 

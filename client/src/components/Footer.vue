@@ -25,10 +25,7 @@
               </router-link>
             </li>
             <li>
-              <router-link to="/projets" class="hover:underline">Devenir Bénévole</router-link>
-            </li>
-            <li>
-              <router-link to="/connexion" class="hover:underline">
+              <router-link to="/create-association" class="hover:underline">
                 Inscrire une association
               </router-link>
             </li>

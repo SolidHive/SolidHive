@@ -84,6 +84,7 @@
                         },
                       }"
                       class="w-full"
+                      @click="closeMenu"
                     >
                       {{ userInAssociation.association.name }}
                     </router-link>
@@ -188,15 +189,19 @@
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <router-link to="/profile" class="w-full">Mon compte</router-link>
+                  <router-link to="/profile" class="w-full" @click="closeMenu">
+                    Mon compte
+                  </router-link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <router-link to="/create-association" class="w-full">
+                  <router-link to="/create-association" class="w-full" @click="closeMenu">
                     Créer une association
                   </router-link>
                 </DropdownMenuItem>
                 <DropdownMenuItem v-if="isAdmin">
-                  <router-link to="/admin/dashboard" class="w-full">Dashboard Admin</router-link>
+                  <router-link to="/admin/dashboard" class="w-full" @click="closeMenu">
+                    Dashboard Admin
+                  </router-link>
                 </DropdownMenuItem>
                 <DropdownMenuSub v-if="accessibleAssociations.length > 0">
                   <DropdownMenuSubTrigger>Accès CRM</DropdownMenuSubTrigger>
@@ -214,6 +219,7 @@
                           },
                         }"
                         class="w-full"
+                        @click="closeMenu"
                       >
                         {{ userInAssociation.association.name }}
                       </router-link>
@@ -224,6 +230,7 @@
                 <DropdownMenuItem
                   class="text-destructive"
                   @click="
+                    closeMenu();
                     authStore.logout();
                     $router.push('/');
                   "
@@ -246,7 +253,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed } from 'vue';
+  import { ref, computed, watch, onBeforeUnmount } from 'vue';
   import { useRouter } from 'vue-router';
   import { useAuthStore } from '../stores/auth';
   import { Button } from '@/components/ui/button';
@@ -276,13 +283,29 @@
     () => authStore.user?.roles?.some((role: any) => role.name?.toLowerCase() === 'admin') ?? false
   );
 
+  // Watcher pour gérer l'overflow du body
+  watch(menuOpen, (isOpen) => {
+    document.body.style.overflow = isOpen ? 'hidden' : 'auto';
+  });
+
+  // Watcher pour remettre l'overflow à auto lors des changements de route
+  watch(
+    () => router.currentRoute.value.path,
+    () => {
+      document.body.style.overflow = 'auto';
+    }
+  );
+
+  // S'assurer que l'overflow est remis à auto quand le composant est détruit
+  onBeforeUnmount(() => {
+    document.body.style.overflow = 'auto';
+  });
+
   function toggleMenu() {
     menuOpen.value = !menuOpen.value;
-    document.body.style.overflow = menuOpen.value ? 'hidden' : 'auto';
   }
   function closeMenu() {
     menuOpen.value = false;
-    document.body.style.overflow = 'auto';
   }
   function goToLogin() {
     closeMenu();

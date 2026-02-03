@@ -6,8 +6,13 @@
       </CardTitle>
     </CardHeader>
     <CardContent class="px-2 pb-4 sm:px-4 md:px-6">
-      <div class="h-[200px] sm:h-[250px] md:h-[300px]">
-        <Doughnut v-if="chartData" :data="chartData" :options="chartOptions" />
+      <div v-if="hasData" class="h-[200px] sm:h-[250px] md:h-[300px]">
+        <Doughnut :data="chartData" :options="chartOptions" />
+      </div>
+      <div v-else class="flex h-[200px] items-center justify-center sm:h-[250px] md:h-[300px]">
+        <p class="text-muted-foreground text-xs sm:text-sm">
+          Il n'y a pas de données pour le moment
+        </p>
       </div>
     </CardContent>
   </Card>
@@ -27,6 +32,8 @@
   }
 
   const props = defineProps<Props>();
+
+  const hasData = computed(() => props.usersCount > 0 || props.associationsCount > 0);
 
   const chartData = computed(() => ({
     labels: ['Utilisateurs', 'Associations'],

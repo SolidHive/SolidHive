@@ -104,9 +104,7 @@
           <div
             class="bg-muted flex h-32 items-center justify-center rounded-lg border-2 border-dashed"
           >
-            <span class="text-muted-foreground text-sm">
-              Aucune image pour la galerie pour le moment
-            </span>
+            <span class="text-muted-foreground text-sm">Aucune image pour la galerie</span>
           </div>
         </div>
       </div>

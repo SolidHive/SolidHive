@@ -4,26 +4,35 @@
       <CardTitle class="text-sm sm:text-base md:text-lg">Performance Financière</CardTitle>
     </CardHeader>
     <CardContent class="px-2 pb-4 sm:px-4 md:px-6">
-      <div class="h-[200px] sm:h-[250px] md:h-[300px]">
-        <Doughnut v-if="chartData" :data="chartData" :options="chartOptions" />
+      <div v-if="totalAmountCollected > 0" class="space-y-4">
+        <div class="h-[200px] sm:h-[250px] md:h-[300px]">
+          <Doughnut :data="chartData" :options="chartOptions" />
+        </div>
+        <div class="space-y-1 sm:space-y-2">
+          <div class="flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-muted-foreground truncate pr-2">Montant total collecté:</span>
+            <span class="font-semibold whitespace-nowrap">
+              {{ formatCurrency(totalAmountCollected) }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-muted-foreground truncate pr-2">Revenus SolidHive:</span>
+            <span class="text-accent font-semibold whitespace-nowrap">
+              {{ formatCurrency(solidHiveRevenue) }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between text-xs sm:text-sm">
+            <span class="text-muted-foreground truncate pr-2">Don moyen:</span>
+            <span class="font-semibold whitespace-nowrap">
+              {{ formatCurrency(averageDonation) }}
+            </span>
+          </div>
+        </div>
       </div>
-      <div class="mt-2 space-y-1 sm:mt-3 sm:space-y-2 md:mt-4">
-        <div class="flex items-center justify-between text-xs sm:text-sm">
-          <span class="text-muted-foreground truncate pr-2">Montant total collecté:</span>
-          <span class="font-semibold whitespace-nowrap">
-            {{ formatCurrency(totalAmountCollected) }}
-          </span>
-        </div>
-        <div class="flex items-center justify-between text-xs sm:text-sm">
-          <span class="text-muted-foreground truncate pr-2">Revenus SolidHive:</span>
-          <span class="text-accent font-semibold whitespace-nowrap">
-            {{ formatCurrency(solidHiveRevenue) }}
-          </span>
-        </div>
-        <div class="flex items-center justify-between text-xs sm:text-sm">
-          <span class="text-muted-foreground truncate pr-2">Don moyen:</span>
-          <span class="font-semibold whitespace-nowrap">{{ formatCurrency(averageDonation) }}</span>
-        </div>
+      <div v-else class="flex h-[200px] items-center justify-center sm:h-[250px] md:h-[300px]">
+        <p class="text-muted-foreground text-xs sm:text-sm">
+          Il n'y a pas de données pour le moment
+        </p>
       </div>
     </CardContent>
   </Card>
