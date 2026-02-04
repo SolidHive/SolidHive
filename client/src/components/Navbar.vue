@@ -35,8 +35,14 @@
         <template v-if="authStore.isAuthenticated()">
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <div class="bg-accent flex h-8 w-8 items-center justify-center rounded-full">
+              <div class="bg-accent relative flex h-8 w-8 items-center justify-center rounded-full">
                 <User class="h-4 w-4 text-white" />
+                <div
+                  v-if="notificationsStore.pendingNotificationsCount > 0"
+                  class="bg-destructive absolute -top-1 -right-1.5 flex h-5 w-5 animate-pulse items-center justify-center rounded-full text-[10px] font-semibold text-white"
+                >
+                  {{ Math.min(notificationsStore.pendingNotificationsCount, 9) }}
+                </div>
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -58,7 +64,15 @@
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <router-link to="/profile" class="w-full">Mon compte</router-link>
+                <router-link to="/profile" class="flex w-full items-center justify-between">
+                  <span>Mon compte</span>
+                  <span
+                    v-if="notificationsStore.pendingNotificationsCount > 0"
+                    class="bg-destructive text-destructive-foreground flex h-5 w-5 animate-pulse items-center justify-center rounded-full text-xs font-medium"
+                  >
+                    {{ notificationsStore.pendingNotificationsCount }}
+                  </span>
+                </router-link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <router-link to="/create-association" class="w-full">
@@ -170,8 +184,16 @@
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <div class="flex items-center gap-2">
-                  <div class="bg-accent flex h-8 w-8 items-center justify-center rounded-full">
+                  <div
+                    class="bg-accent relative flex h-8 w-8 items-center justify-center rounded-full"
+                  >
                     <User class="h-4 w-4 text-white" />
+                    <div
+                      v-if="notificationsStore.pendingNotificationsCount > 0"
+                      class="bg-destructive absolute -top-1 -right-1.5 flex h-5 w-5 animate-pulse items-center justify-center rounded-full text-[10px] font-semibold text-white"
+                    >
+                      {{ Math.min(notificationsStore.pendingNotificationsCount, 9) }}
+                    </div>
                   </div>
                   <div class="text-secondary font-paragraph py-2 text-base">Mon compte</div>
                 </div>
@@ -189,8 +211,18 @@
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <router-link to="/profile" class="w-full" @click="closeMenu">
-                    Mon compte
+                  <router-link
+                    to="/profile"
+                    class="flex w-full items-center justify-between"
+                    @click="closeMenu"
+                  >
+                    <span>Mon compte</span>
+                    <span
+                      v-if="notificationsStore.pendingNotificationsCount > 0"
+                      class="bg-destructive text-destructive-foreground flex h-5 w-5 animate-pulse items-center justify-center rounded-full text-xs font-medium"
+                    >
+                      {{ Math.min(notificationsStore.pendingNotificationsCount, 9) }}
+                    </span>
                   </router-link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
@@ -253,7 +285,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, watch, onBeforeUnmount } from 'vue';
+  import { ref, computed, watch, onBeforeUnmount, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   import { useAuthStore } from '../stores/auth';
   import { Button } from '@/components/ui/button';
@@ -270,8 +302,10 @@
   } from '@/components/ui/dropdown-menu';
   import logoUrl from '@/assets/images/logo-solidhive.png';
   import { Status } from '@/enums/status';
+  import { useNotificationsStore } from '@/stores/notifications';
 
   const authStore = useAuthStore();
+  const notificationsStore = useNotificationsStore();
   const menuOpen = ref(false);
   const router = useRouter();
 
@@ -283,12 +317,27 @@
     () => authStore.user?.roles?.some((role: any) => role.name?.toLowerCase() === 'admin') ?? false
   );
 
-  // Watcher pour gérer l'overflow du body
+  onMounted(() => {
+    if (authStore.user?.email) {
+      notificationsStore.loadPendingNotifications(authStore.user.email);
+    }
+  });
+
+  watch(
+    () => authStore.user,
+    (newUser) => {
+      if (newUser?.email) {
+        notificationsStore.loadPendingNotifications(newUser.email);
+      } else {
+        notificationsStore.resetNotifications();
+      }
+    }
+  );
+
   watch(menuOpen, (isOpen) => {
     document.body.style.overflow = isOpen ? 'hidden' : 'auto';
   });
 
-  // Watcher pour remettre l'overflow à auto lors des changements de route
   watch(
     () => router.currentRoute.value.path,
     () => {
@@ -296,7 +345,6 @@
     }
   );
 
-  // S'assurer que l'overflow est remis à auto quand le composant est détruit
   onBeforeUnmount(() => {
     document.body.style.overflow = 'auto';
   });

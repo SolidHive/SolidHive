@@ -140,6 +140,7 @@ export class UsersService {
           }
         : null,
       status: ua.status,
+      createdAt: ua.createdAt,
     }));
   }
 

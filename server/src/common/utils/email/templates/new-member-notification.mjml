@@ -1,0 +1,204 @@
+<mjml>
+  <mj-head>
+    <mj-title>Nouveau membre dans {{associationName}}</mj-title>
+    <mj-font name="Montserrat" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" />
+    <mj-attributes>
+      <mj-all font-family="Montserrat, Arial, sans-serif" />
+      <mj-text font-size="15px" color="#333333" line-height="24px" />
+      <mj-section background-color="#ffffff" padding="0px" />
+    </mj-attributes>
+    <mj-style inline="inline">
+      .header-title {
+        font-size: 32px;
+        font-weight: 900;
+        color: #ffffff;
+        margin: 0;
+        padding: 0;
+      }
+      .ticket-code {
+        font-size: 36px;
+        font-weight: 900;
+        letter-spacing: 6px;
+        color: #510d6d;
+        margin: 0;
+        padding: 0;
+      }
+      .event-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #510d6d;
+        margin: 0 0 10px 0;
+      }
+      .info-row {
+        background-color: #fafafa;
+        padding: 16px 20px;
+        margin-bottom: 2px;
+      }
+      .info-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #999999;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0 0 6px 0;
+      }
+      .info-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333333;
+        margin: 0;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#f0f0f0">
+    <!-- Header -->
+    <mj-section background-color="#510d6d" padding="50px 30px">
+      <mj-column>
+        <mj-text align="center" font-size="32px" font-weight="900" color="#ffffff" padding="0">
+          SOLIDHIVE
+        </mj-text>
+        <mj-text align="center" font-size="16px" font-weight="500" color="#ffffff" padding="10px 0 0 0">
+          Nouveau membre dans votre association
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Greeting -->
+    <mj-section background-color="#ffffff" padding="50px 30px 30px 30px">
+      <mj-column>
+        <mj-text font-size="15px" color="#333333" line-height="24px">
+          Bonjour <strong>{{ownerFirstname}}</strong>,
+        </mj-text>
+        <mj-text font-size="15px" color="#666666" padding-top="15px" line-height="24px">
+          Excellente nouvelle ! Un nouveau membre a rejoint votre association.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Association Title -->
+    <mj-section background-color="#ffffff" padding="0 30px 30px 30px">
+      <mj-column>
+        <mj-text align="center" font-size="26px" font-weight="700" color="#510d6d" padding="0">
+          {{associationName}}
+        </mj-text>
+        <mj-divider border-color="#f26639" border-width="3px" width="60px" padding="20px 0" />
+      </mj-column>
+    </mj-section>
+
+    <!-- New Member Details -->
+    <mj-section background-color="#ffffff" padding="0 30px">
+      <mj-column>
+        <!-- Member Name -->
+        <mj-text css-class="info-label" padding="0 0 6px 0">
+          Nouveau membre
+        </mj-text>
+        <mj-text css-class="info-value" padding="0 0 20px 0">
+          {{memberFirstname}} {{memberLastname}}
+        </mj-text>
+
+        <!-- Member Email -->
+        <mj-text css-class="info-label" padding="0 0 6px 0">
+          Email
+        </mj-text>
+        <mj-text css-class="info-value" padding="0 0 20px 0">
+          {{memberEmail}}
+        </mj-text>
+
+        <!-- Member Role -->
+        <mj-text css-class="info-label" padding="0 0 6px 0">
+          Rôle attribué
+        </mj-text>
+        <mj-text css-class="info-value" padding="0 0 30px 0">
+          {{memberRole}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Action Button -->
+    <mj-section background-color="#ffffff" padding="0 30px 40px 30px">
+      <mj-column background-color="#fafafa" border-radius="12px" padding="40px 30px">
+        <mj-text align="center" font-size="13px" font-weight="700" color="#999999" letter-spacing="1px" padding="0 0 20px 0">
+          GESTION DES MEMBRES
+        </mj-text>
+        <mj-button href="{{dashboardUrl}}" background-color="#510d6d" color="#ffffff" font-weight="600" padding="20px 0" border-radius="6px">
+          Accéder au tableau de bord
+        </mj-button>
+        <mj-text align="center" font-size="13px" color="#666666" line-height="20px" padding="20px 0 0 0">
+          Gérez les membres de votre association
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Important Instructions -->
+    <mj-section background-color="#ffffff" padding="0 30px 20px 30px">
+      <mj-column background-color="#fffbf0" border="2px solid #f9e8c9" border-radius="8px" padding="25px">
+        <mj-text font-size="14px" font-weight="700" color="#510d6d" padding="0 0 15px 0">
+          Informations importantes
+        </mj-text>
+        <mj-text font-size="13px" color="#666666" line-height="22px" padding="0">
+          • Le nouveau membre a accès à tous les outils<br/>
+          • Vous pouvez modifier ses permissions à tout moment<br/>
+          • Contactez le membre pour l'accueillir<br/>
+          • Vérifiez les statistiques de votre association
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Contact New Member -->
+    <mj-section background-color="#ffffff" padding="0 30px 30px 30px">
+      <mj-column>
+        <mj-text font-size="13px" font-weight="600" color="#999999" padding="0 0 10px 0">
+          CONTACTEZ LE NOUVEAU MEMBRE
+        </mj-text>
+        <mj-text font-size="14px" color="#333333" line-height="22px" padding="0">
+          {{memberFirstname}} {{memberLastname}}<br/>
+          {{memberEmail}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Rappels Pratiques -->
+    <mj-section background-color="#ffffff" padding="0 30px 30px 30px">
+      <mj-column background-color="#f0f9ff" border-radius="8px" padding="25px">
+        <mj-text font-size="14px" font-weight="700" color="#0497af" padding="0 0 15px 0">
+          Rappels pratiques
+        </mj-text>
+        <mj-text font-size="13px" color="#666666" line-height="22px" padding="0">
+          • Accueillez le nouveau membre dans votre équipe<br/>
+          • Présentez-lui les outils et fonctionnalités<br/>
+          • Définissez ses responsabilités clairement<br/>
+          • Encouragez la participation aux projets
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Aide et Support -->
+    <mj-section background-color="#ffffff" padding="0 30px 40px 30px">
+      <mj-column>
+        <mj-text font-size="13px" font-weight="600" color="#999999" padding="0 0 10px 0">
+          BESOIN D'AIDE ?
+        </mj-text>
+        <mj-text font-size="13px" color="#666666" line-height="22px" padding="0">
+          Pour toute question concernant la gestion des membres, vous pouvez nous contacter à <strong>support@solidhive.fr</strong>.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section background-color="#fafafa" padding="40px 30px">
+      <mj-column>
+        <mj-text align="center" font-size="13px" color="#666666" line-height="22px" padding="0 0 8px 0">
+          Questions ? Contactez-nous
+        </mj-text>
+        <mj-text align="center" font-size="13px" font-weight="600" color="#0497af" padding="0 0 25px 0">
+          support@solidhive.fr
+        </mj-text>
+        <mj-divider border-color="#e0e0e0" border-width="1px" padding="0 0 25px 0" />
+        <mj-text align="center" font-size="12px" color="#999999" line-height="20px" padding="0">
+          © 2025 SolidHive — Tous droits réservés<br/>
+          Plateforme de soutien aux associations
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

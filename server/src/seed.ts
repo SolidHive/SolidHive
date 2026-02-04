@@ -6,6 +6,7 @@ import {
   seedAnnouncements,
   seedFundraisings,
   seedEvents,
+  seedPermissionAccess,
 } from './seeds';
 import { UserAssociation } from './modules/associations/modules/users/entities/user-association.entity';
 
@@ -15,6 +16,9 @@ import { UserAssociation } from './modules/associations/modules/users/entities/u
 async function seed(dataSource: DataSource): Promise<void> {
   try {
     console.log('🚀 Starting database seeding...');
+
+    // Seed permission access first (required for other operations)
+    await seedPermissionAccess(dataSource);
 
     // Clean existing data to avoid conflicts
     console.log('🧹 Cleaning existing data...');

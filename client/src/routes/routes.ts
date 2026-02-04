@@ -407,6 +407,15 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/invitation/:invitationId',
+    name: 'Invitation',
+    component: () => import('../views/Invitation.vue'),
+    meta: {
+      title: 'Invitation à rejoindre une association',
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('../views/NotFound.vue'),

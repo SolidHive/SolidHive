@@ -4,3 +4,4 @@ export { seedFiles } from './files.seed';
 export { seedAnnouncements } from './announcements.seed';
 export { seedFundraisings } from './fundraisings.seed';
 export { seedEvents } from './events.seed';
+export { seedPermissionAccess } from './permission-access.seed';

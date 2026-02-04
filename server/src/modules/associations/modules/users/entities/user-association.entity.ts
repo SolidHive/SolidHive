@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, Unique } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+  Unique,
+  CreateDateColumn,
+} from 'typeorm';
 import { Event } from '../../../modules/events/entities/event.entity';
 import { User } from '../../../../../modules/users/entities/user.entity';
 import { Association } from 'src/modules/associations/entities/association.entity';
@@ -90,4 +99,11 @@ export class UserAssociation {
   })
   @Column({ type: 'enum', enum: Status, default: Status.PENDING })
   status: Status;
+
+  @ApiProperty({
+    example: '2023-01-01T00:00:00.000Z',
+    description: 'Date de création de la relation',
+  })
+  @CreateDateColumn()
+  createdAt: Date;
 }
