@@ -13,20 +13,21 @@ import {
 import { AnnouncementsService } from './announcements.service';
 import { CreateAnnouncementDto } from './dto/create-announcement.dto';
 import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
-import { User } from '../../common/decorators/user.decorator';
-import { ApiCookieAuth, ApiResponse } from '@nestjs/swagger';
-import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
-import { Roles, RolesGuard } from '../auth/guards/roles.guard';
-import { FindOptionsDto } from '../../common/dto/find-all-query.dto';
+import { User } from '../../../common/decorators/user.decorator';
+import { ApiCookieAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthenticatedGuard } from '../../auth/guards/authenticated.guard';
+import { Roles, RolesGuard } from '../../auth/guards/roles.guard';
+import { FindOptionsDto } from '../../../common/dto/find-all-query.dto';
 
-@Controller('announcements')
+@ApiTags('Admin - Announcements')
+@Controller('admin/announcements')
+@ApiCookieAuth()
 export class AnnouncementsController {
   constructor(private readonly announcementsService: AnnouncementsService) {}
 
   @Post()
   @UseGuards(AuthenticatedGuard, RolesGuard)
   @Roles('admin')
-  @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   create(@Body() createAnnouncementDto: CreateAnnouncementDto, @User('id') userId: string) {
@@ -38,6 +39,15 @@ export class AnnouncementsController {
     return this.announcementsService.findAll(options);
   }
 
+  @Get('all')
+  @UseGuards(AuthenticatedGuard, RolesGuard)
+  @Roles('admin')
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 403, description: 'Accès refusé' })
+  findAllForAdmin(@Query() options?: FindOptionsDto) {
+    return this.announcementsService.findAllForAdmin(options);
+  }
+
   @Get(':id')
   findOne(@Param('id', new ParseUUIDPipe()) id: string, @Query() options?: FindOptionsDto) {
     return this.announcementsService.findOne(id, options);
@@ -46,7 +56,6 @@ export class AnnouncementsController {
   @Patch(':id')
   @UseGuards(AuthenticatedGuard, RolesGuard)
   @Roles('admin')
-  @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   update(@Param('id') id: string, @Body() updateAnnouncementDto: UpdateAnnouncementDto) {
@@ -56,7 +65,6 @@ export class AnnouncementsController {
   @Delete(':id')
   @UseGuards(AuthenticatedGuard, RolesGuard)
   @Roles('admin')
-  @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   remove(@Param('id') id: string) {

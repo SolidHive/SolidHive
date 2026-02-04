@@ -5,6 +5,8 @@ export interface Announcement extends HasId {
   content: string;
   image: string | null;
   isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   timestamps?: {
     createdAt?: Date;
     updatedAt?: Date;

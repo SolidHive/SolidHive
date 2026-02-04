@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../users/entities/user.entity';
+import { User } from '../../../users/entities/user.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Timestamps } from '../../../common/embeddeds/timestamps.embedded';
+import { Timestamps } from '../../../../common/embeddeds/timestamps.embedded';
 
 @Entity()
 export class Announcement {

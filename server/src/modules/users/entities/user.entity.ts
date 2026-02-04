@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from './role.entity';
-import { Announcement } from '../../announcements/entities/announcement.entity';
+import { Announcement } from '../../admin/announcements/entities/announcement.entity';
 import { Association } from '../../../modules/associations/entities/association.entity';
 import { UserAssociation } from '../../../modules/associations/modules/users/entities/user-association.entity';
 import { Favorite } from '../../../modules/favorites/entities/favorite.entity';
