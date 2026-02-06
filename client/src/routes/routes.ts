@@ -7,6 +7,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Accueil' },
   },
   {
+    path: '/about-premium',
+    name: 'AboutPremium',
+    component: () => import('../views/AboutPremium.vue'),
+    meta: { title: 'À propos du premium' },
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('../views/auth/Login.vue'),
@@ -319,12 +325,6 @@ const routes: RouteRecordRaw[] = [
             meta: { title: 'Modifier un événement - CRM' },
           },
         ],
-      },
-      {
-        path: 'premium-required',
-        name: 'CRMPremiumRequired',
-        component: () => import('../views/crm/PremiumRequired.vue'),
-        meta: { title: 'Premium requis - CRM' },
       },
     ],
   },
