@@ -440,7 +440,7 @@
 
 <script setup lang="ts">
   import { onBeforeMount, reactive, ref, watch } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
+  import { useRouter } from 'vue-router';
   import { Plus, Trash2 } from 'lucide-vue-next';
   import Header from '@/components/dashboard/Header.vue';
   import Button from '@/components/ui/button/Button.vue';
@@ -464,7 +464,6 @@
   const member = crmStore.getMember();
   const crmAccess = useCrmAccess(member);
   const crmPremiumAccess = useCrmPremiumAccess(crmStore.associationPremiumUntil);
-  const route = useRoute();
   const toast = useToast();
   const formSubmitted = ref(false);
 
@@ -757,10 +756,7 @@
 
     if (!hasPremiumAccess) {
       router.push({
-        name: 'CRMPremiumRequired',
-        params: {
-          id: route.params.id,
-        },
+        name: 'AboutPremium',
       });
       return;
     }
