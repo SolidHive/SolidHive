@@ -69,9 +69,9 @@ export default class Database {
     }
   }
 
-  static async delete(collection: string) {
+  static async delete(collection: string, data?: object) {
     try {
-      const { status } = await api.delete(`/${collection}`);
+      const { status } = await api.delete(`/${collection}`, { data });
       return status;
     } catch (err: unknown) {
       console.error('API Error in Database.delete:', err);

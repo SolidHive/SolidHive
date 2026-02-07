@@ -91,6 +91,31 @@
             {{ validationErrors.roles }}
           </p>
         </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium">Statut du compte</label>
+          <div class="space-y-3">
+            <div class="flex items-center space-x-3">
+              <input
+                id="user-status"
+                type="checkbox"
+                :checked="!currentUserIsVerified"
+                class="border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2"
+                @change="toggleUserStatus(($event.target as HTMLInputElement).checked)"
+              />
+              <label for="user-status" class="cursor-pointer text-sm leading-none font-medium">
+                {{ currentUserIsVerified ? 'Bannir cet utilisateur' : 'Débannir cet utilisateur' }}
+              </label>
+            </div>
+            <p class="text-muted-foreground text-sm">
+              {{
+                currentUserIsVerified
+                  ? "En cochant cette case, l'utilisateur sera banni et ne pourra plus se connecter."
+                  : "En décochant cette case, l'utilisateur sera débanni et pourra se reconnecter."
+              }}
+            </p>
+          </div>
+        </div>
       </div>
     </template>
     <template #description>Modifiez les informations de l'utilisateur et ses rôles.</template>
@@ -110,17 +135,18 @@
 
   const Update = UpdateRaw<User>;
   const route = useRoute();
-  const userId = route.params.itemId;
+  const userId = route.params.itemId as string;
   const toast = useToast();
   const formSubmitted = ref(false);
   const availableRoles = ref<Role[]>([]);
   const selectedRoles = ref<string[]>([]);
   const initialRoles = ref<string[]>([]);
+  const currentUserIsVerified = ref(true);
+  const initialUserIsVerified = ref(true);
 
   if (!userId || typeof userId !== 'string') {
     console.error('No userId provided in route parameters.');
   }
-
   // États du formulaire
   const formData = reactive({
     firstname: '',
@@ -187,6 +213,10 @@
     clearValidationErrors(validationErrors, 'roles');
   }
 
+  function toggleUserStatus(isBanned: boolean) {
+    currentUserIsVerified.value = !isBanned;
+  }
+
   async function handleBeforeSubmit(): Promise<boolean> {
     formSubmitted.value = true;
 
@@ -212,6 +242,26 @@
       }
     }
 
+    // Mettre à jour le statut de vérification seulement s'il a changé
+    const verificationChanged = currentUserIsVerified.value !== initialUserIsVerified.value;
+
+    if (verificationChanged) {
+      try {
+        await Database.update(`admin/users`, userId, {
+          isVerified: currentUserIsVerified.value,
+        });
+        toast.success(
+          currentUserIsVerified.value
+            ? 'Utilisateur débanni avec succès'
+            : 'Utilisateur banni avec succès'
+        );
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour du statut:', error);
+        toast.error('Erreur lors de la mise à jour du statut');
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -224,6 +274,8 @@
         formData.phone = response.phone || '';
         selectedRoles.value = response.roles?.map((r: Role) => r.name) || [];
         initialRoles.value = [...selectedRoles.value];
+        currentUserIsVerified.value = response.isVerified ?? true;
+        initialUserIsVerified.value = currentUserIsVerified.value;
       }
     } catch (err) {
       console.error("Erreur lors du chargement de l'utilisateur:", err);

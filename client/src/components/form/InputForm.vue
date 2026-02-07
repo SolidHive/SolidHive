@@ -25,6 +25,7 @@
         :id="inputName"
         :type="inputType"
         :placeholder="placeholder"
+        autocomplete="current-password"
         :value="inputType === 'checkbox' ? undefined : modelValue"
         :checked="inputType === 'checkbox' ? (modelValue as boolean) : undefined"
         :class="

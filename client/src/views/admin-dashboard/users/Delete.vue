@@ -3,12 +3,15 @@
     :can-remove-item="true"
     :fetch-item="`admin/users/${userId}`"
     :delete-endpoint="`admin/users/${userId}`"
+    delete-method="DELETE"
+    action-label="Bannir"
+    action-loading-label="Bannissement..."
   >
-    <template #title>Supprimer l'utilisateur</template>
+    <template #title>Bannir l'utilisateur</template>
     <template #description="{ email, firstname, name }">
-      Cette action est irréversible. L'utilisateur
+      Cette action suspendra temporairement l'utilisateur
       <span class="font-semibold">{{ firstname }} {{ name }} ({{ email }})</span>
-      sera supprimé définitivement.
+      . L'utilisateur recevra un email de notification et ne pourra plus se connecter à son compte.
     </template>
   </CrudDelete>
 </template>

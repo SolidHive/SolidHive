@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Role } from './entities/role.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,6 +16,14 @@ import { UserAssociation } from '../associations/modules/users/entities/user-ass
 import { Status } from 'src/common/enums/status';
 import { Roles } from '../../common/enums/roles';
 import { RedisService } from '../../common/redis/redis.service';
+import { DeleteUserDto } from './dto/delete-user.dto';
+import { EventRegister } from '../associations/modules/events/modules/registers/entities/event-register.entity';
+import { Transaction } from '../transactions/entities/transaction.entity';
+import { Favorite } from '../favorites/entities/favorite.entity';
+import { Association } from '../associations/entities/association.entity';
+import { Fundraising } from '../associations/modules/fundraisings/entities/fundraising.entity';
+import { Event } from '../associations/modules/events/entities/event.entity';
+import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +34,18 @@ export class UsersService {
     private roleRepository: Repository<Role>,
     @InjectRepository(UserAssociation)
     private userAssociationRepository: Repository<UserAssociation>,
+    @InjectRepository(EventRegister)
+    private eventRegisterRepository: Repository<EventRegister>,
+    @InjectRepository(Transaction)
+    private transactionRepository: Repository<Transaction>,
+    @InjectRepository(Favorite)
+    private favoriteRepository: Repository<Favorite>,
+    @InjectRepository(Association)
+    private associationRepository: Repository<Association>,
+    @InjectRepository(Fundraising)
+    private fundraisingRepository: Repository<Fundraising>,
+    @InjectRepository(Event)
+    private eventRepository: Repository<Event>,
     private userSecurityService: UserSecurityService,
     private redisService: RedisService
   ) {}
@@ -215,6 +235,172 @@ export class UsersService {
       throw new InternalServerErrorException(
         'Une erreur est survenue lors de la mise à jour du profil'
       );
+    }
+  }
+
+  async deleteUser(userId: string, deleteUserDto: DeleteUserDto): Promise<{ message: string }> {
+    const user = await this.findOne(userId);
+
+    // Vérifier le mot de passe
+    const isPasswordValid = PasswordUtils.validatePassword(
+      deleteUserDto.password,
+      user.salt,
+      user.password
+    );
+    if (!isPasswordValid) {
+      throw new BadRequestException('Mot de passe incorrect');
+    }
+
+    // Vérifications avant suppression
+    await this.validateUserCanBeDeleted(userId);
+
+    // Démarrer une transaction pour assurer l'intégrité des données
+    const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. Anonymiser les données personnelles dans les transactions
+      await queryRunner.manager.update(
+        Transaction,
+        { user: { id: userId } },
+        {
+          user: null, // Dissocier l'utilisateur des transactions pour garder l'historique
+        }
+      );
+
+      // 2. Supprimer les inscriptions aux événements (mais garder l'historique si nécessaire)
+      // Pour les événements passés, on garde les inscriptions anonymisées
+      const pastEventRegisters = await queryRunner.manager.find(EventRegister, {
+        where: {
+          user: { id: userId },
+          eventPricing: {
+            event: {
+              endDate: new Date(), // Événements terminés
+            },
+          },
+        },
+        relations: ['eventPricing', 'eventPricing.event'],
+      });
+
+      // Anonymiser les inscriptions aux événements passés
+      for (const register of pastEventRegisters) {
+        await queryRunner.manager.update(
+          EventRegister,
+          { id: register.id },
+          {
+            user: null,
+            participantLastName: 'Anonyme',
+            participantFirstName: 'Utilisateur',
+          }
+        );
+      }
+
+      // Supprimer les inscriptions aux événements futurs
+      const futureEventRegisters = await queryRunner.manager.find(EventRegister, {
+        where: {
+          user: { id: userId },
+          eventPricing: {
+            event: {
+              endDate: MoreThan(new Date()), // Événements futurs
+            },
+          },
+        },
+        select: ['id'],
+      });
+
+      if (futureEventRegisters.length > 0) {
+        const registerIds = futureEventRegisters.map((register) => register.id);
+        await queryRunner.manager.delete(EventRegister, registerIds);
+      }
+
+      // 3. Supprimer les favoris
+      await queryRunner.manager.delete(Favorite, { userId });
+
+      // 4. Supprimer les associations utilisateur (mais pas les associations elles-mêmes)
+      await queryRunner.manager.delete(UserAssociation, { userId });
+
+      // 5. Anonymiser l'utilisateur (soft delete avec conservation des données légales)
+      const anonymizedData = {
+        name: 'Utilisateur',
+        firstname: 'Supprimé',
+        email: `deleted_${userId}@anonymous.local`,
+        phone: '',
+        password: '', // Vider le mot de passe
+        salt: '',
+        isVerified: false,
+      };
+
+      await queryRunner.manager.update(User, { id: userId }, anonymizedData);
+
+      // 8. Supprimer le cache Redis
+      const cacheKey = `user:profile:${userId}`;
+      await this.redisService.del(cacheKey);
+
+      // 9. Logger la suppression pour audit
+      console.log(
+        `Utilisateur ${userId} supprimé le ${new Date().toISOString()}. Raison: ${deleteUserDto.reason || 'Non spécifiée'}`
+      );
+
+      await queryRunner.commitTransaction();
+
+      return {
+        message:
+          'Votre compte a été supprimé avec succès. Toutes vos données personnelles ont été anonymisées conformément à la réglementation.',
+      };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.error('Erreur lors de la suppression du compte:', error);
+      throw new InternalServerErrorException(
+        'Une erreur est survenue lors de la suppression du compte'
+      );
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private async validateUserCanBeDeleted(userId: string): Promise<void> {
+    // Vérifier si l'utilisateur est propriétaire d'associations
+    const ownedAssociations = await this.associationRepository.count({
+      where: { createdBy: { id: userId } },
+    });
+
+    if (ownedAssociations > 0) {
+      throw new BadRequestException(
+        "Vous ne pouvez pas supprimer votre compte car vous êtes propriétaire d'une ou plusieurs associations. " +
+          'Veuillez transférer la propriété de vos associations à un autre administrateur avant de supprimer votre compte.'
+      );
+    }
+
+    // Vérifier les inscriptions aux événements futurs
+    const futureEventRegisters = await this.eventRegisterRepository
+      .createQueryBuilder('register')
+      .leftJoinAndSelect('register.eventPricing', 'pricing')
+      .leftJoinAndSelect('pricing.event', 'event')
+      .where('register.userId = :userId', { userId })
+      .andWhere('event.endDate > :now', { now: new Date() })
+      .getCount();
+
+    if (futureEventRegisters > 0) {
+      throw new BadRequestException(
+        'Vous ne pouvez pas supprimer votre compte car vous êtes inscrit à un ou plusieurs événements futurs. ' +
+          'Veuillez vous désinscrire de tous les événements avant de supprimer votre compte.'
+      );
+    }
+
+    // Vérifier les transactions récentes (conserver pour raisons légales)
+    const recentTransactions = await this.transactionRepository.count({
+      where: {
+        user: { id: userId },
+        timestamps: {
+          createdAt: MoreThan(new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)), // 90 jours
+        },
+      },
+    });
+
+    if (recentTransactions > 0) {
+      // Les transactions récentes sont conservées pour raisons légales/fiscales
+      // mais cela n'empêche pas la suppression du compte
     }
   }
 }

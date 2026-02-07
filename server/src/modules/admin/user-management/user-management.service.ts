@@ -6,16 +6,25 @@ import { Role } from '../../users/entities/role.entity';
 import { UpdateUserDto, UpdateUserRoleDto } from './dto/update-user.dto';
 import { RolesList } from '../../../common/enums/roles';
 import { FindOptionsDto } from '../../../common/dto/find-all-query.dto';
+import { EmailService } from '../../../common/utils/email/email.service';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as Handlebars from 'handlebars';
 
 @Injectable()
 export class UserManagementService {
+  private banUserTemplate: HandlebarsTemplateDelegate;
+  private unbanUserTemplate: HandlebarsTemplateDelegate;
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>
+    private readonly roleRepository: Repository<Role>,
+    private readonly emailService: EmailService
   ) {
     this.initializeRoles();
+    this.loadEmailTemplates();
   }
 
   private async initializeRoles() {
@@ -28,6 +37,32 @@ export class UserManagementService {
         const role = this.roleRepository.create(roleData);
         await this.roleRepository.save(role);
       }
+    }
+  }
+
+  private loadEmailTemplates() {
+    // Template de bannissement
+    const banUserTemplatePath = path.join(
+      process.cwd(),
+      'src/common/utils/email/templates/user-ban-notification.html'
+    );
+    try {
+      const banContent = fs.readFileSync(banUserTemplatePath, 'utf8');
+      this.banUserTemplate = Handlebars.compile(banContent);
+    } catch (error) {
+      console.error('Erreur chargement template bannissement utilisateur:', error);
+    }
+
+    // Template de débannissement
+    const unbanUserTemplatePath = path.join(
+      process.cwd(),
+      'src/common/utils/email/templates/user-unban-notification.html'
+    );
+    try {
+      const unbanContent = fs.readFileSync(unbanUserTemplatePath, 'utf8');
+      this.unbanUserTemplate = Handlebars.compile(unbanContent);
+    } catch (error) {
+      console.error('Erreur chargement template débannissement utilisateur:', error);
     }
   }
 
@@ -103,9 +138,50 @@ export class UserManagementService {
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
+    const wasVerified = user.isVerified;
 
     Object.assign(user, updateUserDto);
-    return await this.userRepository.save(user);
+    const updatedUser = await this.userRepository.save(user);
+
+    // Envoyer un email si le statut de vérification a changé
+    if (updateUserDto.isVerified !== undefined && updateUserDto.isVerified !== wasVerified) {
+      try {
+        if (updateUserDto.isVerified === false && this.banUserTemplate) {
+          // Bannissement
+          const htmlContent = this.banUserTemplate({
+            userName: `${user.firstname} ${user.name}`,
+            userEmail: user.email,
+          });
+
+          await this.emailService.sendEmail({
+            to: user.email,
+            subject: 'Votre compte SolidHive a été suspendu',
+            html: htmlContent,
+          });
+        } else if (updateUserDto.isVerified === true && this.unbanUserTemplate) {
+          // Débannissement
+          const htmlContent = this.unbanUserTemplate({
+            userName: `${user.firstname} ${user.name}`,
+            userEmail: user.email,
+            loginUrl: `${process.env.FRONTEND_URL || 'https://solidhive.fr'}/login`,
+          });
+
+          await this.emailService.sendEmail({
+            to: user.email,
+            subject: 'Votre compte SolidHive a été réactivé',
+            html: htmlContent,
+          });
+        }
+      } catch (emailError) {
+        console.error(
+          'Erreur envoi email lors de la mise à jour du statut utilisateur:',
+          emailError
+        );
+        // Ne pas échouer l'opération si l'email échoue
+      }
+    }
+
+    return updatedUser;
   }
 
   async updateRoles(id: string, updateUserRoleDto: UpdateUserRoleDto) {
@@ -131,10 +207,36 @@ export class UserManagementService {
     return await this.userRepository.save(user);
   }
 
-  async remove(id: string) {
-    const user = await this.findOne(id);
-    await this.userRepository.remove(user);
-    return { message: 'Utilisateur supprimé avec succès' };
+  async banUser(id: string) {
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException(`Utilisateur avec l'ID ${id} non trouvé`);
+    }
+
+    // Bannir l'utilisateur en mettant isVerified à false
+    await this.userRepository.update(id, { isVerified: false });
+
+    // Envoyer un email de notification
+    try {
+      if (this.banUserTemplate) {
+        const htmlContent = this.banUserTemplate({
+          userName: `${user.firstname} ${user.name}`,
+          userEmail: user.email,
+        });
+
+        await this.emailService.sendEmail({
+          to: user.email,
+          subject: 'Votre compte SolidHive a été suspendu',
+          html: htmlContent,
+        });
+      }
+    } catch (emailError) {
+      console.error('Erreur envoi email bannissement utilisateur:', emailError);
+      // Ne pas échouer l'opération si l'email échoue
+    }
+
+    return { message: 'Utilisateur banni avec succès' };
   }
 
   async getAllRoles() {

@@ -1,7 +1,19 @@
-import { Controller, Post, Body, Get, Req, UseGuards, Param, Put } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Req,
+  UseGuards,
+  Param,
+  Put,
+  Delete,
+  HttpCode,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { DeleteUserDto } from './dto/delete-user.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { Request } from 'express';
@@ -76,5 +88,28 @@ export class UsersController {
       throw new Error('User not authenticated');
     }
     return this.usersService.updateUser(userId, updateUserDto);
+  }
+
+  @Delete('me')
+  @UseGuards(AuthenticatedGuard)
+  @ApiBearerAuth()
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Delete current user account' })
+  @ApiBody({ type: DeleteUserDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User account has been successfully deleted.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request - Invalid password or account cannot be deleted.',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async deleteAccount(@Req() req: Request, @Body() deleteUserDto: DeleteUserDto) {
+    const userId = req.user?.['id'];
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+    return this.usersService.deleteUser(userId, deleteUserDto);
   }
 }

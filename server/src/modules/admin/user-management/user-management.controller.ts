@@ -67,10 +67,10 @@ export class UserManagementController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Supprimer un utilisateur' })
-  @ApiResponse({ status: 200, description: 'Utilisateur supprimé' })
+  @ApiOperation({ summary: 'Bannir un utilisateur' })
+  @ApiResponse({ status: 200, description: 'Utilisateur banni avec succès' })
   @ApiResponse({ status: 404, description: 'Utilisateur non trouvé' })
-  async remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.userManagementService.remove(id);
+  async banUser(@Param('id', ParseUUIDPipe) id: string) {
+    return this.userManagementService.banUser(id);
   }
 }
