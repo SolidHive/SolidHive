@@ -321,6 +321,11 @@ export class EventPaymentService {
       return { participants, contact };
     } catch (error) {
       console.error('Erreur lors du parsing des métadonnées de la session Stripe :', error);
+      // Retourner des valeurs par défaut en cas d'erreur
+      return {
+        participants: [],
+        contact: {},
+      };
     }
   }
 
