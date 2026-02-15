@@ -18,6 +18,7 @@
             :recent-fundraising-donations="recentFundraisingDonations"
             :recent-event-registrations="recentEventRegistrations"
             :is-loading="isLoadingDonations"
+            @registration-cancelled="handleRegistrationCancelled"
           />
         </div>
 
@@ -150,6 +151,11 @@
   function handleAccountDeleted(): void {
     toast.success('Votre compte a été supprimé avec succès');
     router.push('/login');
+  }
+
+  function handleRegistrationCancelled(transactionId: string | number): void {
+    console.log('handleRegistrationCancelled appelé avec:', transactionId);
+    loadRecentDonations();
   }
 
   onMounted(() => {

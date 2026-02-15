@@ -237,11 +237,54 @@ export class InvoicesService {
   /**
    * Générer les lignes de facture par fallback (depuis la BD)
    */
-  private async generateEventInvoiceLinesFromDatabase(eventId: string): Promise<InvoiceLineItem[]> {
-    const eventRegisters = await this.eventRegisterRepository.find({
-      where: { eventPricing: { event: { id: eventId } } },
-      relations: ['eventPricing'],
-    });
+  private async generateEventInvoiceLinesFromDatabase(
+    transaction: Transaction
+  ): Promise<InvoiceLineItem[]> {
+    if (!transaction.user) {
+      throw new Error('Transaction sans utilisateur');
+    }
+
+    const eventId = transaction.relatedBy;
+    const userId = transaction.user.id;
+    const isRefund = Number(transaction.amount) < 0;
+
+    // Pour un remboursement, filtrer par inscriptions annulées autour de la date de transaction
+    // Pour un paiement normal, filtrer par inscriptions actives (sans cancelledAt)
+    let eventRegisters: EventRegister[] = [];
+
+    if (isRefund) {
+      // Pour un remboursement : récupérer les inscriptions annulées
+      // Fenêtre de 10 minutes autour de la création de la transaction
+      const transactionDate = new Date(transaction.timestamps.createdAt);
+      const startWindow = new Date(transactionDate.getTime() - 10 * 60 * 1000);
+      const endWindow = new Date(transactionDate.getTime() + 10 * 60 * 1000);
+
+      const allCancelledRegisters = await this.eventRegisterRepository
+        .createQueryBuilder('register')
+        .leftJoinAndSelect('register.eventPricing', 'pricing')
+        .leftJoinAndSelect('pricing.event', 'event')
+        .leftJoinAndSelect('register.user', 'user')
+        .where('event.id = :eventId', { eventId })
+        .andWhere('user.id = :userId', { userId })
+        .andWhere('register.cancelledAt IS NOT NULL')
+        .andWhere('register.cancelledAt BETWEEN :start AND :end', {
+          start: startWindow,
+          end: endWindow,
+        })
+        .getMany();
+
+      eventRegisters = allCancelledRegisters;
+    } else {
+      // Pour un paiement normal : récupérer toutes les inscriptions de l'utilisateur pour cet événement
+      // (anciennes inscriptions sans cancelledAt)
+      eventRegisters = await this.eventRegisterRepository.find({
+        where: {
+          user: { id: userId },
+          eventPricing: { event: { id: eventId } },
+        },
+        relations: ['eventPricing', 'user'],
+      });
+    }
 
     if (!eventRegisters || eventRegisters.length === 0) {
       return [];
@@ -278,7 +321,7 @@ export class InvoicesService {
       if (participants && participants.length > 0) {
         invoiceLines = await this.generateEventInvoiceLines(participants);
       } else {
-        invoiceLines = await this.generateEventInvoiceLinesFromDatabase(transaction.relatedBy);
+        invoiceLines = await this.generateEventInvoiceLinesFromDatabase(transaction);
       }
     } else {
       // Pour les dons (Association, Fundraising) : une ligne unique avec le montant net
@@ -288,6 +331,15 @@ export class InvoicesService {
           amount: Number(amounts.net),
         },
       ];
+    }
+
+    // Si c'est un remboursement, inverser le signe des montants dans les lignes
+    const isRefund = Number(transaction.amount) < 0;
+    if (isRefund) {
+      invoiceLines = invoiceLines.map((line) => ({
+        ...line,
+        amount: -Math.abs(line.amount), // S'assurer que le montant est négatif
+      }));
     }
 
     // Générer le HTML
@@ -366,6 +418,9 @@ export class InvoicesService {
   ): string {
     let html = template;
 
+    // Détecter si c'est un remboursement
+    const isRefund = Number(transaction.amount) < 0;
+
     // Préparer les lignes HTML
     const invoiceLinesHtml = invoiceLines
       .map(
@@ -379,13 +434,50 @@ export class InvoicesService {
 
     // Préparer la ligne SolidHive si applicable
     const solidHiveRow =
-      Number(amounts.solidHive) > 0
+      Math.abs(Number(amounts.solidHive)) > 0
         ? `
       <tr class="border-b border-gray-200">
         <td class="py-4 text-sm text-gray-600">Contribution SolidHive (frais de plateforme)</td>
         <td class="text-right py-4 text-sm text-gray-600">${amounts.solidHive} €</td>
       </tr>`
         : '';
+
+    // Styles conditionnels selon le type (facture/avoir)
+    const styles = isRefund
+      ? {
+          headerBgClass: 'bg-red-600',
+          invoiceType: 'AVOIR / REMBOURSEMENT',
+          transactionDetailsTitle: 'Détails du remboursement',
+          tableBorderClass: 'border-red-600',
+          tableHeaderClass: 'text-red-600',
+          totalRowBgClass: 'bg-red-50',
+          totalTextClass: 'text-red-600',
+          totalLabel: 'MONTANT REMBOURSÉ',
+          totalAmount: `${amounts.total} €`,
+          infoBgClass: 'bg-red-50',
+          infoBorderClass: 'border-red-500',
+          infoIconClass: 'text-red-500',
+          infoIconPath: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+          infoTextClass: 'text-red-600',
+          paymentStatusTitle: 'Remboursement traité',
+        }
+      : {
+          headerBgClass: 'bg-secondary',
+          invoiceType: 'FACTURE',
+          transactionDetailsTitle: 'Détails de la transaction',
+          tableBorderClass: 'border-secondary',
+          tableHeaderClass: 'text-secondary',
+          totalRowBgClass: 'bg-gray-50',
+          totalTextClass: 'text-secondary',
+          totalLabel: 'TOTAL',
+          totalAmount: `${amounts.total} €`,
+          infoBgClass: 'bg-accent/10',
+          infoBorderClass: 'border-accent',
+          infoIconClass: 'text-accent',
+          infoIconPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+          infoTextClass: 'text-accent',
+          paymentStatusTitle: 'Paiement effectué avec succès',
+        };
 
     // Remplacer les placeholders
     html = html
@@ -405,7 +497,23 @@ export class InvoicesService {
       .replace(/{{amount}}/g, amounts.total)
       .replace(/{{netAmount}}/g, amounts.net)
       .replace(/{{invoiceLines}}/g, invoiceLinesHtml)
-      .replace(/{{solidHiveAmountRow}}/g, solidHiveRow);
+      .replace(/{{solidHiveAmountRow}}/g, solidHiveRow)
+      // Nouveaux placeholders pour les styles conditionnels
+      .replace(/{{headerBgClass}}/g, styles.headerBgClass)
+      .replace(/{{invoiceType}}/g, styles.invoiceType)
+      .replace(/{{transactionDetailsTitle}}/g, styles.transactionDetailsTitle)
+      .replace(/{{tableBorderClass}}/g, styles.tableBorderClass)
+      .replace(/{{tableHeaderClass}}/g, styles.tableHeaderClass)
+      .replace(/{{totalRowBgClass}}/g, styles.totalRowBgClass)
+      .replace(/{{totalTextClass}}/g, styles.totalTextClass)
+      .replace(/{{totalLabel}}/g, styles.totalLabel)
+      .replace(/{{totalAmount}}/g, styles.totalAmount)
+      .replace(/{{infoBgClass}}/g, styles.infoBgClass)
+      .replace(/{{infoBorderClass}}/g, styles.infoBorderClass)
+      .replace(/{{infoIconClass}}/g, styles.infoIconClass)
+      .replace(/{{infoIconPath}}/g, styles.infoIconPath)
+      .replace(/{{infoTextClass}}/g, styles.infoTextClass)
+      .replace(/{{paymentStatusTitle}}/g, styles.paymentStatusTitle);
 
     return html;
   }

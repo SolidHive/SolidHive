@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import Stripe from 'stripe';
@@ -28,7 +28,7 @@ import { EmailModule } from '../../common/utils/email/email.module';
 @Module({
   imports: [
     ConfigModule,
-    AssociationsModule,
+    forwardRef(() => AssociationsModule),
     TransactionsModule,
     FundraisingsModule,
     TicketsModule,
@@ -58,6 +58,6 @@ import { EmailModule } from '../../common/utils/email/email.module';
     },
   ],
   controllers: [PaymentsController, StripeAccountController],
-  exports: [PaymentsService, StripeService, StripeAccountService],
+  exports: [PaymentsService, StripeService, StripeAccountService, EventPaymentService],
 })
 export class PaymentsModule {}

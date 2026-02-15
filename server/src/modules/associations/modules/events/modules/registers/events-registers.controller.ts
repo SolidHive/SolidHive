@@ -8,11 +8,11 @@ import { User } from '../../../../../../common/decorators/user.decorator';
 import { FindOptionsDto } from '../../../../../../common/dto/find-all-query.dto';
 
 @ApiTags('Association - Event - Registers')
-@Controller('association/:associationId/event/:eventId')
+@Controller()
 export class EventsRegistersController {
   constructor(private readonly eventsRegistersService: EventsRegistersService) {}
 
-  @Post('register')
+  @Post('association/:associationId/event/:eventId/register')
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   @ApiParam({ name: 'associationId', type: 'string' })
@@ -21,13 +21,13 @@ export class EventsRegistersController {
     return this.eventsRegistersService.create(createEventRegisterDto, userId);
   }
 
-  @Get('registers')
+  @Get('association/:associationId/event/:eventId/registers')
   @ApiParam({ name: 'associationId', type: 'string' })
   findAll(@Param('eventId') eventId: string, @Query() options?: FindOptionsDto) {
     return this.eventsRegistersService.findAll(eventId, options);
   }
 
-  @Get('my-registers')
+  @Get('association/:associationId/event/:eventId/my-registers')
   @UseGuards(AuthenticatedGuard)
   @ApiCookieAuth()
   @ApiResponse({ status: 200, description: "Inscriptions de l'utilisateur récupérées avec succès" })
@@ -38,7 +38,7 @@ export class EventsRegistersController {
     return this.eventsRegistersService.findUserRegisters(eventId, userId);
   }
 
-  @Get('register/:id')
+  @Get('association/:associationId/event/:eventId/register/:id')
   @ApiParam({ name: 'associationId', type: 'string' })
   findOne(
     @Param('id') id: string,
@@ -48,7 +48,7 @@ export class EventsRegistersController {
     return this.eventsRegistersService.findOne(id, eventId, options);
   }
 
-  @Delete('register/:id')
+  @Delete('association/:associationId/event/:eventId/register/:id')
   @UseGuards(AuthenticatedGuard, RolesGuard)
   @Roles('admin')
   @ApiCookieAuth()
@@ -57,5 +57,28 @@ export class EventsRegistersController {
   @ApiParam({ name: 'associationId', type: 'string' })
   remove(@Param('id') id: string, @Param('eventId') eventId: string) {
     return this.eventsRegistersService.remove(id, eventId);
+  }
+
+  @Get('associations/events/registers/check/:transactionId')
+  @UseGuards(AuthenticatedGuard)
+  @ApiCookieAuth()
+  @ApiResponse({ status: 200, description: 'Vérification effectuée' })
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  checkCancellation(@Param('transactionId') transactionId: string, @User('id') userId: string) {
+    return this.eventsRegistersService.canCancelRegistrationByTransaction(transactionId, userId);
+  }
+
+  @Post('associations/events/registers/cancel')
+  @UseGuards(AuthenticatedGuard)
+  @ApiCookieAuth()
+  @ApiResponse({ status: 200, description: 'Inscription annulée avec succès' })
+  @ApiResponse({ status: 400, description: 'Annulation impossible' })
+  @ApiResponse({ status: 401, description: 'Non authentifié' })
+  @ApiResponse({ status: 404, description: 'Inscription non trouvée' })
+  cancelRegistrationByTransaction(
+    @Body('transactionId') transactionId: string,
+    @User('id') userId: string
+  ) {
+    return this.eventsRegistersService.cancelRegistrationByTransaction(transactionId, userId);
   }
 }

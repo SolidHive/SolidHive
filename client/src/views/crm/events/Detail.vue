@@ -223,13 +223,22 @@
                   </div>
                   <div class="flex justify-between">
                     <span class="text-muted-foreground">Montant:</span>
-                    <span class="font-medium">
+                    <span
+                      class="font-medium"
+                      :class="{ 'text-destructive line-through': registration.cancelledAt }"
+                    >
                       {{ Number(registration.eventPricing?.amount || 0).toFixed(2) }} €
                     </span>
                   </div>
-                  <div class="flex justify-between">
-                    <span class="text-muted-foreground">Inscription:</span>
+                  <div class="flex items-center justify-between">
+                    <span class="text-muted-foreground">Inscrit le:</span>
                     <span class="text-xs">{{ formatDate(registration.registeredAt) }}</span>
+                  </div>
+                  <div v-if="registration.cancelledAt" class="flex items-center justify-between">
+                    <span class="text-muted-foreground">Annulé le:</span>
+                    <span class="text-destructive text-xs">
+                      {{ formatDate(registration.cancelledAt) }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -238,6 +247,18 @@
                 <div class="flex items-center justify-between">
                   <span class="text-sm font-medium">Total des inscriptions</span>
                   <span class="text-lg font-bold">{{ registrations.length }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">Inscriptions actives</span>
+                  <span class="text-lg font-bold text-green-600">
+                    {{ activeRegistrationsCount }}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-medium">Inscriptions annulées</span>
+                  <span class="text-destructive text-lg font-bold">
+                    {{ cancelledRegistrationsCount }}
+                  </span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-sm font-medium">Montant total collecté</span>
@@ -259,6 +280,7 @@
                       <th class="p-3 text-left text-sm font-medium lg:p-4">Email</th>
                       <th class="p-3 text-left text-sm font-medium lg:p-4">Tarif</th>
                       <th class="p-3 text-left text-sm font-medium lg:p-4">Date d'inscription</th>
+                      <th class="p-3 text-left text-sm font-medium lg:p-4">Statut</th>
                       <th class="p-3 text-right text-sm font-medium lg:p-4">Montant</th>
                     </tr>
                   </thead>
@@ -288,7 +310,25 @@
                       <td class="text-muted-foreground p-3 text-sm lg:p-4">
                         {{ formatDate(registration.registeredAt) }}
                       </td>
-                      <td class="p-3 text-right font-medium lg:p-4">
+                      <td class="p-3 lg:p-4">
+                        <div v-if="registration.cancelledAt">
+                          <span
+                            class="bg-destructive/10 text-destructive rounded-full px-2 py-1 text-xs font-medium"
+                          >
+                            Annulé
+                          </span>
+                        </div>
+                        <span
+                          v-else
+                          class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800"
+                        >
+                          Actif
+                        </span>
+                      </td>
+                      <td
+                        class="p-3 text-right font-medium lg:p-4"
+                        :class="{ 'text-destructive line-through': registration.cancelledAt }"
+                      >
                         {{ Number(registration.eventPricing?.amount || 0).toFixed(2) }} €
                       </td>
                     </tr>
@@ -300,6 +340,18 @@
                 <div class="flex items-center justify-between">
                   <span class="text-sm font-medium">Total des inscriptions</span>
                   <span class="text-lg font-bold">{{ registrations.length }}</span>
+                </div>
+                <div class="mt-1 flex items-center justify-between">
+                  <span class="text-sm font-medium">Inscriptions actives</span>
+                  <span class="text-lg font-bold text-green-600">
+                    {{ activeRegistrationsCount }}
+                  </span>
+                </div>
+                <div class="mt-1 flex items-center justify-between">
+                  <span class="text-sm font-medium">Inscriptions annulées</span>
+                  <span class="text-destructive text-lg font-bold">
+                    {{ cancelledRegistrationsCount }}
+                  </span>
                 </div>
                 <div class="mt-1 flex items-center justify-between">
                   <span class="text-sm font-medium">Montant total collecté</span>
@@ -555,11 +607,20 @@
   };
 
   const totalAmount = computed(() => {
-    const total = registrations.value.reduce(
-      (sum, reg) => sum + Number(reg.eventPricing?.amount || 0),
-      0
-    );
+    const total = registrations.value.reduce((sum, reg) => {
+      // Exclure les inscriptions annulées du total
+      if (reg.cancelledAt) return sum;
+      return sum + Number(reg.eventPricing?.amount || 0);
+    }, 0);
     return total.toFixed(2);
+  });
+
+  const activeRegistrationsCount = computed(() => {
+    return registrations.value.filter((reg) => !reg.cancelledAt).length;
+  });
+
+  const cancelledRegistrationsCount = computed(() => {
+    return registrations.value.filter((reg) => reg.cancelledAt).length;
   });
 
   const getParticipantName = (registration: ParticipantCRM) => {

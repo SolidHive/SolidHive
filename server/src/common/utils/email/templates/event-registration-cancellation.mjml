@@ -1,0 +1,220 @@
+<mjml>
+  <mj-head>
+    <mj-title>Annulation de votre inscription</mj-title>
+    <mj-font name="Montserrat" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" />
+    <mj-attributes>
+      <mj-all font-family="Montserrat, Arial, sans-serif" />
+      <mj-text font-size="15px" color="#333333" line-height="24px" />
+      <mj-section background-color="#ffffff" padding="0px" />
+    </mj-attributes>
+    <mj-style inline="inline">
+      .header-title {
+        font-size: 32px;
+        font-weight: 900;
+        color: #ffffff;
+        margin: 0;
+        padding: 0;
+      }
+      .refund-status {
+        font-size: 18px;
+        font-weight: 700;
+        color: #510d6d;
+        margin: 0;
+        padding: 0;
+      }
+      .event-title {
+        font-size: 26px;
+        font-weight: 700;
+        color: #510d6d;
+        margin: 0 0 10px 0;
+      }
+      .info-row {
+        background-color: #fafafa;
+        padding: 16px 20px;
+        margin-bottom: 2px;
+      }
+      .info-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #999999;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0 0 6px 0;
+      }
+      .info-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333333;
+        margin: 0;
+      }
+      .refund-amount {
+        font-size: 24px;
+        font-weight: 900;
+        color: #0497af;
+        margin: 0;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#f0f0f0">
+    <!-- Header -->
+    <mj-section background-color="#510d6d" padding="50px 30px">
+      <mj-column>
+        <mj-text align="center" font-size="32px" font-weight="900" color="#ffffff" padding="0">
+          SOLIDHIVE
+        </mj-text>
+        <mj-text align="center" font-size="16px" font-weight="500" color="#ffffff" padding="10px 0 0 0">
+          Annulation confirmée
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Greeting -->
+    <mj-section background-color="#ffffff" padding="50px 30px 30px 30px">
+      <mj-column>
+        <mj-text font-size="15px" color="#333333" line-height="24px">
+          Bonjour <strong>{{userName}}</strong>,
+        </mj-text>
+        <mj-text font-size="15px" color="#666666" padding-top="15px" line-height="24px">
+          Votre annulation d'inscription a été traitée avec succès.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Event Title -->
+    <mj-section background-color="#ffffff" padding="0 30px 30px 30px">
+      <mj-column>
+        <mj-text align="center" font-size="26px" font-weight="700" color="#510d6d" padding="0">
+          {{eventTitle}}
+        </mj-text>
+        <mj-divider border-color="#f26639" border-width="3px" width="60px" padding="20px 0" />
+      </mj-column>
+    </mj-section>
+
+    <!-- Cancellation Details -->
+    <mj-section background-color="#ffffff" padding="0 30px">
+      <mj-column>
+        <!-- Event Date -->
+        <mj-text css-class="info-label" padding="0 0 6px 0">
+          Date de l'événement
+        </mj-text>
+        <mj-text css-class="info-value" padding="0 0 20px 0">
+          {{eventDate}}
+        </mj-text>
+
+        <!-- Cancellation Date -->
+        <mj-text css-class="info-label" padding="0 0 6px 0">
+          Date d'annulation
+        </mj-text>
+        <mj-text css-class="info-value" padding="0 0 30px 0">
+          {{cancellationDate}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Refund Status -->
+    <mj-section background-color="#ffffff" padding="0 30px 40px 30px">
+      <mj-column background-color="#fafafa" border-radius="12px" padding="40px 30px">
+        <mj-text align="center" font-size="13px" font-weight="700" color="#999999" letter-spacing="1px" padding="0 0 20px 0">
+          STATUT DU REMBOURSEMENT
+        </mj-text>
+        <mj-text align="center" font-size="18px" font-weight="700" color="#510d6d" padding="0 0 20px 0">
+          {{refundStatus}}
+        </mj-text>
+        {{#if refundAmount}}
+        <mj-text align="center" font-size="24px" font-weight="900" color="#0497af" padding="0">
+          {{refundAmount}}€
+        </mj-text>
+        {{/if}}
+        
+        {{#if participantCount}}
+        {{#if participantsList}}
+        <mj-text align="center" font-size="12px" font-weight="600" color="#999999" letter-spacing="1px" padding="20px 0 10px 0">
+          PARTICIPANTS ANNULÉS
+        </mj-text>
+        <mj-text align="center" font-size="14px" color="#510d6d" padding="0 0 10px 0">
+          {{participantCount}} inscription(s)
+        </mj-text>
+        <mj-text align="center" font-size="13px" color="#666666" line-height="20px" padding="0">
+          {{participantsList}}
+        </mj-text>
+        {{/if}}
+        {{/if}}
+      </mj-column>
+    </mj-section>
+
+    <!-- Important Information -->
+    <mj-section background-color="#ffffff" padding="0 30px 20px 30px">
+      <mj-column background-color="#fffbf0" border="2px solid #f9e8c9" border-radius="8px" padding="25px">
+        <mj-text font-size="14px" font-weight="700" color="#510d6d" padding="0 0 15px 0">
+          Informations importantes
+        </mj-text>
+        <mj-text font-size="13px" color="#666666" line-height="22px" padding="0">
+          {{#if refundProcessed}}
+          • Votre remboursement sera traité sous 3-5 jours ouvrés<br/>
+          • Vous recevrez un email de confirmation de Stripe<br/>
+          • Le montant sera crédité sur votre moyen de paiement initial
+          {{else}}
+          • Votre inscription a été annulée<br/>
+          • Aucun remboursement n'était nécessaire<br/>
+          • Vous pouvez vous réinscrire si vous changez d'avis
+          {{/if}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Contact Information -->
+    <mj-section background-color="#ffffff" padding="0 30px 30px 30px">
+      <mj-column>
+        <mj-text font-size="13px" font-weight="600" color="#999999" padding="0 0 10px 0">
+          ORGANISATEUR
+        </mj-text>
+        <mj-text font-size="14px" color="#333333" line-height="22px" padding="0">
+          {{associationName}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Next Steps -->
+    <mj-section background-color="#ffffff" padding="0 30px 30px 30px">
+      <mj-column background-color="#f0f9ff" border-radius="8px" padding="25px">
+        <mj-text font-size="14px" font-weight="700" color="#0497af" padding="0 0 15px 0">
+          Prochaines étapes
+        </mj-text>
+        <mj-text font-size="13px" color="#666666" line-height="22px" padding="0">
+          • Vérifiez vos emails pour la confirmation de remboursement<br/>
+          • Contactez-nous si vous ne recevez pas le remboursement<br/>
+          • Pensez à sauvegarder cet email comme justificatif
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Help and Support -->
+    <mj-section background-color="#ffffff" padding="0 30px 40px 30px">
+      <mj-column>
+        <mj-text font-size="13px" font-weight="600" color="#999999" padding="0 0 10px 0">
+          BESOIN D'AIDE ?
+        </mj-text>
+        <mj-text font-size="13px" color="#666666" line-height="22px" padding="0">
+          Pour toute question concernant votre annulation ou le remboursement, vous pouvez nous contacter à <strong>support@solidhive.fr</strong>.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section background-color="#fafafa" padding="40px 30px">
+      <mj-column>
+        <mj-text align="center" font-size="13px" color="#666666" line-height="22px" padding="0 0 8px 0">
+          Questions ? Contactez-nous
+        </mj-text>
+        <mj-text align="center" font-size="13px" font-weight="600" color="#0497af" padding="0 0 25px 0">
+          support@solidhive.fr
+        </mj-text>
+        <mj-divider border-color="#e0e0e0" border-width="1px" padding="0 0 25px 0" />
+        <mj-text align="center" font-size="12px" color="#999999" line-height="20px" padding="0">
+          © 2025 SolidHive — Tous droits réservés<br/>
+          Plateforme de soutien aux associations
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
