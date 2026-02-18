@@ -245,7 +245,8 @@
 
     if (!hasPremiumAccess) {
       router.push({
-        name: 'AboutPremium',
+        name: 'CRMPremiumRequired',
+        params: { id: route.params.id },
       });
       return;
     }

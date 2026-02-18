@@ -28,6 +28,8 @@
         autocomplete="current-password"
         :value="inputType === 'checkbox' ? undefined : modelValue"
         :checked="inputType === 'checkbox' ? (modelValue as boolean) : undefined"
+        :max="max"
+        :min="min"
         :class="
           inputClass || [
             'font-paragraph w-full rounded-lg border px-4 py-2 pr-10',
@@ -90,6 +92,14 @@
     inputClass: {
       type: String,
       default: '',
+    },
+    max: {
+      type: [String, Number],
+      default: undefined,
+    },
+    min: {
+      type: [String, Number],
+      default: undefined,
     },
   });
 

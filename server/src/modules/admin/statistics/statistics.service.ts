@@ -42,8 +42,8 @@ export class StatisticsService {
       .getRawOne();
     const totalAmountCollected = parseFloat(totalAmountResult?.total || 0);
 
-    // Revenus SolidHive (somme des solidHiveAmount)
-    const solidHiveRevenueResult = await this.transactionRepository
+    // Revenus SolidHive (somme des solidHiveAmount pour dons + montant total pour Premium)
+    const solidHiveRevenueFromDonations = await this.transactionRepository
       .createQueryBuilder('transaction')
       .select('SUM(transaction.solidHiveAmount)', 'total')
       .where('transaction.relatedTo IN (:...categories)', {
@@ -51,7 +51,20 @@ export class StatisticsService {
       })
       .andWhere('transaction.solidHiveAmount IS NOT NULL')
       .getRawOne();
-    const solidHiveRevenue = parseFloat(solidHiveRevenueResult?.total || 0);
+
+    const solidHiveRevenueFromPremium = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .select('SUM(transaction.amount)', 'total')
+      .where('transaction.relatedTo = :category', {
+        category: Categories.PREMIUM,
+      })
+      .getRawOne();
+
+    const solidHiveRevenue =
+      parseFloat(solidHiveRevenueFromDonations?.total || 0) +
+      parseFloat(solidHiveRevenueFromPremium?.total || 0);
+
+    const premiumRevenue = parseFloat(solidHiveRevenueFromPremium?.total || 0);
 
     // Don moyen
     const averageDonation = donationsCount > 0 ? totalAmountCollected / donationsCount : 0;
@@ -259,6 +272,7 @@ export class StatisticsService {
       donationsCount,
       totalAmountCollected,
       solidHiveRevenue,
+      premiumRevenue,
       averageDonation,
       top5Associations: top5AssociationsData,
       topDonationAssociation,

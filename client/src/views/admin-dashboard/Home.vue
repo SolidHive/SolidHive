@@ -124,6 +124,7 @@
         <FinancialChart
           :total-amount-collected="stats.totalAmountCollected"
           :solid-hive-revenue="stats.solidHiveRevenue"
+          :premium-revenue="stats.premiumRevenue"
           :average-donation="stats.averageDonation"
         />
         <UsersAssociationsChart
@@ -241,6 +242,7 @@
     donationsCount: number;
     totalAmountCollected: number;
     solidHiveRevenue: number;
+    premiumRevenue: number;
     averageDonation: number;
     top5Associations: Array<{
       association: { name: string } | null;
@@ -267,6 +269,7 @@
     donationsCount: 0,
     totalAmountCollected: 0,
     solidHiveRevenue: 0,
+    premiumRevenue: 0,
     averageDonation: 0,
     top5Associations: [],
     topDonationAssociation: null,

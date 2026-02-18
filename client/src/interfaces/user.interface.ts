@@ -1,6 +1,8 @@
+import type { Association } from './association.interface';
+import type { Role } from './roles.interface';
 import type { HasId } from './has_id.interface';
 
-export interface Role {
+export interface SystemRole {
   id: number;
   name: string;
   description?: string;
@@ -19,22 +21,11 @@ export interface User extends HasId {
     updatedAt: string;
   };
   associations?: UserAssociation[];
-  roles?: Role[];
+  roles?: SystemRole[];
 }
 
 export interface UserAssociation extends HasId {
-  association: {
-    id: string;
-    name: string;
-    description?: string;
-    primaryColor?: string;
-    secondaryColor?: string;
-    status: string;
-  };
-  role: {
-    id: string;
-    name: string;
-    description?: string;
-  } | null;
+  association: Association;
+  role: Role | null;
   status: string;
 }

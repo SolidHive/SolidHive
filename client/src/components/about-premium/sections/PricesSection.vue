@@ -30,12 +30,12 @@
             <span class="font-semibold text-black">{{ feature.label }}</span>
           </li>
         </ul>
-
-        <button
-          class="border-primary text-primary hover:bg-primary rounded-full border-2 px-6 py-3 font-semibold transition-colors hover:text-white"
+        <router-link
+          to="/create-association"
+          class="border-primary text-primary hover:bg-primary h-12 cursor-pointer rounded-full border-2 px-6 py-3 text-center text-[15px] font-semibold transition-colors hover:text-white"
         >
           J'inscris mon association
-        </button>
+        </router-link>
       </div>
 
       <!-- Card Version Premium -->
@@ -58,14 +58,66 @@
         </ul>
 
         <div class="mb-6 text-center">
-          <p class="text-primary text-2xl font-bold sm:text-3xl lg:text-4xl">14,99€/mois</p>
+          <p class="text-primary text-2xl font-bold sm:text-3xl lg:text-4xl">15€/mois</p>
         </div>
 
-        <button
-          class="bg-primary hover:bg-primary/90 rounded-full px-6 py-3 font-semibold text-white transition-colors"
-        >
-          Mettre mon association en Premium
-        </button>
+        <Dialog v-model:open="open" @update:open="handleDialogOpen">
+          <DialogTrigger as-child>
+            <Button
+              class="bg-primary hover:bg-primary/90 h-12 cursor-pointer rounded-full px-6 py-3 text-[15px] font-semibold whitespace-nowrap text-white transition-colors"
+            >
+              Passer mon association en Premium
+            </Button>
+          </DialogTrigger>
+          <DialogContent class="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Passer mon association en Premium</DialogTitle>
+              <DialogDescription>
+                Pour passer votre association en Premium, veuillez choisir parmis les associations
+                dont vous êtes propriétaire.
+              </DialogDescription>
+            </DialogHeader>
+            <div class="flex items-center gap-2">
+              <div class="grid flex-1 gap-2">
+                <label for="association-select" class="text-secondary text-xs sm:text-sm">
+                  Choisir une association :
+                </label>
+                <select
+                  id="association-select"
+                  v-model="activeIndex"
+                  class="border-input bg-background ring-offset-background focus-visible:ring-ring h-7 rounded-md border px-1.5 text-xs focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-8 sm:px-2 sm:text-sm"
+                  @change="
+                    typeof activeIndex === 'string' ? null : setSelectedAssociation(activeIndex)
+                  "
+                >
+                  <option selected disabled value="">Sélectionnez une association</option>
+                  <option
+                    v-for="(assos, index) in userOwnedAssociations"
+                    :key="assos.id"
+                    :value="index"
+                    class="font-title text-secondary"
+                  >
+                    {{ assos.association.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose as-child>
+                <Button type="button" variant="destructive" class="cursor-pointer">Fermer</Button>
+              </DialogClose>
+              <Button
+                v-if="selectedAssociation"
+                type="button"
+                variant="outline"
+                class="cursor-pointer"
+                @click="goToPremiumPayment"
+              >
+                Passer en premium
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   </section>
@@ -78,6 +130,21 @@
   import { ref } from 'vue';
   import { Permissions } from '@/enums/permissions';
   import type { PermissionAccess } from '@/interfaces/permission-access.interface';
+  import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogClose,
+  } from '@/components/ui/dialog';
+  import Button from '@/components/ui/button/Button.vue';
+  import type { UserAssociation } from '@/interfaces';
+  import { useAuthStore } from '@/stores/auth';
+  import { useRouter } from 'vue-router';
+  import { useToast } from 'vue-toastification';
 
   interface Feature {
     label: string;
@@ -112,12 +179,23 @@
     },
   ];
 
+  const authStore = useAuthStore();
+  const router = useRouter();
+  const toast = useToast();
+
+  const userOwnedAssociations = ref<UserAssociation[]>([]);
+  const selectedAssociation = ref<UserAssociation | null>(null);
+  const open = ref(false);
+  const activeIndex = ref<number | string>('');
   const features = ref<Feature[]>(featuresList);
+
+  const setSelectedAssociation = (index: number) => {
+    selectedAssociation.value = userOwnedAssociations.value[index] || null;
+  };
 
   const fetchFeaturesPermissions = async () => {
     try {
       const response = await Database.getAll('permission-access');
-      console.log(response);
       const permissionsValues = Object.values(Permissions).filter(
         (value) => value !== Permissions.ALL
       );
@@ -143,7 +221,40 @@
     }
   };
 
+  const fetchUserOwnedAssociations = async () => {
+    try {
+      const response = await Database.getAll('users/me/owned-associations');
+      userOwnedAssociations.value = response;
+    } catch (error) {
+      console.error('Erreur lors de la récupération des associations de l’utilisateur :', error);
+    }
+  };
+  const goToPremiumPayment = () => {
+    if (!selectedAssociation.value) {
+      toast.error('Veuillez sélectionner une association');
+      return;
+    }
+
+    router.push({
+      name: 'PremiumPayment',
+      params: { associationId: selectedAssociation.value.association.id },
+    });
+  };
+  const handleDialogOpen = async () => {
+    if (authStore.isAuthenticated() === false) {
+      router.push({ name: 'Login' });
+    }
+
+    if (userOwnedAssociations.value.length === 0) {
+      open.value = false;
+      toast.info(
+        "Vous devez être propriétaire d'au moins une association pour accéder à cette fonctionnalité."
+      );
+    }
+  };
+
   onMounted(() => {
     fetchFeaturesPermissions();
+    fetchUserOwnedAssociations();
   });
 </script>

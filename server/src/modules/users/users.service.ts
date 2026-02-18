@@ -164,6 +164,33 @@ export class UsersService {
     }));
   }
 
+  async getUserOwnedAssociations(userId: string) {
+    const userAssociations = await this.userAssociationRepository.find({
+      where: { userId, role: { name: 'owner' } },
+      relations: ['association', 'role'],
+    });
+
+    return userAssociations.map((ua) => ({
+      id: ua.id,
+      association: {
+        id: ua.association.id,
+        name: ua.association.name,
+        description: ua.association.description,
+        primaryColor: ua.association.primaryColor,
+        status: ua.association.status,
+      },
+      role: ua.role
+        ? {
+            id: ua.role.id,
+            name: ua.role.name,
+            description: ua.role.description,
+          }
+        : null,
+      status: ua.status,
+      createdAt: ua.createdAt,
+    }));
+  }
+
   async hasAccessToAssociation(
     userId: string,
     associationId: string
@@ -190,7 +217,14 @@ export class UsersService {
           phone: true,
         },
         status: true,
-        association: {},
+        association: {
+          id: true,
+          name: true,
+          description: true,
+          paymentServiceValidUntil: true,
+          canReceiveDonations: true,
+          status: true,
+        },
       },
       where: {
         userId,

@@ -3,4 +3,5 @@ export enum Categories {
   EVENT = 'Event',
   ASSOCIATION = 'Association',
   ANNOUNCEMENT = 'Announcement',
+  PREMIUM = 'Premium',
 }
