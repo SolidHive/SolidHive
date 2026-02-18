@@ -13,6 +13,24 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'À propos du premium' },
   },
   {
+    path: '/premium-payment/:associationId',
+    name: 'PremiumPayment',
+    component: () => import('../views/PremiumPayment.vue'),
+    meta: {
+      title: 'Paiement Premium',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/payment/premium-success',
+    name: 'PremiumSuccess',
+    component: () => import('../views/PremiumSuccess.vue'),
+    meta: {
+      title: 'Paiement Premium Réussi',
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('../views/auth/Login.vue'),
@@ -189,6 +207,12 @@ const routes: RouteRecordRaw[] = [
         name: 'CRMHome',
         component: () => import('../views/crm/Home.vue'),
         meta: { title: 'Accueil - CRM' },
+      },
+      {
+        path: 'premium-required',
+        name: 'CRMPremiumRequired',
+        component: () => import('../views/crm/PremiumRequired.vue'),
+        meta: { title: 'Premium requis - CRM' },
       },
       {
         path: 'statistics',

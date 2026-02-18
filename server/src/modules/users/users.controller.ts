@@ -53,6 +53,24 @@ export class UsersController {
     return this.usersService.getUserAssociations(userId);
   }
 
+  @Get('me/owned-associations')
+  @UseGuards(AuthenticatedGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get current user's owned associations" })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Returns the list of owned associations for the current user with their role and status.',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async getMyOwnedAssociations(@Req() req: Request) {
+    const userId = req.user?.['id'];
+    if (!userId) {
+      throw new Error('User not authenticated');
+    }
+    return this.usersService.getUserOwnedAssociations(userId);
+  }
+
   @Get('me/association/:associationId')
   @UseGuards(AuthenticatedGuard)
   @ApiBearerAuth()

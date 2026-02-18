@@ -58,6 +58,18 @@ export const useCrmStore = defineStore('crm', () => {
     return member.value;
   }
 
+  async function refreshAssociationData(associationId: string): Promise<void> {
+    try {
+      const result = await Database.getAll(`users/me/association/${associationId}`);
+      if (result && result.status === 'accepted') {
+        member.value = result;
+        associationPremiumUntil.value = result.association?.paymentServiceValidUntil || null;
+      }
+    } catch (err) {
+      console.error('Erreur lors du rafraîchissement des données:', err);
+    }
+  }
+
   function reset() {
     currentAssociationId.value = null;
     currentRoute.value = null;
@@ -80,6 +92,7 @@ export const useCrmStore = defineStore('crm', () => {
     setCurrentRoute,
     setCurrentAssociation,
     hasAccessToAssociation,
+    refreshAssociationData,
     reset,
   };
 });
