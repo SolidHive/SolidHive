@@ -49,7 +49,7 @@
 
       <div v-if="association.description">
         <label class="text-muted-foreground text-xs sm:text-sm">Description</label>
-        <p class="mt-1 text-sm break-words sm:text-base">{{ association.description }}</p>
+        <p class="mt-1 text-sm wrap-break-word sm:text-base">{{ association.description }}</p>
       </div>
 
       <div v-if="association.contact">
@@ -59,7 +59,7 @@
 
       <div>
         <label class="text-muted-foreground text-xs sm:text-sm">À propos</label>
-        <p class="mt-1 text-sm break-words sm:text-base">
+        <p class="mt-1 text-sm wrap-break-word sm:text-base">
           {{ association.aboutText || 'Aucun texte à propos défini' }}
         </p>
       </div>
@@ -118,7 +118,7 @@
         <label class="text-xs font-medium text-yellow-900 sm:text-sm">
           Demande d'informations supplémentaires
         </label>
-        <p class="mt-1 text-xs break-words text-yellow-800 sm:text-sm">
+        <p class="mt-1 text-xs wrap-break-word text-yellow-800 sm:text-sm">
           {{ association.additionalRequest }}
         </p>
       </div>
@@ -132,6 +132,26 @@
             :style="{ backgroundColor: association.primaryColor }"
           />
           <span class="font-mono text-xs break-all sm:text-sm">{{ association.primaryColor }}</span>
+        </div>
+      </div>
+
+      <!-- Premium status -->
+      <div class="mt-4">
+        <label class="text-muted-foreground text-xs sm:text-sm">Statut premium</label>
+        <div class="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
+          <template v-if="association.paymentServiceValidUntil">
+            <span class="text-xs font-medium sm:text-sm">
+              Valide jusqu'au {{ formatDate(association.paymentServiceValidUntil) }}
+            </span>
+            <Button size="sm" variant="outline" :disabled="!invoiceUrl" @click="downloadInvoice">
+              Voir la facture
+            </Button>
+          </template>
+          <template v-else>
+            <Button size="sm" variant="primary" class="mt-2" @click="goPremium">
+              Découvrir Premium
+            </Button>
+          </template>
         </div>
       </div>
 
@@ -185,14 +205,17 @@
   import Button from '@/components/ui/button/Button.vue';
   import type { Association } from '@/interfaces';
   import { Pencil, Trash2, CreditCard } from 'lucide-vue-next';
+  import { ref, watch } from 'vue';
+  import Database from '@/utils/database.utils';
 
-  defineProps<{
+  const props = defineProps<{
     association: Association;
     imageKey: number;
     canUpdate: boolean;
     canDelete: boolean;
     showStripeForOwner: boolean;
   }>();
+  const { association, imageKey, canUpdate, canDelete, showStripeForOwner } = props; // destructure for ease of use
 
   defineEmits<{
     (e: 'edit'): void;
@@ -212,4 +235,45 @@
     };
     return statusMap[status] || status;
   };
+
+  // premium invoice url
+  const invoiceUrl = ref<string | null>(null);
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  };
+
+  const downloadInvoice = () => {
+    if (invoiceUrl.value) {
+      window.open(invoiceUrl.value, '_blank');
+    }
+  };
+
+  const goPremium = () => {
+    window.open('/about-premium', '_blank');
+  };
+
+  const fetchInvoice = async () => {
+    if (!association.paymentServiceValidUntil) return;
+    try {
+      const res = await Database.getOne(`payments/premium/${association.id}/invoice`, '');
+      if (res.transactionId) {
+        invoiceUrl.value = `/files/Transaction/${res.transactionId}?purpose=invoice`;
+      }
+    } catch (err) {
+      console.error('Erreur récupération facture premium', err);
+    }
+  };
+
+  watch(
+    () => association,
+    (newVal) => {
+      if (newVal) fetchInvoice();
+    },
+    { immediate: true }
+  );
 </script>

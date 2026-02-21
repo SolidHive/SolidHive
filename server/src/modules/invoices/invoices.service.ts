@@ -177,6 +177,15 @@ export class InvoicesService {
         };
       }
 
+      case 'Premium': {
+        const assoc = await this.associationRepository.findOne({ where: { id: relatedBy } });
+        return {
+          type: 'Premium',
+          name: assoc?.name || 'Association inconnue',
+          description: 'Abonnement Premium',
+        };
+      }
+
       default:
         throw new Error(`Unknown transaction type: ${relatedTo}`);
     }
@@ -396,6 +405,12 @@ export class InvoicesService {
     net: string;
   } {
     const total = Number(transaction.amount).toFixed(2);
+
+    // pour les abonnements premium, on considère que toute la somme est nette
+    if (transaction.relatedTo === 'Premium') {
+      return { total, solidHive: '0.00', net: total };
+    }
+
     const solidHive = transaction.solidHiveAmount
       ? Number(transaction.solidHiveAmount).toFixed(2)
       : '0.00';

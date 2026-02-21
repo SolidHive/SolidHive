@@ -23,13 +23,6 @@
         >
           Inscrire mon association
         </Button>
-        <Button
-          variant="outline"
-          class="border-accent text-accent hover:bg-accent px-4 py-2 text-sm transition-colors hover:text-white sm:text-base"
-          @click="navigateToEvents"
-        >
-          Se connecter
-        </Button>
       </div>
     </div>
     <!-- Image hexagonale à droite -->
@@ -53,10 +46,6 @@
   const router = useRouter();
 
   const navigateToAssociations = () => {
-    router.push('/associations');
-  };
-
-  const navigateToEvents = () => {
-    router.push('/events');
+    router.push('/create-association');
   };
 </script>

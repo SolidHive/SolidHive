@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import Stripe from 'stripe';
 import { Association } from '../../associations/entities/association.entity';
+import { AssociationsService } from '../../associations/associations.service';
 import { TransactionsService } from '../../transactions/transactions.service';
 import { Transaction } from '../../transactions/entities/transaction.entity';
 import { CreatePremiumSubscriptionDto } from '../dto/create-premium-subscription.dto';
@@ -11,6 +12,11 @@ import { Categories } from '../../../common/enums/categories';
 import { AssociationNotFoundException } from '../exceptions/payment.exceptions';
 import { StripeSessionBuilder } from '../helpers/stripe-session.builder';
 import { PaymentValidationService } from './payment-validation.service';
+import { InvoicesService } from '../../invoices/invoices.service';
+import { EmailService } from '../../../common/utils/email/email.service';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as handlebars from 'handlebars';
 
 export interface PremiumSessionResult {
   sessionId: string;
@@ -25,18 +31,42 @@ export class PremiumSubscriptionService {
   private readonly logger = new Logger(PremiumSubscriptionService.name);
   private readonly isMockMode: boolean;
   private readonly PRICE_PER_MONTH = 15; // 15€ par mois
+  private premiumTemplate: handlebars.TemplateDelegate;
 
   constructor(
     @Inject('STRIPE_CLIENT') private readonly stripe: Stripe,
     private readonly configService: ConfigService,
     private readonly transactionsService: TransactionsService,
     private readonly validationService: PaymentValidationService,
+    private readonly associationsService: AssociationsService,
     @InjectRepository(Association)
     private associationsRepository: Repository<Association>,
     @InjectRepository(Transaction)
-    private transactionsRepository: Repository<Transaction>
+    private transactionsRepository: Repository<Transaction>,
+    private readonly invoicesService: InvoicesService,
+    private readonly emailService: EmailService
   ) {
     this.isMockMode = this.configService.get<string>('USE_STRIPE_MOCK') === 'true';
+
+    // Load premium template
+    try {
+      const templatePath = path.join(
+        process.cwd(),
+        'src',
+        'common',
+        'utils',
+        'email',
+        'templates',
+        'premium-subscription-confirmation.html'
+      );
+      const templateSource = fs.readFileSync(templatePath, 'utf8');
+      this.premiumTemplate = handlebars.compile(templateSource);
+    } catch (error) {
+      this.logger.error(
+        'Erreur lors du chargement du template premium-subscription-confirmation.html',
+        error
+      );
+    }
   }
 
   /**
@@ -129,6 +159,16 @@ export class PremiumSubscriptionService {
       return;
     }
 
+    // éviter retraitement multiple si la transaction existe déjà
+    const existingInvoicePath = `/invoices/premium-${session.id}.pdf`;
+    const existing = await this.transactionsRepository.findOne({
+      where: { invoicePath: existingInvoicePath },
+    });
+    if (existing) {
+      this.logger.log(`Session premium ${session.id} déjà finalisée, ignorer.`);
+      return;
+    }
+
     const { associationId, message, userId } = metadata;
     const totalAmount = (session.amount_total ?? 0) / 100;
 
@@ -177,11 +217,12 @@ export class PremiumSubscriptionService {
     );
 
     // Créer la transaction
+    const invoicePath = `/invoices/premium-${session.id}.pdf`;
     const transaction = this.transactionsRepository.create({
       amount: totalAmount,
       relatedTo: Categories.PREMIUM,
       relatedBy: associationId,
-      invoicePath: '', // À générer plus tard si nécessaire
+      invoicePath,
       solidHiveAmount: totalAmount, // Tout l'argent va à SolidHive
       user: userId !== 'anonymous' ? { id: userId } : null,
     });
@@ -189,5 +230,84 @@ export class PremiumSubscriptionService {
     await this.transactionsRepository.save(transaction);
 
     this.logger.log(`Transaction premium créée: ${transaction.id}`);
+
+    // generate invoice and send email
+    if (userId && transaction.id) {
+      await this.invoicesService.getInvoiceStream(transaction.id, userId);
+      await this.sendPremiumConfirmationEmail(
+        userId,
+        transaction.id,
+        association,
+        months,
+        totalAmount,
+        currentDate
+      );
+    }
+  }
+
+  /**
+   * Retourne la dernière transaction premium liée à une association (pour l'URL de la facture)
+   */
+  async getLatestPremiumInvoice(associationId: string): Promise<{ transactionId: string | null }> {
+    const tx = await this.transactionsRepository.findOne({
+      where: { relatedTo: Categories.PREMIUM, relatedBy: associationId },
+      order: { timestamps: { createdAt: 'DESC' } },
+    });
+
+    return { transactionId: tx ? tx.id : null };
+  }
+
+  private async sendPremiumConfirmationEmail(
+    userId: string,
+    transactionId: string,
+    association: any,
+    months: number,
+    totalAmount: number,
+    validUntil: Date
+  ): Promise<void> {
+    try {
+      const user = await this.associationsService['usersRepository'].findOne({
+        where: { id: userId },
+      });
+      if (!user) return;
+
+      const invoiceFile = await this.invoicesService['fileRepository'].findOne({
+        where: { relatedTo: 'Transaction', relatedBy: transactionId },
+      });
+      if (!invoiceFile) {
+        this.logger.error(`Facture non trouvée pour la transaction ${transactionId}`);
+        return;
+      }
+
+      const invoicePath = path.join(process.cwd(), 'uploads', userId, invoiceFile.filename);
+      if (!fs.existsSync(invoicePath)) {
+        this.logger.error(`Fichier facture introuvable: ${invoicePath}`);
+        return;
+      }
+
+      const htmlContent = this.premiumTemplate({
+        userName: user.name,
+        associationName: association.name,
+        months,
+        totalAmount: totalAmount.toFixed(2),
+        validUntil: validUntil.toLocaleDateString('fr-FR'),
+      });
+
+      await this.emailService.sendEmail({
+        to: user.email,
+        subject: `Confirmation d'abonnement Premium - ${association.name}`,
+        html: htmlContent,
+        attachments: [
+          {
+            filename: invoiceFile.oldFilename || 'facture.pdf',
+            path: invoicePath,
+          },
+        ],
+      });
+
+      this.logger.log(`Email de confirmation premium envoyé à ${user.email}`);
+    } catch (error) {
+      this.logger.error("Erreur lors de l'envoi de l'email de confirmation premium", error);
+    }
   }
 }

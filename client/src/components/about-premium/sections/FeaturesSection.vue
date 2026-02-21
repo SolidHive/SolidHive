@@ -25,10 +25,10 @@
             "
           >
             <Server :size="28" class="text-white" />
-            <h3 class="font-title text-xl font-semibold">Centralisation des données</h3>
+            <h3 class="font-title text-lg font-semibold sm:text-xl">Centralisation des données</h3>
           </div>
           <p
-            class="px-3 pb-3 text-sm leading-relaxed text-white/90"
+            class="px-3 pb-3 text-xs leading-relaxed text-white/90 sm:text-sm"
             style="
               background: linear-gradient(
                 rgba(81, 13, 109, 0.533) 0%,
@@ -67,10 +67,10 @@
               "
             >
               <Waypoints :size="28" class="text-white" />
-              <h3 class="font-title text-xl font-semibold">Connexion avec vos applis</h3>
+              <h3 class="font-title text-lg font-semibold sm:text-xl">Connexion avec vos applis</h3>
             </div>
             <p
-              class="px-3 pb-3 text-sm leading-relaxed text-white/90"
+              class="px-3 pb-3 text-xs leading-relaxed text-white/90 sm:text-sm"
               style="
                 background: linear-gradient(
                   rgba(81, 13, 109, 0.533) 0%,
@@ -104,10 +104,12 @@
               "
             >
               <Send :size="28" class="text-white" />
-              <h3 class="font-title text-xl font-semibold">Automatisation de vos mail</h3>
+              <h3 class="font-title text-lg font-semibold sm:text-xl">
+                Automatisation de vos mail
+              </h3>
             </div>
             <p
-              class="px-3 pb-3 text-sm leading-relaxed text-white/90"
+              class="px-3 pb-3 text-xs leading-relaxed text-white/90 sm:text-sm"
               style="
                 background: linear-gradient(
                   rgba(81, 13, 109, 0.533) 0%,
@@ -138,10 +140,10 @@
             "
           >
             <CircleDollarSign :size="28" class="text-white" />
-            <h3 class="font-title text-xl font-semibold">Cagnottes, billetteries...</h3>
+            <h3 class="font-title text-lg font-semibold sm:text-xl">Cagnottes, billetteries...</h3>
           </div>
           <p
-            class="px-3 pb-3 text-sm leading-relaxed text-white/90"
+            class="px-3 pb-3 text-xs leading-relaxed text-white/90 sm:text-sm"
             style="
               background: linear-gradient(
                 rgba(81, 13, 109, 0.533) 0%,

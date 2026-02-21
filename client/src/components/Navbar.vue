@@ -29,6 +29,12 @@
           Associations
         </router-link>
         <router-link
+          to="/about-premium"
+          class="text-secondary font-paragraph text-sm transition-opacity hover:opacity-80"
+        >
+          Premium
+        </router-link>
+        <router-link
           to="/blog"
           class="text-secondary font-paragraph text-sm transition-opacity hover:opacity-80"
         >
@@ -182,6 +188,13 @@
             @click="closeMenu"
           >
             Associations
+          </router-link>
+          <router-link
+            to="/about-premium"
+            class="text-secondary font-paragraph py-2 text-base"
+            @click="closeMenu"
+          >
+            Premium
           </router-link>
           <router-link
             to="/blog"

@@ -1,6 +1,6 @@
 <template>
   <section>
-    <h2 class="font-title text-secondary mb-12 text-center text-2xl sm:text-3xl md:text-4xl">
+    <h2 class="font-title text-secondary mb-12 text-center text-xl sm:text-3xl md:text-4xl">
       Nos tarifs
     </h2>
 
@@ -12,7 +12,9 @@
         class="flex w-full max-w-100 flex-1 flex-col rounded-3xl bg-white p-8 shadow-lg sm:w-100"
       >
         <div class="bg-secondary mb-8 rounded-full px-6 py-3 text-center">
-          <h3 class="font-title text-lg font-bold text-white uppercase">Version Gratuite</h3>
+          <h3 class="font-title text-base font-bold text-white uppercase sm:text-lg">
+            Version Gratuite
+          </h3>
         </div>
 
         <ul class="mb-8 flex-1 space-y-4">
@@ -27,14 +29,14 @@
               :stroke-width="3"
             />
             <X v-else class="h-6 w-6 shrink-0 text-red-500" :stroke-width="3" />
-            <span class="font-semibold text-black">{{ feature.label }}</span>
+            <span class="text-sm font-semibold text-black sm:text-base">{{ feature.label }}</span>
           </li>
         </ul>
         <router-link
           to="/create-association"
-          class="border-primary text-primary hover:bg-primary h-12 cursor-pointer rounded-full border-2 px-6 py-3 text-center text-[15px] font-semibold transition-colors hover:text-white"
+          class="border-primary text-primary hover:bg-primary inline-flex h-10 cursor-pointer items-center justify-center rounded-full border-2 px-4 py-2 text-center text-xs font-semibold transition-colors hover:text-white sm:h-12 sm:px-6 sm:py-3 sm:text-[15px]"
         >
-          J'inscris mon association
+          <span class="whitespace-nowrap">J'inscris mon association</span>
         </router-link>
       </div>
 
@@ -43,7 +45,9 @@
         class="ring-primary flex w-full max-w-100 flex-1 flex-col rounded-3xl p-8 shadow-xl ring-4 sm:w-100"
       >
         <div class="bg-primary mb-8 rounded-full px-6 py-3 text-center">
-          <h3 class="font-title text-lg font-bold text-white uppercase">Version Premium</h3>
+          <h3 class="font-title text-base font-bold text-white uppercase sm:text-lg">
+            Version Premium
+          </h3>
         </div>
 
         <ul class="mb-8 flex-1 space-y-4">
@@ -53,20 +57,20 @@
             class="flex items-center gap-3"
           >
             <Check class="h-6 w-6 shrink-0 text-[#009B77]" :stroke-width="3" />
-            <span class="font-semibold text-black">{{ feature.label }}</span>
+            <span class="text-sm font-semibold text-black sm:text-base">{{ feature.label }}</span>
           </li>
         </ul>
 
         <div class="mb-6 text-center">
-          <p class="text-primary text-2xl font-bold sm:text-3xl lg:text-4xl">15€/mois</p>
+          <p class="text-primary text-xl font-bold sm:text-3xl lg:text-4xl">15€/mois</p>
         </div>
 
         <Dialog v-model:open="open" @update:open="handleDialogOpen">
           <DialogTrigger as-child>
             <Button
-              class="bg-primary hover:bg-primary/90 h-12 cursor-pointer rounded-full px-6 py-3 text-[15px] font-semibold whitespace-nowrap text-white transition-colors"
+              class="bg-primary hover:bg-primary/90 inline-flex h-10 cursor-pointer items-center justify-center rounded-full px-4 py-2 text-center text-xs font-semibold text-white transition-colors sm:h-12 sm:px-6 sm:py-3 sm:text-[15px]"
             >
-              Passer mon association en Premium
+              <span class="whitespace-nowrap">Passer Premium</span>
             </Button>
           </DialogTrigger>
           <DialogContent class="sm:max-w-md">
@@ -109,7 +113,7 @@
               <Button
                 v-if="selectedAssociation"
                 type="button"
-                variant="outline"
+                variant="default"
                 class="cursor-pointer"
                 @click="goToPremiumPayment"
               >
@@ -243,6 +247,7 @@
   const handleDialogOpen = async () => {
     if (authStore.isAuthenticated() === false) {
       router.push({ name: 'Login' });
+      return;
     }
 
     if (userOwnedAssociations.value.length === 0) {
