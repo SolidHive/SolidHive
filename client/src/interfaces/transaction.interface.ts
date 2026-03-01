@@ -27,5 +27,6 @@ export interface Transaction extends HasId {
   event?: {
     id: string;
     title: string;
+    startDate: string;
   };
 }

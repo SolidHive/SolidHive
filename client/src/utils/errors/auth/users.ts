@@ -110,3 +110,8 @@ export const updateUserValidationSchema = yup.object({
       return userErrorMessages.patterns.phone.test(value);
     }),
 });
+
+export const deleteAccountValidationSchema = yup.object({
+  password: yup.string().required(userErrorMessages.required.password),
+  reason: yup.string().optional().max(500, 'La raison ne peut pas dépasser 500 caractères'),
+});

@@ -64,6 +64,15 @@
             <Users :size="20" />
             <span class="hidden lg:block">Utilisateurs</span>
           </RouterLink>
+          <RouterLink
+            :to="{ name: 'AdminDashboardAnnouncements', params: { locale: $route.params.locale } }"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            :class="$route.name === 'AdminDashboardAnnouncements' ? '' : 'hover:bg-[#8574B3]'"
+            active-class="bg-secondary font-semibold"
+          >
+            <Megaphone :size="20" />
+            <span class="hidden lg:block">Blog</span>
+          </RouterLink>
         </div>
       </div>
       <div id="admin-aside-footer" class="border-accent-foreground border-t px-2 py-4 lg:px-4">
@@ -78,7 +87,14 @@
 
 <script setup lang="ts">
   import logo from '@/assets/images/logo-small-solidhive.svg';
-  import { LayoutDashboard, Building2, ShieldCheck, Users, ArrowLeft } from 'lucide-vue-next';
+  import {
+    LayoutDashboard,
+    Building2,
+    ShieldCheck,
+    Users,
+    ArrowLeft,
+    Megaphone,
+  } from 'lucide-vue-next';
   import { useWindowSize } from '@vueuse/core';
 
   const { width } = useWindowSize();

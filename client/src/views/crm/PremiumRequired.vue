@@ -95,8 +95,6 @@
   };
 
   const contactSupport = () => {
-    // Rediriger vers une page de contact ou d'upgrade
-    // Pour l'instant, on peut juste ouvrir une fenêtre mailto ou rediriger vers une page de contact
-    window.location.href = 'mailto:contact@solidhive.com?subject=Abonnement Premium';
+    router.push({ name: 'AboutPremium' });
   };
 </script>

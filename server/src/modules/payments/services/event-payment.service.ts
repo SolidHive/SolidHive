@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -26,7 +26,6 @@ export interface EventRegistrationSessionResult {
  */
 @Injectable()
 export class EventPaymentService {
-  private readonly logger = new Logger(EventPaymentService.name);
   private readonly isMockMode: boolean;
 
   constructor(
@@ -81,10 +80,6 @@ export class EventPaymentService {
       createEventRegistrationDto.participants
     );
 
-    this.logger.log(
-      `Création d'une session d'inscription pour l'événement ${event.title} (${createEventRegistrationDto.participants.length} participants, ${totalAmount}€)`
-    );
-
     // Construire la session Stripe
     const sessionConfig = this.buildStripeSession(
       event,
@@ -95,8 +90,6 @@ export class EventPaymentService {
 
     // Créer la session
     const session = await this.stripe.checkout.sessions.create(sessionConfig);
-
-    this.logger.log(`Session d'inscription créée avec succès: ${session.id}`);
 
     return {
       sessionId: session.id,
@@ -110,24 +103,14 @@ export class EventPaymentService {
   async finalizeEventRegistration(sessionId: string): Promise<void> {
     // Vérifier si une transaction existe déjà pour cette session
     const invoicePathToCheck = `/invoices/event-registration-${sessionId}.pdf`;
-    this.logger.log(
-      `[FINALIZE] Recherche d'une transaction avec invoicePath: ${invoicePathToCheck}`
-    );
 
     const existingTransaction = await this.transactionsRepository.findOne({
       where: { invoicePath: invoicePathToCheck },
     });
 
     if (existingTransaction) {
-      this.logger.log(
-        `[FINALIZE] Session ${sessionId} DÉJÀ finalisée (transaction ${existingTransaction.id}), aucune action`
-      );
       return;
     }
-
-    this.logger.log(
-      `[FINALIZE] Aucune transaction trouvée, lancement de la finalisation complète...`
-    );
 
     const session = await this.stripe.checkout.sessions.retrieve(sessionId);
 
@@ -139,7 +122,6 @@ export class EventPaymentService {
     const eventId = session.metadata?.eventId;
 
     if (!eventId) {
-      this.logger.error(`EventId manquant pour la session ${sessionId}`);
       throw new Error("Métadonnées d'inscription manquantes");
     }
 
@@ -147,7 +129,6 @@ export class EventPaymentService {
     const { participants } = this.parseSessionMetadata(session);
 
     if (!participants || participants.length === 0) {
-      this.logger.error(`Participants manquants pour la session ${sessionId}`);
       throw new Error('Données des participants manquantes');
     }
 
@@ -191,17 +172,10 @@ export class EventPaymentService {
     if (registrationIds.length > 0 && session.metadata?.userId && transactionId) {
       try {
         await this.ticketsService.generateAndSendAllTickets(registrationIds, transactionId);
-        this.logger.log(
-          `Email envoyé avec ${registrationIds.length} billet(s) pour l'événement ${event.title}`
-        );
       } catch (error) {
-        this.logger.error(`Erreur lors de l'envoi de l'email groupé`, error);
+        console.error('Erreur lors de la génération ou de l’envoi des billets :', error);
       }
     }
-
-    this.logger.log(
-      `Inscription finalisée avec succès pour l'événement ${event.title} (session: ${sessionId})`
-    );
   }
 
   /**
@@ -346,8 +320,12 @@ export class EventPaymentService {
 
       return { participants, contact };
     } catch (error) {
-      this.logger.error(`Erreur lors du parsing des données pour la session ${session.id}`, error);
-      throw new Error("Impossible de récupérer les données d'inscription");
+      console.error('Erreur lors du parsing des métadonnées de la session Stripe :', error);
+      // Retourner des valeurs par défaut en cas d'erreur
+      return {
+        participants: [],
+        contact: {},
+      };
     }
   }
 
@@ -375,9 +353,6 @@ export class EventPaymentService {
           const currentRegistrations = currentPricing.registers?.length || 0;
 
           if (currentRegistrations >= currentPricing.maxCapacity) {
-            this.logger.error(
-              `Capacité dépassée pour le tarif ${pricing.title} de l'événement ${event.title}`
-            );
             throw new Error(`Capacité dépassée pour le tarif "${pricing.title}"`);
           }
         }
@@ -394,10 +369,6 @@ export class EventPaymentService {
         const savedRegister = await this.eventsRepository.manager.save(EventRegister, register);
 
         registrationIds.push(savedRegister.id);
-
-        this.logger.log(
-          `Inscription créée pour ${participant.firstName} ${participant.lastName} à l'événement ${event.title}`
-        );
       }
     }
 
@@ -413,30 +384,116 @@ export class EventPaymentService {
     totalAmount: number,
     sessionId: string
   ): Promise<string> {
-    try {
-      const invoicePath = `/invoices/event-registration-${sessionId}.pdf`;
-      this.logger.log(`[TRANSACTION] Création transaction avec invoicePath: ${invoicePath}`);
+    const invoicePath = `/invoices/event-registration-${sessionId}.pdf`;
 
-      const transaction = await this.transactionsService.create(
+    const transaction = await this.transactionsService.create(
+      {
+        amount: totalAmount,
+        relatedTo: Categories.EVENT,
+        relatedBy: eventId,
+        invoicePath,
+      },
+      userId
+    );
+
+    return transaction.id;
+  }
+
+  /**
+   * Traiter le remboursement d'une inscription à un événement
+   */
+  async processEventRegistrationRefund(
+    registrationId: string,
+    userId: string,
+    refundAmount: number,
+    eventId: string
+  ): Promise<{ refundId: string; transactionId: string }> {
+    // Trouver la transaction de paiement originale pour cet événement
+    const originalTransaction = await this.transactionsRepository.findOne({
+      where: {
+        user: { id: userId },
+        relatedTo: Categories.EVENT,
+        relatedBy: eventId,
+        amount: refundAmount,
+      },
+      relations: ['user'],
+    });
+
+    if (!originalTransaction) {
+      throw new Error(
+        `Transaction de paiement originale non trouvée pour l'inscription ${registrationId}`
+      );
+    }
+
+    // Extraire l'ID de session Stripe depuis l'invoicePath
+    const sessionIdMatch = originalTransaction.invoicePath?.match(/event-registration-(.+)\.pdf/);
+    if (!sessionIdMatch) {
+      throw new Error(
+        `ID de session Stripe non trouvé dans la transaction ${originalTransaction.id}`
+      );
+    }
+
+    const sessionId = sessionIdMatch[1];
+
+    // Récupérer la session Stripe pour obtenir le payment_intent
+    const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+    if (!session.payment_intent) {
+      throw new Error(`Payment intent non trouvé pour la session ${sessionId}`);
+    }
+
+    // Vérifier si des remboursements existent déjà pour ce payment_intent
+    const existingRefunds = await this.stripe.refunds.list({
+      payment_intent: session.payment_intent as string,
+    });
+
+    const hasBeenRefunded = existingRefunds.data.length > 0;
+
+    if (hasBeenRefunded) {
+      // Créer quand même une transaction de remboursement pour la traçabilité
+      const refundInvoicePath = `/invoices/event-refund-already-processed-${Date.now()}.pdf`;
+      const refundTransaction = await this.transactionsService.create(
         {
-          amount: totalAmount,
+          amount: -refundAmount, // Montant négatif pour le remboursement
           relatedTo: Categories.EVENT,
-          relatedBy: eventId,
-          invoicePath,
+          relatedBy: eventId, // Utiliser l'ID de l'événement comme pour les paiements
+          invoicePath: refundInvoicePath,
         },
         userId
       );
 
-      this.logger.log(
-        `[TRANSACTION] Transaction créée: ${transaction.id} avec path ${invoicePath}`
-      );
-      return transaction.id;
-    } catch (error) {
-      this.logger.error(
-        `Erreur lors de la création de la transaction pour la session ${sessionId}`,
-        error
-      );
-      throw error;
+      return {
+        refundId: existingRefunds.data[0].id, // Utiliser l'ID du remboursement existant
+        transactionId: refundTransaction.id,
+      };
     }
+
+    // Créer le remboursement Stripe en utilisant le payment_intent
+    const refund = await this.stripe.refunds.create({
+      payment_intent: session.payment_intent as string,
+      amount: Math.round(refundAmount * 100), // Convertir en centimes
+      reason: 'requested_by_customer',
+      metadata: {
+        registrationId,
+        userId,
+        originalTransactionId: originalTransaction.id,
+      },
+    });
+
+    // Créer une transaction de remboursement
+    const refundInvoicePath = `/invoices/event-refund-${refund.id}.pdf`;
+    const refundTransaction = await this.transactionsService.create(
+      {
+        amount: -refundAmount, // Montant négatif pour le remboursement
+        relatedTo: Categories.EVENT,
+        relatedBy: eventId,
+        invoicePath: refundInvoicePath,
+      },
+      userId
+    );
+
+    return {
+      refundId: refund.id,
+      transactionId: refundTransaction.id,
+    };
   }
 }

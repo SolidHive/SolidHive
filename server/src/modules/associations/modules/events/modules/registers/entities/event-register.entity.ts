@@ -56,4 +56,12 @@ export class EventRegister {
   })
   @Column({ type: 'varchar', length: 255, nullable: true })
   participantEmail: string | null;
+
+  @ApiProperty({
+    example: '2023-01-01T00:00:00Z',
+    description: "Date d'annulation de l'inscription",
+    required: false,
+  })
+  @Column({ type: 'timestamp', nullable: true })
+  cancelledAt: Date | null;
 }

@@ -2,8 +2,10 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 import { CreateDonationDto } from './dto/create-donation.dto';
 import { CreateEventRegistrationDto } from './dto/create-event-registration.dto';
+import { CreatePremiumSubscriptionDto } from './dto/create-premium-subscription.dto';
 import { DonationPaymentService } from './services/donation-payment.service';
 import { EventPaymentService } from './services/event-payment.service';
+import { PremiumSubscriptionService } from './services/premium-subscription.service';
 
 export interface DonationSessionResult {
   sessionId: string;
@@ -21,7 +23,8 @@ export class PaymentsService {
   constructor(
     @Inject('STRIPE_CLIENT') private readonly stripe: Stripe,
     private readonly donationPaymentService: DonationPaymentService,
-    private readonly eventPaymentService: EventPaymentService
+    private readonly eventPaymentService: EventPaymentService,
+    private readonly premiumSubscriptionService: PremiumSubscriptionService
   ) {
     this.logger.log('PaymentsService initialisé');
   }
@@ -81,5 +84,27 @@ export class PaymentsService {
   async getSession(sessionId: string): Promise<Stripe.Checkout.Session> {
     this.logger.debug(`Récupération de la session ${sessionId}`);
     return await this.stripe.checkout.sessions.retrieve(sessionId);
+  }
+
+  /**
+   * Crée une session de paiement pour un abonnement premium
+   * Délègue au service spécialisé PremiumSubscriptionService
+   */
+  async createPremiumSession(
+    createPremiumDto: CreatePremiumSubscriptionDto,
+    userId?: string
+  ): Promise<DonationSessionResult> {
+    this.logger.log('Création session premium', { dto: createPremiumDto, userId });
+    return this.premiumSubscriptionService.createPremiumSession(createPremiumDto, userId);
+  }
+
+  /**
+   * Finalise un abonnement premium après paiement réussi
+   * Délègue au service spécialisé PremiumSubscriptionService
+   */
+  async finalizePremium(sessionId: string): Promise<void> {
+    this.logger.log('Finalisation abonnement premium', { sessionId });
+    const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+    return this.premiumSubscriptionService.handlePremiumPaymentSuccess(session);
   }
 }

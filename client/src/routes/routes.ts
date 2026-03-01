@@ -7,6 +7,30 @@ const routes: RouteRecordRaw[] = [
     meta: { title: 'Accueil' },
   },
   {
+    path: '/about-premium',
+    name: 'AboutPremium',
+    component: () => import('../views/AboutPremium.vue'),
+    meta: { title: 'À propos du premium' },
+  },
+  {
+    path: '/premium-payment/:associationId',
+    name: 'PremiumPayment',
+    component: () => import('../views/PremiumPayment.vue'),
+    meta: {
+      title: 'Paiement Premium',
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/payment/premium-success',
+    name: 'PremiumSuccess',
+    component: () => import('../views/PremiumSuccess.vue'),
+    meta: {
+      title: 'Paiement Premium Réussi',
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('../views/auth/Login.vue'),
@@ -159,6 +183,14 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/blog',
+    name: 'Blog',
+    component: () => import('../views/Blog.vue'),
+    meta: {
+      title: 'Blog SolidHive',
+    },
+  },
+  {
     path: '/crm/:id',
     name: 'CRM',
     component: () => import('../views/crm/Shell.vue'),
@@ -175,6 +207,12 @@ const routes: RouteRecordRaw[] = [
         name: 'CRMHome',
         component: () => import('../views/crm/Home.vue'),
         meta: { title: 'Accueil - CRM' },
+      },
+      {
+        path: 'premium-required',
+        name: 'CRMPremiumRequired',
+        component: () => import('../views/crm/PremiumRequired.vue'),
+        meta: { title: 'Premium requis - CRM' },
       },
       {
         path: 'statistics',
@@ -312,12 +350,6 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
-      {
-        path: 'premium-required',
-        name: 'CRMPremiumRequired',
-        component: () => import('../views/crm/PremiumRequired.vue'),
-        meta: { title: 'Premium requis - CRM' },
-      },
     ],
   },
   {
@@ -401,6 +433,32 @@ const routes: RouteRecordRaw[] = [
             name: 'AdminDashboardUsersDelete',
             component: () => import('../views/admin-dashboard/users/Delete.vue'),
             meta: { title: 'Supprimer un utilisateur - Dashboard Admin' },
+          },
+        ],
+      },
+      {
+        path: 'announcements',
+        name: 'AdminDashboardAnnouncements',
+        component: () => import('../views/admin-dashboard/announcements/Read.vue'),
+        meta: { title: 'Annonces Blog - Dashboard Admin' },
+        children: [
+          {
+            path: 'create',
+            name: 'AdminDashboardAnnouncementsCreate',
+            component: () => import('../views/admin-dashboard/announcements/Create.vue'),
+            meta: { title: 'Créer une annonce - Dashboard Admin' },
+          },
+          {
+            path: 'update/:itemId',
+            name: 'AdminDashboardAnnouncementsUpdate',
+            component: () => import('../views/admin-dashboard/announcements/Update.vue'),
+            meta: { title: 'Modifier une annonce - Dashboard Admin' },
+          },
+          {
+            path: 'delete/:itemId',
+            name: 'AdminDashboardAnnouncementsDelete',
+            component: () => import('../views/admin-dashboard/announcements/Delete.vue'),
+            meta: { title: 'Supprimer une annonce - Dashboard Admin' },
           },
         ],
       },

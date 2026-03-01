@@ -116,6 +116,7 @@
   import { availablePermissions } from '@/utils/permissions.utils';
   import { useToast } from 'vue-toastification';
   import { useCrmPremiumAccess } from '@/composables/crm-premium';
+  import { Permissions } from '@/enums/permissions';
 
   const crmStore = useCrmStore();
   const member = crmStore.getMember();
@@ -228,9 +229,7 @@
     if (!hasPremiumAccess) {
       router.push({
         name: 'CRMPremiumRequired',
-        params: {
-          id: route.params.id,
-        },
+        params: { id: route.params.id },
       });
       return;
     }

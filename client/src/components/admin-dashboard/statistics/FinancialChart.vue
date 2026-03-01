@@ -49,12 +49,15 @@
   interface Props {
     totalAmountCollected: number;
     solidHiveRevenue: number;
+    premiumRevenue: number;
     averageDonation: number;
   }
 
   const props = defineProps<Props>();
 
-  const associationsRevenue = computed(() => props.totalAmountCollected - props.solidHiveRevenue);
+  const associationsRevenue = computed(
+    () => props.totalAmountCollected - (props.solidHiveRevenue - props.premiumRevenue)
+  );
 
   const chartData = computed(() => ({
     labels: ['Associations', 'SolidHive'],

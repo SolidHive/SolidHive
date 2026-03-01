@@ -14,7 +14,7 @@ import { SecurityModule } from './modules/security/security.module';
 import { AssociationsModule } from './modules/associations/associations.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
-import { AnnouncementsModule } from './modules/announcements/announcements.module';
+import { AnnouncementsModule } from './modules/admin/announcements/announcements.module';
 import { FilesModule } from './modules/files/files.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';

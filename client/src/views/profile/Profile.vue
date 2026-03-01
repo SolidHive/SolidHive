@@ -18,6 +18,7 @@
             :recent-fundraising-donations="recentFundraisingDonations"
             :recent-event-registrations="recentEventRegistrations"
             :is-loading="isLoadingDonations"
+            @registration-cancelled="handleRegistrationCancelled"
           />
         </div>
 
@@ -28,6 +29,7 @@
           :is-loading-favorites="isLoadingFavorites"
           @logout="handleLogout"
           @remove-favorite="handleRemoveFavorite"
+          @account-deleted="handleAccountDeleted"
         />
       </div>
     </div>
@@ -144,6 +146,16 @@
     } finally {
       isLoggingOut.value = false;
     }
+  }
+
+  function handleAccountDeleted(): void {
+    toast.success('Votre compte a été supprimé avec succès');
+    router.push('/login');
+  }
+
+  function handleRegistrationCancelled(transactionId: string | number): void {
+    console.log('handleRegistrationCancelled appelé avec:', transactionId);
+    loadRecentDonations();
   }
 
   onMounted(() => {

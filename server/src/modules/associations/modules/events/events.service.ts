@@ -11,7 +11,7 @@ import { File } from '../../../files/entities/file.entity';
 import { EventPricing } from './modules/pricings/entities/event-pricing.entity';
 import { EventRegister } from './modules/registers/entities/event-register.entity';
 import { FilesService } from '../../../files/files.service';
-import { Like, Between } from 'typeorm';
+import { Like, Between, IsNull } from 'typeorm';
 
 @Injectable()
 export class EventsService {
@@ -248,19 +248,22 @@ export class EventsService {
       throw new HttpException('Événement non trouvé', HttpStatus.NOT_FOUND);
     }
 
-    // Compter les inscriptions liées à l'événement
-    const registrationsCount = await this.eventRegisterRepository.count({
-      where: { eventPricing: { event: { id } } },
+    // Compter les inscriptions actives (non annulées) liées à l'événement
+    const activeRegistrationsCount = await this.eventRegisterRepository.count({
+      where: {
+        eventPricing: { event: { id } },
+        cancelledAt: IsNull(), // Uniquement les inscriptions non annulées
+      },
     });
 
     // Vérifier si l'événement est passé (date de fin dépassée ou date de début dépassée si pas de date de fin)
     const eventDate = event.endDate || event.startDate;
     const now = new Date();
 
-    // Si l'événement a des inscriptions, vérifier qu'il est passé
-    if (registrationsCount > 0 && eventDate > now) {
+    // Si l'événement a des inscriptions actives, vérifier qu'il est passé
+    if (activeRegistrationsCount > 0 && eventDate > now) {
       throw new HttpException(
-        "Impossible de supprimer un événement qui n'est pas encore passé et qui a des inscriptions.",
+        "Impossible de supprimer un événement qui n'est pas encore passé et qui a des inscriptions actives.",
         HttpStatus.BAD_REQUEST
       );
     }

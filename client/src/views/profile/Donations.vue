@@ -13,6 +13,7 @@
         :is-loading="isLoading"
         :total-count="totalCount"
         :total-amount="totalAmount"
+        @registration-cancelled="onRegistrationCancelled"
       />
 
       <!-- Pagination -->
@@ -158,6 +159,12 @@
   const goToPage = async (page: number) => {
     currentPage.value = page;
     await loadDonations(donationType.value, page);
+  };
+
+  const onRegistrationCancelled = async () => {
+    // Recharger les données après l'annulation d'une inscription
+    await loadTotals(donationType.value);
+    await loadDonations(donationType.value, currentPage.value);
   };
 
   onMounted(() => {

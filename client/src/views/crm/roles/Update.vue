@@ -256,9 +256,7 @@
     if (!hasPremiumAccess) {
       router.push({
         name: 'CRMPremiumRequired',
-        params: {
-          id: route.params.id,
-        },
+        params: { id: route.params.id },
       });
       return;
     }

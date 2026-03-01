@@ -125,7 +125,7 @@ export class TransactionsService {
           const repo = this.dataSource.getRepository('Event');
           transactionWithRelations.event = await repo.findOne({
             where: { id: transaction.relatedBy },
-            select: ['id', 'title'],
+            select: ['id', 'title', 'startDate'],
           });
         }
 
