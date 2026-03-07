@@ -63,13 +63,12 @@
 
 <script setup lang="ts">
   import { onBeforeMount, ref } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
+  import { useRoute } from 'vue-router';
   import { AlertTriangle } from 'lucide-vue-next';
   import { useCrmStore } from '@/stores/crm';
   import { TableCell } from '@/components/ui/table';
   import { useCrmAccess } from '@/composables/crm-access';
   import { Read as ReadRaw } from '@/components/dashboard/crud';
-  import { Permissions } from '@/enums/permissions';
   import type { Fundraising } from '@/interfaces';
   import Image from '@/components/dashboard/Image.vue';
   import type { TableHeader } from '@/interfaces/table-header.interface';
@@ -88,7 +87,6 @@
   const member = crmStore.getMember();
   const crmAccess = useCrmAccess(member);
   const route = useRoute();
-  const router = useRouter();
   const associationId = route.params.id as string;
   const hasStripeAccount = ref(false);
 
@@ -115,13 +113,6 @@
   };
 
   onBeforeMount(async () => {
-    const canAccessToFundraisings = member.role.permissions.some(
-      (permission) => permission === Permissions.ALL
-    );
-    if (!canAccessToFundraisings) {
-      router.push('/unauthorized');
-      return;
-    }
     await checkStripeAccount();
   });
 </script>

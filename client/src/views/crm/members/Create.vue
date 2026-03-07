@@ -126,6 +126,11 @@
   const roles = ref<Role[]>([]);
 
   const availableRoles = computed(() => {
+    // Si l'utilisateur actuel est owner, il peut assigner le rôle owner
+    const isOwner = member?.role?.name === 'owner';
+    if (isOwner) {
+      return roles.value;
+    }
     return roles.value.filter((role) => role.name !== 'owner');
   });
 

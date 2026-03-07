@@ -36,9 +36,14 @@ export class UsersAssociationsController {
   @ApiResponse({ status: 403, description: 'Accès refusé' })
   create(
     @Body() createUserAssociationDto: CreateUserAssociationDto,
-    @Param('associationId') associationId: string
+    @Param('associationId') associationId: string,
+    @User('id') currentUserId: string
   ) {
-    return this.usersAssociationsService.create(createUserAssociationDto, associationId);
+    return this.usersAssociationsService.create(
+      createUserAssociationDto,
+      associationId,
+      currentUserId
+    );
   }
 
   @Get('users')

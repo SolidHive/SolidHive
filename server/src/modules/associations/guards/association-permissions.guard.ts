@@ -89,7 +89,9 @@ export class AssociationPermissionsGuard {
               userPermission && userPermission.toUpperCase() === permission.toUpperCase()
           )
         );
-
+    console.log('User Permissions:', userPermissions);
+    console.log('Required Permissions:', requiredPermissions);
+    console.log('Has Required Permissions:', hasPermissions);
     if (!hasPermissions) {
       return false;
     }

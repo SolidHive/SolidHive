@@ -56,7 +56,11 @@ export class UsersAssociationsService {
     }
   }
 
-  async create(createUserAssociationDto: CreateUserAssociationDto, associationId: string) {
+  async create(
+    createUserAssociationDto: CreateUserAssociationDto,
+    associationId: string,
+    currentUserId?: string
+  ) {
     const user = await this.usersRepository.findOne({
       where: { email: createUserAssociationDto.email },
     });
@@ -76,6 +80,20 @@ export class UsersAssociationsService {
     });
     if (!role) {
       throw new HttpException('Role not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Si on essaie d'assigner le rôle owner, vérifier que l'utilisateur actuel est owner
+    if (role.name === 'owner' && currentUserId) {
+      const currentUserAssociation = await this.usersAssociationsRepository.findOne({
+        where: { userId: currentUserId, associationId },
+        relations: ['role'],
+      });
+      if (!currentUserAssociation || currentUserAssociation.role.name !== 'owner') {
+        throw new HttpException(
+          'Seul un propriétaire peut assigner le rôle de propriétaire',
+          HttpStatus.FORBIDDEN
+        );
+      }
     }
 
     // Vérifier si l'utilisateur est déjà membre de l'association
@@ -301,11 +319,6 @@ export class UsersAssociationsService {
       throw new HttpException('User association not found', HttpStatus.NOT_FOUND);
     }
 
-    // Empêcher la modification d'un propriétaire
-    if (userAssociation.role.name === 'owner') {
-      throw new ForbiddenException("Impossible de modifier le rôle d'un propriétaire");
-    }
-
     // Empêcher l'auto-modification
     if (currentUserId && userAssociation.user.id === currentUserId) {
       throw new ForbiddenException('Vous ne pouvez pas modifier votre propre rôle');
@@ -316,6 +329,19 @@ export class UsersAssociationsService {
     });
     if (!role) {
       throw new HttpException('Role not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Si on modifie un owner ou qu'on assigne le rôle owner, vérifier que l'utilisateur actuel est owner
+    if ((userAssociation.role.name === 'owner' || role.name === 'owner') && currentUserId) {
+      const currentUserAssociation = await this.usersAssociationsRepository.findOne({
+        where: { userId: currentUserId, associationId },
+        relations: ['role'],
+      });
+      if (!currentUserAssociation || currentUserAssociation.role.name !== 'owner') {
+        throw new ForbiddenException(
+          'Seul un propriétaire peut modifier ou assigner le rôle de propriétaire'
+        );
+      }
     }
 
     await this.usersAssociationsRepository.update(id, {
@@ -366,14 +392,20 @@ export class UsersAssociationsService {
       throw new HttpException('User association not found', HttpStatus.NOT_FOUND);
     }
 
-    // Empêcher la suppression d'un propriétaire
-    if (userAssociation.role.name === 'owner') {
-      throw new ForbiddenException('Impossible de supprimer un propriétaire');
-    }
-
     // Empêcher l'auto-suppression
     if (currentUserId && userAssociation.user.id === currentUserId) {
       throw new ForbiddenException('Vous ne pouvez pas vous supprimer vous-même');
+    }
+
+    // Si on supprime un owner, vérifier que l'utilisateur actuel est owner
+    if (userAssociation.role.name === 'owner' && currentUserId) {
+      const currentUserAssociation = await this.usersAssociationsRepository.findOne({
+        where: { userId: currentUserId, associationId },
+        relations: ['role'],
+      });
+      if (!currentUserAssociation || currentUserAssociation.role.name !== 'owner') {
+        throw new ForbiddenException('Seul un propriétaire peut supprimer un autre propriétaire');
+      }
     }
 
     return this.usersAssociationsRepository.delete({ id, associationId });

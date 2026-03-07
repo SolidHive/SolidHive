@@ -160,8 +160,6 @@
       });
 
       if (result) {
-        toast.success('Connexion réussie !');
-
         // Vérifier s'il y a une association en attente de création
         await checkAndCreatePendingAssociation();
 
