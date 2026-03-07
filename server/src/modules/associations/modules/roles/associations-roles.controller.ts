@@ -45,7 +45,12 @@ export class AssociationsRolesController {
 
   @Get('roles')
   @UseGuards(AuthenticatedGuard, AssociationPermissionsGuard)
-  @AssociationPermissions(Permissions.ROLES_VIEW)
+  @AssociationPermissions(
+    Permissions.ROLES_VIEW,
+    Permissions.REGISTERS_CREATE,
+    Permissions.REGISTERS_UPDATE,
+    Permissions.REGISTERS_DELETE
+  )
   @ApiCookieAuth()
   @ApiResponse({ status: 401, description: 'Non authentifié' })
   @ApiResponse({ status: 403, description: 'Accès refusé' })

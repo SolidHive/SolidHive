@@ -57,6 +57,7 @@
   }>();
 
   const isLoading = ref(false);
+  const hasNavigated = ref(false);
 
   const handleCreate = async () => {
     try {
@@ -73,7 +74,10 @@
       const createdItem = await Database.create(props.createEndpoint, props.formData || {});
 
       // Émettre l'événement après création et attendre qu'il soit traité
-      await emit('afterCreate', createdItem);
+      emit('afterCreate', createdItem);
+
+      // Attendre un peu pour que l'événement soit traité
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       returnToView();
     } catch (error) {
@@ -129,19 +133,31 @@
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) {
+    if (!open && !hasNavigated.value) {
       returnToView();
     }
   };
 
   function returnToView() {
+    if (hasNavigated.value) {
+      return; // Éviter les doubles redirections
+    }
+
+    hasNavigated.value = true;
+
     try {
+      // Supprimer 'Create' du nom de la route pour retourner à la vue liste
+      const viewRouteName = (route.name as string).replace('Create', '');
+
+      console.log('Navigation de:', route.name, 'vers:', viewRouteName);
+
       router.push({
-        name: (route.name as string).replace('Create', ''),
-        params: route.params, // Conserver les params de la route parente
+        name: viewRouteName,
+        params: route.params,
       });
     } catch (error) {
       console.error('Erreur lors de la navigation:', error);
+      // En cas d'erreur, simplement retourner en arrière
       router.back();
     }
   }

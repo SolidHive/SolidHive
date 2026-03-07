@@ -5,7 +5,7 @@
     :can-create-items="crmAccess.canCreateMember"
     :can-update-items="crmAccess.canUpdateMember"
     :can-delete-items="crmAccess.canRemoveMember"
-    :can-modify-specific-item="(item: Member) => item.role.name !== 'owner'"
+    :can-modify-specific-item="canModifyMember"
     create-route-name="CRMMembersCreate"
     update-route-name="CRMMembersUpdate"
     delete-route-name="CRMMembersDelete"
@@ -89,6 +89,22 @@
   const router = useRouter();
   const crmPremiumAccess = useCrmPremiumAccess(crmStore.associationPremiumUntil);
   const associationId = route.params.id as string;
+
+  // Fonction pour déterminer si un membre peut être modifié/supprimé
+  const canModifyMember = (item: Member): boolean => {
+    // Empêcher l'auto-suppression
+    if (member?.user?.id && item.user.id === member.user.id) {
+      return false;
+    }
+
+    // Si l'utilisateur actuel est owner, il peut modifier n'importe qui (sauf lui-même)
+    const isOwner = member?.role?.name === 'owner';
+    if (isOwner) {
+      return true;
+    }
+    // Sinon, il ne peut pas modifier les owners
+    return item.role.name !== 'owner';
+  };
 
   onBeforeMount(async () => {
     const hasPremiumAccess = await crmPremiumAccess.hasAccessToPremiumFeatures(

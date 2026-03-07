@@ -1,7 +1,5 @@
 <template>
-  <aside
-    class="bg-accent fixed top-0 left-0 z-40 flex h-screen min-w-16 flex-none flex-col lg:w-45 xl:w-55 2xl:w-65"
-  >
+  <aside class="bg-accent top-0 left-0 z-40 flex min-h-screen flex-none flex-col">
     <div
       id="admin-aside-header"
       class="flex h-16 w-full items-center justify-center border-b border-gray-200 py-4 sm:h-24"

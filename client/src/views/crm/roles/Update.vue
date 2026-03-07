@@ -63,33 +63,39 @@
               class="rounded-md border p-3"
               :class="showError('permissions') ? 'border-destructive' : 'border-input'"
             >
-              <div class="grid grid-cols-2 gap-2">
-                <div
-                  v-for="permission in availablePermissions()"
-                  :key="permission.value"
-                  class="flex items-center space-x-2"
-                >
-                  <input
-                    :id="`edit-perm-${permission.value}`"
-                    v-model="formData.permissions"
-                    type="checkbox"
-                    :value="permission.value"
-                    :disabled="selectAll"
-                    class="border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    @change="
-                      () => {
-                        touchedFields.permissions = true;
-                        clearValidationErrors(validationErrors, 'permissions');
-                      }
-                    "
-                  />
-                  <label
-                    :for="`edit-perm-${permission.value}`"
-                    class="text-sm"
-                    :class="selectAll ? 'opacity-50' : ''"
-                  >
-                    {{ permission.label }}
-                  </label>
+              <div class="space-y-4">
+                <div v-for="group in groupedPermissions()" :key="group.type" class="space-y-2">
+                  <h4 class="text-muted-foreground text-sm font-semibold">{{ group.category }}</h4>
+                  <div class="grid grid-cols-2 gap-2 pl-2">
+                    <div
+                      v-for="permission in group.permissions"
+                      :key="permission.value"
+                      class="flex items-center space-x-2"
+                    >
+                      <input
+                        :id="`edit-perm-${permission.value}`"
+                        v-model="formData.permissions"
+                        type="checkbox"
+                        :value="permission.value"
+                        :disabled="selectAll"
+                        class="border-input bg-background ring-offset-background focus-visible:ring-ring h-4 w-4 rounded border focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        @change="
+                          (event) => {
+                            touchedFields.permissions = true;
+                            clearValidationErrors(validationErrors, 'permissions');
+                            onPermissionChange(event, formData.permissions);
+                          }
+                        "
+                      />
+                      <label
+                        :for="`edit-perm-${permission.value}`"
+                        class="text-sm"
+                        :class="selectAll ? 'opacity-50' : ''"
+                      >
+                        {{ permission.label }}
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -113,7 +119,7 @@
   import { useCrmStore } from '@/stores/crm';
   import Database from '@/utils/database.utils';
   import { updateRoleValidationSchema } from '@/utils/errors/crm/roles';
-  import { availablePermissions } from '@/utils/permissions.utils';
+  import { groupedPermissions, onPermissionChange } from '@/utils/permissions.utils';
   import { computed, onBeforeMount, onMounted, reactive, ref, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';

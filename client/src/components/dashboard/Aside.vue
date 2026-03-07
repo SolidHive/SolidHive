@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="bg-accent fixed top-0 left-0 z-40 flex h-screen min-w-16 flex-none flex-col lg:w-45 xl:w-55 2xl:w-65"
+    class="bg-accent top-0 left-0 z-40 flex min-h-screen min-w-16 flex-none flex-col lg:w-45 xl:w-55 2xl:w-65"
   >
     <div
       id="crm-aside-header"
@@ -85,7 +85,7 @@
             <span class="hidden lg:block">Cagnottes</span>
           </RouterLink>
           <RouterLink
-            v-if="crmAccess.canCreateEvent && isAssociationAccepted"
+            v-if="isAssociationAccepted"
             :to="{ name: 'CRMEvents', params: { locale: $route.params.locale } }"
             class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
             :class="$route.name === 'CRMEvents' ? '' : 'hover:bg-[#8574B3]'"
