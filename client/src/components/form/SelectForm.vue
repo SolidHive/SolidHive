@@ -23,12 +23,8 @@
     <select
       :id="inputName"
       :value="modelValue"
-      class="font-paragraph flex h-10 w-full appearance-none rounded-md border px-3 py-2 text-sm capitalize focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-      :class="
-        errorState
-          ? 'border-destructive focus-visible:ring-destructive'
-          : 'border-input bg-background ring-offset-background focus-visible:ring-ring'
-      "
+      class="font-paragraph w-full rounded-lg border px-2 py-2 disabled:cursor-not-allowed disabled:opacity-50"
+      :class="errorState ? 'border-destructive' : 'border-border'"
       @change="handleChange"
       @blur="$emit('blur')"
     >

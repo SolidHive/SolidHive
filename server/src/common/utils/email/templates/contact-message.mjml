@@ -1,0 +1,114 @@
+<mjml>
+  <mj-head>
+    <mj-title>Nouveau message de contact — SolidHive</mj-title>
+    <mj-font name="Montserrat" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" />
+    <mj-attributes>
+      <mj-all font-family="Montserrat, Arial, sans-serif" />
+      <mj-text font-size="15px" color="#333333" line-height="24px" />
+      <mj-section background-color="#ffffff" padding="0px" />
+    </mj-attributes>
+    <mj-style inline="inline">
+      .info-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #999999;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin: 0 0 4px 0;
+      }
+      .info-value {
+        font-size: 15px;
+        font-weight: 600;
+        color: #333333;
+        margin: 0;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#f0f0f0">
+
+    <!-- Header -->
+    <mj-section background-color="#510d6d" padding="50px 30px">
+      <mj-column>
+        <mj-text align="center" font-size="32px" font-weight="900" color="#ffffff" padding="0">
+          SOLIDHIVE
+        </mj-text>
+        <mj-text align="center" font-size="16px" font-weight="500" color="#ffffff" padding="10px 0 0 0">
+          Nouveau message de contact
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Greeting -->
+    <mj-section background-color="#ffffff" padding="40px 30px 20px 30px">
+      <mj-column>
+        <mj-text font-size="15px" color="#333333" line-height="24px" padding="0">
+          Bonjour,
+        </mj-text>
+        <mj-text font-size="15px" color="#666666" padding-top="12px" line-height="24px">
+          Un nouveau message a été soumis via le formulaire de contact de SolidHive.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Sender identity -->
+    <mj-section background-color="#ffffff" padding="10px 30px 30px 30px">
+      <mj-column>
+        <mj-text align="center" font-size="22px" font-weight="700" color="#510d6d" padding="0">
+          {{firstName}} {{lastName}}
+        </mj-text>
+        <mj-divider border-color="#f26639" border-width="3px" width="60px" padding="16px 0" />
+      </mj-column>
+    </mj-section>
+
+    <!-- Contact details -->
+    <mj-section background-color="#ffffff" padding="0 30px 10px 30px">
+      <mj-column>
+        <mj-text css-class="info-label" padding="0 0 4px 0">E-mail</mj-text>
+        <mj-text css-class="info-value" padding="0 0 20px 0">{{email}}</mj-text>
+
+        <mj-text css-class="info-label" padding="0 0 4px 0">Sujet</mj-text>
+        <mj-text css-class="info-value" padding="0 0 10px 0">{{subject}}</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Message content -->
+    <mj-section background-color="#ffffff" padding="0 30px 40px 30px">
+      <mj-column>
+        <mj-text css-class="info-label" padding="0 0 10px 0">Message</mj-text>
+        <mj-section background-color="#fafafa" border-radius="8px" padding="20px 25px">
+          <mj-column>
+            <mj-text font-size="14px" color="#333333" line-height="22px" padding="0">
+              {{{message}}}
+            </mj-text>
+          </mj-column>
+        </mj-section>
+      </mj-column>
+    </mj-section>
+
+    <!-- Actions recommandées -->
+    <mj-section background-color="#ffffff" padding="0 30px 40px 30px">
+      <mj-column background-color="#f0f9ff" border-radius="8px" padding="25px">
+        <mj-text font-size="14px" font-weight="700" color="#0497af" padding="0 0 12px 0">
+          Actions recommandées
+        </mj-text>
+        <mj-text font-size="13px" color="#555555" line-height="22px" padding="0">
+          • Répondre à l'expéditeur sous 48h ouvrées à : <strong>{{email}}</strong><br/>
+          • Transférer au service concerné si le sujet ne vous est pas destiné<br/>
+          • Archiver ce message une fois traité
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section background-color="#fafafa" padding="40px 30px">
+      <mj-column>
+        <mj-divider border-color="#e0e0e0" border-width="1px" padding="0 0 25px 0" />
+        <mj-text align="center" font-size="12px" color="#999999" line-height="20px" padding="0">
+          © {{year}} SolidHive — Tous droits réservés<br/>
+          Plateforme de soutien aux associations
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+  </mj-body>
+</mjml>

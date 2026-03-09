@@ -17,7 +17,7 @@
           </h3>
           <ul class="space-y-2 text-center md:text-left">
             <li>
-              <router-link to="/" class="hover:underline">Qui sommes-nous ?</router-link>
+              <router-link to="/about" class="hover:underline">Qui sommes-nous ?</router-link>
             </li>
             <li>
               <router-link to="/associations" class="hover:underline">
@@ -38,9 +38,9 @@
           </h3>
           <ul class="space-y-2 text-center md:text-left">
             <li>
-              <a href="#" class="hover:underline">Newletter</a>
+              <router-link to="/newsletter" class="hover:underline">Newsletter</router-link>
             </li>
-            <li><a href="#" class="hover:underline">FAQ</a></li>
+            <li><router-link to="/faq" class="hover:underline">FAQ</router-link></li>
           </ul>
         </div>
         <!-- Références légales -->
@@ -48,10 +48,10 @@
           <h3 class="font-title text-secondary mb-4 text-center text-lg md:text-left">CGU</h3>
           <ul class="space-y-2 text-center md:text-left">
             <li>
-              <a href="#" class="hover:underline">Mentions légales</a>
+              <router-link to="/legal-notice" class="hover:underline">Mentions légales</router-link>
             </li>
             <li>
-              <a href="#" class="hover:underline">Gestion des cookies</a>
+              <router-link to="/cookies" class="hover:underline">Gestion des cookies</router-link>
             </li>
           </ul>
         </div>
@@ -60,7 +60,9 @@
           <h3 class="font-title text-secondary mb-4 text-center text-lg md:text-left">Contact</h3>
           <ul class="space-y-2 text-center md:text-left">
             <li>
-              <a href="#" class="hover:underline">Contactez notre équipe</a>
+              <router-link to="/contact" class="hover:underline">
+                Contactez notre équipe
+              </router-link>
             </li>
             <li>
               <div class="mt-2 flex justify-center gap-4 md:justify-start">

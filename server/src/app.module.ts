@@ -21,6 +21,8 @@ import { InvoicesModule } from './modules/invoices/invoices.module';
 import { TicketsModule } from './modules/associations/modules/events/modules/tickets/tickets.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { PermissionAccessModule } from './modules/admin/permissions-access/permission-access.module';
+import { NewsletterModule } from './modules/newsletter/newsletter.module';
+import { ContactModule } from './modules/contact/contact.module';
 
 @Module({
   imports: [
@@ -53,6 +55,8 @@ import { PermissionAccessModule } from './modules/admin/permissions-access/permi
     TicketsModule,
     AdminModule,
     PermissionAccessModule,
+    NewsletterModule,
+    ContactModule,
     RedisModule,
   ],
   controllers: [],

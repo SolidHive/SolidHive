@@ -191,6 +191,42 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/newsletter',
+    name: 'Newsletter',
+    component: () => import('../views/Newsletter.vue'),
+    meta: { title: 'Newsletter SolidHive' },
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: () => import('../views/About.vue'),
+    meta: { title: 'Qui sommes-nous ?' },
+  },
+  {
+    path: '/faq',
+    name: 'FAQ',
+    component: () => import('../views/FAQ.vue'),
+    meta: { title: 'FAQ' },
+  },
+  {
+    path: '/legal-notice',
+    name: 'LegalNotice',
+    component: () => import('../views/LegalNotice.vue'),
+    meta: { title: 'Mentions légales' },
+  },
+  {
+    path: '/cookies',
+    name: 'CookiePolicy',
+    component: () => import('../views/CookiePolicy.vue'),
+    meta: { title: 'Gestion des cookies' },
+  },
+  {
+    path: '/contact',
+    name: 'Contact',
+    component: () => import('../views/Contact.vue'),
+    meta: { title: 'Contact' },
+  },
+  {
     path: '/crm/:id',
     name: 'CRM',
     component: () => import('../views/crm/Shell.vue'),

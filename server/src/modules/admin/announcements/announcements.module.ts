@@ -6,9 +6,10 @@ import { User } from '../../users/entities/user.entity';
 import { Announcement } from './entities/announcement.entity';
 import { File } from '../../files/entities/file.entity';
 import { FilesModule } from '../../files/files.module';
+import { NewsletterModule } from '../../newsletter/newsletter.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Announcement, File]), FilesModule],
+  imports: [TypeOrmModule.forFeature([User, Announcement, File]), FilesModule, NewsletterModule],
   controllers: [AnnouncementsController],
   providers: [AnnouncementsService],
 })

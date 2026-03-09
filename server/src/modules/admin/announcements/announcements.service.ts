@@ -8,6 +8,7 @@ import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
 import { FindOptionsDto } from '../../../common/dto/find-all-query.dto';
 import { FilesService } from '../../files/files.service';
 import { File } from '../../files/entities/file.entity';
+import { NewsletterService } from '../../newsletter/newsletter.service';
 
 @Injectable()
 export class AnnouncementsService {
@@ -18,7 +19,8 @@ export class AnnouncementsService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(File)
     private readonly fileRepository: Repository<File>,
-    private readonly filesService: FilesService
+    private readonly filesService: FilesService,
+    private readonly newsletterService: NewsletterService
   ) {}
 
   async create(createAnnouncementDto: CreateAnnouncementDto, userId: string) {
@@ -35,7 +37,20 @@ export class AnnouncementsService {
       createdBy: user,
     });
 
-    return this.announcementsRepository.save(announcement);
+    const saved = await this.announcementsRepository.save(announcement);
+
+    // envoyer la newsletter
+    try {
+      await this.newsletterService.notifyAnnouncement({
+        id: saved.id,
+        title: saved.title,
+        content: saved.content,
+      });
+    } catch (err) {
+      console.error('Erreur envoi newsletter après création annonce', err);
+    }
+
+    return saved;
   }
 
   async findAll(options?: FindOptionsDto) {
