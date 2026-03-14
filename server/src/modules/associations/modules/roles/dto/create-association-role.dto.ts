@@ -6,8 +6,8 @@ export class CreateAssociationRoleDto {
   @ApiProperty({ example: 'Gestionnaire', description: 'Nom du rôle' })
   @IsString({ message: 'Le nom du rôle doit être une chaîne de caractères' })
   @IsNotEmpty({ message: 'Le nom du rôle est requis' })
-  @Length(3, 12, {
-    message: 'Le nom du rôle doit contenir entre 3 et 12 caractères',
+  @Length(3, 50, {
+    message: 'Le nom du rôle doit contenir entre 3 et 50 caractères',
   })
   name: string;
 

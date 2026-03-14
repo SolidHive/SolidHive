@@ -183,12 +183,39 @@
           </div>
         </div>
       </section>
+
+      <section class="bg-primary rounded-2xl px-8 py-14 text-center">
+        <h2 class="font-title mb-4 text-2xl text-white sm:text-3xl lg:text-4xl">
+          Prêt à faire partie de la ruche ?
+        </h2>
+        <p class="font-paragraph mx-auto mb-8 max-w-xl text-sm text-white/80 lg:text-base">
+          Rejoignez des milliers de personnes qui soutiennent activement les associations et
+          contribuent à un monde plus solidaire.
+        </p>
+        <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
+          <Button
+            v-if="!isAuthenticated"
+            class="text-primary bg-white px-6 py-2 text-sm font-semibold hover:bg-white/90 sm:text-base"
+            @click="router.push('/register')"
+          >
+            Créer mon compte
+          </Button>
+          <Button
+            class="hover:text-primary border border-white bg-transparent px-6 py-2 text-sm text-white transition-colors hover:bg-white sm:text-base"
+            @click="router.push('/associations')"
+          >
+            Explorer les associations
+          </Button>
+        </div>
+      </section>
     </div>
   </PageContainer>
 </template>
 
 <script setup lang="ts">
-  import { ref, reactive } from 'vue';
+  import { computed, ref, reactive } from 'vue';
+  import { useRouter } from 'vue-router';
+  import { useAuthStore } from '@/stores/auth';
   import PageContainer from '@/components/PageContainer.vue';
   import { Button } from '@/components/ui/button';
   import InputForm from '@/components/form/InputForm.vue';
@@ -214,6 +241,9 @@
   const isSubscribing = ref(false);
   const isUnsubscribing = ref(false);
   const toast = useToast();
+  const router = useRouter();
+  const authStore = useAuthStore();
+  const isAuthenticated = computed(() => authStore.isAuthenticated());
 
   const showError = (): boolean => {
     return touched.email || formSubmitted.value ? !!validationErrors.email : false;

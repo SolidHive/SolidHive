@@ -2,7 +2,7 @@
   <Card class="h-full">
     <CardHeader class="px-4 py-3 sm:px-6 sm:py-4">
       <CardTitle class="text-sm sm:text-base md:text-lg">
-        Association la plus active (30 derniers jours)
+        Association la plus active (7 derniers jours)
       </CardTitle>
     </CardHeader>
     <CardContent class="px-3 py-3 sm:px-4 sm:py-4 md:px-6">
@@ -13,7 +13,7 @@
               {{ mostActiveAssociation.association.name }}
             </p>
             <p class="text-muted-foreground text-[10px] sm:text-xs">
-              {{ mostActiveAssociation.donationCount }} dons ce mois
+              {{ mostActiveAssociation.donationCount }} dons ces 7 derniers jours
             </p>
           </div>
           <div
@@ -73,15 +73,36 @@
   const props = defineProps<Props>();
 
   const chartData = computed(() => {
-    // Simuler une progression sur 30 jours (à adapter avec de vraies données)
+    // Simuler une progression sur 7 derniers jours (à adapter avec de vraies données)
     const donationCount = props.mostActiveAssociation?.donationCount || 0;
-    const labels = ['Semaine 1', 'Semaine 2', 'Semaine 3', 'Semaine 4'];
-    const data = [
-      Math.floor(donationCount * 0.15),
-      Math.floor(donationCount * 0.25),
-      Math.floor(donationCount * 0.3),
-      Math.floor(donationCount * 0.3),
-    ];
+
+    // Préparer les 7 derniers jours (dont aujourd'hui) pour l'axe X
+    const today = new Date();
+    const days = Array.from({ length: 7 }).map((_, index) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - (6 - index));
+      return date;
+    });
+
+    const labels = days.map((date) =>
+      date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+    );
+
+    const data = days.map((_, index) => {
+      if (donationCount <= 1) {
+        return index === days.length - 1 ? donationCount : 0;
+      }
+      return Math.floor(donationCount / days.length);
+    });
+
+    const sum = data.reduce((s, v) => s + v, 0);
+    if (sum !== donationCount) {
+      const lastIndex = data.length - 1;
+      const lastValue = data[lastIndex];
+      if (lastValue !== undefined) {
+        data[lastIndex] = lastValue + (donationCount - sum);
+      }
+    }
 
     return {
       labels,

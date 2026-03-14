@@ -1,37 +1,35 @@
 <template>
   <PageContainer>
-    <div class="bg-muted/30 min-h-screen">
-      <ProfileHeader :profile="profile" />
+    <ProfileHeader :profile="profile" />
 
-      <div class="grid gap-6 lg:grid-cols-3">
-        <div class="space-y-6 lg:col-span-2">
-          <ProfilePersonalInfo :profile="profile" />
+    <div class="grid gap-6 lg:grid-cols-3">
+      <div class="space-y-6 lg:col-span-2">
+        <ProfilePersonalInfo :profile="profile" />
 
-          <ProfileAssociations
-            :associations="associations"
-            :is-loading="isLoadingAssociations"
-            @create-association="createAssociation"
-          />
+        <ProfileAssociations
+          :associations="associations"
+          :is-loading="isLoadingAssociations"
+          @create-association="createAssociation"
+        />
 
-          <ProfileDonations
-            :recent-donations="recentDonations"
-            :recent-fundraising-donations="recentFundraisingDonations"
-            :recent-event-registrations="recentEventRegistrations"
-            :is-loading="isLoadingDonations"
-            @registration-cancelled="handleRegistrationCancelled"
-          />
-        </div>
-
-        <ProfileSidebar
-          :profile="profile"
-          :is-logging-out="isLoggingOut"
-          :favorite-associations="favoriteAssociations"
-          :is-loading-favorites="isLoadingFavorites"
-          @logout="handleLogout"
-          @remove-favorite="handleRemoveFavorite"
-          @account-deleted="handleAccountDeleted"
+        <ProfileDonations
+          :recent-donations="recentDonations"
+          :recent-fundraising-donations="recentFundraisingDonations"
+          :recent-event-registrations="recentEventRegistrations"
+          :is-loading="isLoadingDonations"
+          @registration-cancelled="handleRegistrationCancelled"
         />
       </div>
+
+      <ProfileSidebar
+        :profile="profile"
+        :is-logging-out="isLoggingOut"
+        :favorite-associations="favoriteAssociations"
+        :is-loading-favorites="isLoadingFavorites"
+        @logout="handleLogout"
+        @remove-favorite="handleRemoveFavorite"
+        @account-deleted="handleAccountDeleted"
+      />
     </div>
   </PageContainer>
 </template>

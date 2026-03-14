@@ -246,7 +246,7 @@
               <div class="bg-card space-y-2 rounded-lg border p-3">
                 <div class="flex items-center justify-between">
                   <span class="text-sm font-medium">Total des inscriptions</span>
-                  <span class="text-lg font-bold">{{ registrations.length }}</span>
+                  <span class="text-lg font-bold">{{ totalRegistrationsCount }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="text-sm font-medium">Inscriptions actives</span>
@@ -339,7 +339,7 @@
               <div class="border-t p-3 lg:p-4">
                 <div class="flex items-center justify-between">
                   <span class="text-sm font-medium">Total des inscriptions</span>
-                  <span class="text-lg font-bold">{{ registrations.length }}</span>
+                  <span class="text-lg font-bold">{{ totalRegistrationsCount }}</span>
                 </div>
                 <div class="mt-1 flex items-center justify-between">
                   <span class="text-sm font-medium">Inscriptions actives</span>
@@ -358,6 +358,18 @@
                   <span class="text-primary text-lg font-bold">{{ totalAmount }} €</span>
                 </div>
               </div>
+            </div>
+
+            <div class="pt-4">
+              <Pagination
+                :current-page="currentPage"
+                :total-pages="totalPages"
+                :total-items="totalItems"
+                :items-per-page="itemsPerPage"
+                @previous="goToPreviousPage"
+                @next="goToNextPage"
+                @update:items-per-page="handleItemsPerPageChange"
+              />
             </div>
           </div>
         </div>
@@ -495,7 +507,7 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted, reactive, ref } from 'vue';
+  import { computed, onMounted, reactive, ref, watch } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { ArrowLeft, ArrowRight, Calendar, Pencil, Plus, Trash2 } from 'lucide-vue-next';
   import Header from '@/components/dashboard/Header.vue';
@@ -517,7 +529,7 @@
   import { singlePricingValidationSchema } from '@/utils/errors/crm/events';
   import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
   import { useToast } from 'vue-toastification';
-  import type { Event, EventPricing, ParticipantCRM } from '@/interfaces';
+  import Pagination from '@/components/dashboard/Pagination.vue';
 
   const route = useRoute();
   const router = useRouter();
@@ -536,6 +548,16 @@
   const editingPricing = ref<EventPricing | null>(null);
   const pricingToDelete = ref<EventPricing | null>(null);
   const registrations = ref<any[]>([]);
+  const currentPage = ref(1);
+  const itemsPerPage = ref(5);
+  const totalItems = ref(0);
+  const totalPages = ref(1);
+
+  const totalRegistrations = ref<number | null>(null);
+  const totalActiveRegistrations = ref<number | null>(null);
+  const totalCancelledRegistrations = ref<number | null>(null);
+  const totalCollected = ref<number | null>(null);
+
   const formSubmitted = ref(false);
 
   const tabs = [
@@ -607,6 +629,10 @@
   };
 
   const totalAmount = computed(() => {
+    if (totalCollected.value !== null) {
+      return totalCollected.value.toFixed(2);
+    }
+
     const total = registrations.value.reduce((sum, reg) => {
       // Exclure les inscriptions annulées du total
       if (reg.cancelledAt) return sum;
@@ -616,11 +642,24 @@
   });
 
   const activeRegistrationsCount = computed(() => {
+    if (totalActiveRegistrations.value !== null) {
+      return totalActiveRegistrations.value;
+    }
     return registrations.value.filter((reg) => !reg.cancelledAt).length;
   });
 
   const cancelledRegistrationsCount = computed(() => {
+    if (totalCancelledRegistrations.value !== null) {
+      return totalCancelledRegistrations.value;
+    }
     return registrations.value.filter((reg) => reg.cancelledAt).length;
+  });
+
+  const totalRegistrationsCount = computed(() => {
+    if (totalRegistrations.value !== null) {
+      return totalRegistrations.value;
+    }
+    return registrations.value.length;
   });
 
   const getParticipantName = (registration: ParticipantCRM) => {
@@ -670,14 +709,54 @@
     try {
       loadingRegistrations.value = true;
       const response = await Database.getAll(
-        `association/${crmStore.currentAssociationId}/event/${event.value.id}/registers`
+        `association/${crmStore.currentAssociationId}/event/${event.value.id}/registers`,
+        {
+          skip: (currentPage.value - 1) * itemsPerPage.value,
+          take: itemsPerPage.value,
+        }
       );
-      registrations.value = response || [];
+
+      if (response && typeof response === 'object' && 'data' in response && 'meta' in response) {
+        registrations.value = response.data || [];
+        totalItems.value = response.meta.total;
+        totalPages.value = response.meta.totalPages;
+
+        totalRegistrations.value = response.meta.total;
+        totalActiveRegistrations.value = response.meta.active ?? null;
+        totalCancelledRegistrations.value = response.meta.cancelled ?? null;
+        totalCollected.value = response.meta.collected ?? null;
+      } else {
+        registrations.value = Array.isArray(response) ? response : [];
+        totalItems.value = registrations.value.length;
+        totalPages.value = Math.ceil(totalItems.value / itemsPerPage.value) || 1;
+
+        totalRegistrations.value = null;
+        totalActiveRegistrations.value = null;
+        totalCancelledRegistrations.value = null;
+        totalCollected.value = null;
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des inscriptions:', error);
     } finally {
       loadingRegistrations.value = false;
     }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage.value > 1) {
+      currentPage.value -= 1;
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage.value < totalPages.value) {
+      currentPage.value += 1;
+    }
+  };
+
+  const handleItemsPerPageChange = (value: number) => {
+    itemsPerPage.value = value;
+    currentPage.value = 1;
   };
 
   const editPricing = (pricing: EventPricing) => {
@@ -767,5 +846,9 @@
   onMounted(async () => {
     await loadEvent();
     await loadRegistrations();
+  });
+
+  watch([currentPage, itemsPerPage], () => {
+    loadRegistrations();
   });
 </script>

@@ -9,6 +9,7 @@
         class="border-input bg-background ring-offset-background focus-visible:ring-ring h-7 rounded-md border px-1.5 text-xs focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:h-8 sm:px-2 sm:text-sm"
         @change="$emit('update:itemsPerPage', parseInt(($event.target as HTMLSelectElement).value))"
       >
+        <option value="5">5</option>
         <option value="10">10</option>
         <option value="20">20</option>
         <option value="50">50</option>

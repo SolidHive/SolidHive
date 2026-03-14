@@ -266,6 +266,7 @@
         </p>
         <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
           <Button
+            v-if="!isAuthenticated"
             class="text-primary bg-white px-6 py-2 text-sm font-semibold hover:bg-white/90 sm:text-base"
             @click="router.push('/register')"
           >
@@ -284,7 +285,9 @@
 </template>
 
 <script setup lang="ts">
+  import { computed } from 'vue';
   import { useRouter } from 'vue-router';
+  import { useAuthStore } from '@/stores/auth';
   import PageContainer from '@/components/PageContainer.vue';
   import { Button } from '@/components/ui/button';
   import {
@@ -305,6 +308,8 @@
   } from 'lucide-vue-next';
 
   const router = useRouter();
+  const authStore = useAuthStore();
+  const isAuthenticated = computed(() => authStore.isAuthenticated());
 
   const values = [
     {

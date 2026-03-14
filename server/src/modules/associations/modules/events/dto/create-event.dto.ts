@@ -26,8 +26,8 @@ export class CreateEventDto {
     message: "La description de l'événement doit être une chaîne de caractères",
   })
   @IsOptional()
-  @Length(5, 500, {
-    message: "La description de l'événement doit contenir entre 5 et 500 caractères",
+  @Length(5, 1000, {
+    message: "La description de l'événement doit contenir entre 5 et 1000 caractères",
   })
   description?: string;
 

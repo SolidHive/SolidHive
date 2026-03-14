@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="bg-accent top-0 left-0 z-40 flex min-h-screen min-w-16 flex-none flex-col lg:w-45 xl:w-55 2xl:w-65"
+    class="bg-accent sticky top-0 left-0 z-40 flex h-screen min-w-16 flex-col lg:w-45 xl:w-55 2xl:w-65"
   >
     <div
       id="crm-aside-header"
@@ -15,19 +15,19 @@
     <div class="border-b border-gray-200 px-2 py-2 lg:px-4">
       <RouterLink
         to="/"
-        class="text-accent-foreground flex flex-row items-center justify-center gap-2 rounded-lg px-2 py-3 hover:bg-[#8574B3] lg:justify-start"
+        class="text-accent-foreground flex flex-row items-center justify-center gap-2 rounded-lg px-2 py-3 hover:bg-[#8574B3] lg:justify-start lg:transition lg:duration-150 lg:hover:-translate-x-1"
       >
         <ArrowLeft :size="20" />
         <span class="hidden lg:block xl:hidden">Quitter</span>
         <span class="hidden xl:block">Quitter le CRM</span>
       </RouterLink>
     </div>
-    <div class="flex flex-1 flex-col justify-between">
-      <div id="crm-aside-links" class="px-2 lg:px-4">
+    <div class="flex min-h-0 flex-1 flex-col">
+      <div id="crm-aside-links" class="min-h-0 flex-1 overflow-y-auto px-2 lg:px-4">
         <div class="flex flex-col gap-4 py-4 lg:py-6">
           <RouterLink
             :to="{ name: 'CRMHome', params: { locale: $route.params.locale } }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'CRMHome' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >
@@ -37,7 +37,7 @@
           <RouterLink
             v-if="crmAccess.canAccessToStatistics && isAssociationAccepted"
             :to="{ name: 'CRMStatistics', params: { locale: $route.params.locale } }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'CRMStatistics' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >
@@ -47,7 +47,7 @@
           <RouterLink
             v-if="crmAccess.canAccessToMembers && isAssociationAccepted"
             :to="{ name: 'CRMMembers', params: { locale: $route.params.locale } }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'CRMMembers' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >
@@ -57,7 +57,7 @@
           <RouterLink
             v-if="crmAccess.canAccessToRoles && isAssociationAccepted"
             :to="{ name: 'CRMRoles', params: { locale: $route.params.locale } }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'CRMRoles' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >
@@ -67,7 +67,7 @@
           <RouterLink
             v-if="isAssociationAccepted"
             :to="{ name: 'CRMAnnouncements', params: { locale: $route.params.locale } }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'CRMAnnouncements' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >
@@ -77,7 +77,7 @@
           <RouterLink
             v-if="isAssociationAccepted"
             :to="{ name: 'CRMFundraisings', params: { locale: $route.params.locale } }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'CRMFundraisings' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >
@@ -87,7 +87,7 @@
           <RouterLink
             v-if="isAssociationAccepted"
             :to="{ name: 'CRMEvents', params: { locale: $route.params.locale } }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'CRMEvents' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >

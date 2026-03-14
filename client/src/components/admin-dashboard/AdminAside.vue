@@ -1,5 +1,7 @@
 <template>
-  <aside class="bg-accent top-0 left-0 z-40 flex min-h-screen flex-none flex-col">
+  <aside
+    class="bg-accent sticky top-0 left-0 z-40 flex h-screen min-w-16 flex-col lg:w-45 xl:w-55 2xl:w-65"
+  >
     <div
       id="admin-aside-header"
       class="flex h-16 w-full items-center justify-center border-b border-gray-200 py-4 sm:h-24"
@@ -13,19 +15,19 @@
     <div class="border-b border-gray-200 px-2 py-2 lg:px-4">
       <RouterLink
         to="/"
-        class="text-accent-foreground flex flex-row items-center justify-center gap-2 rounded-lg px-2 py-3 hover:bg-[#8574B3] lg:justify-start"
+        class="text-accent-foreground flex flex-row items-center justify-center gap-2 rounded-lg px-2 py-3 hover:bg-[#8574B3] lg:justify-start lg:transition lg:duration-150 lg:hover:-translate-x-1"
       >
         <ArrowLeft :size="20" />
         <span class="hidden lg:block xl:hidden">Quitter</span>
         <span class="hidden xl:block">Quitter l'admin</span>
       </RouterLink>
     </div>
-    <div class="flex flex-1 flex-col justify-between">
-      <div id="admin-aside-links" class="px-2 lg:px-4">
+    <div class="flex min-h-0 flex-1 flex-col">
+      <div id="admin-aside-links" class="min-h-0 flex-1 overflow-y-auto px-2 lg:px-4">
         <div class="flex flex-col gap-4 py-4 lg:py-6">
           <RouterLink
             :to="{ name: 'AdminDashboardHome', params: { locale: $route.params.locale } }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'AdminDashboardHome' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >
@@ -34,7 +36,7 @@
           </RouterLink>
           <RouterLink
             :to="{ name: 'AdminDashboardAssociations', params: { locale: $route.params.locale } }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'AdminDashboardAssociations' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >
@@ -46,7 +48,7 @@
               name: 'AdminDashboardPermissionsAccess',
               params: { locale: $route.params.locale },
             }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'AdminDashboardPermissionsAccess' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >
@@ -55,7 +57,7 @@
           </RouterLink>
           <RouterLink
             :to="{ name: 'AdminDashboardUsers', params: { locale: $route.params.locale } }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'AdminDashboardUsers' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >
@@ -64,7 +66,7 @@
           </RouterLink>
           <RouterLink
             :to="{ name: 'AdminDashboardAnnouncements', params: { locale: $route.params.locale } }"
-            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2"
+            class="text-accent-foreground flex flex-row items-center justify-center rounded-lg px-2 py-3 lg:justify-start lg:gap-2 lg:transition lg:duration-150 lg:hover:-translate-x-1"
             :class="$route.name === 'AdminDashboardAnnouncements' ? '' : 'hover:bg-[#8574B3]'"
             active-class="bg-secondary font-semibold"
           >

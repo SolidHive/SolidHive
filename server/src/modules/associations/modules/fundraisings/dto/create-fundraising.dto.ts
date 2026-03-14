@@ -17,8 +17,8 @@ export class CreateFundraisingDto {
   })
   @IsString({ message: 'La description doit être une chaîne de caractères' })
   @IsOptional()
-  @Length(5, 500, {
-    message: 'La description doit contenir entre 5 et 500 caractères',
+  @Length(5, 2000, {
+    message: 'La description doit contenir entre 5 et 2000 caractères',
   })
   description?: string;
 

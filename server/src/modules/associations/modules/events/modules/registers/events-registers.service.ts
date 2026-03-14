@@ -72,12 +72,56 @@ export class EventsRegistersService {
     return this.eventsRegisterRepository.save(eventRegister);
   }
 
-  findAll(eventId: string, options?: FindOptionsDto) {
-    return this.eventsRegisterRepository.find({
+  async findAll(eventId: string, options?: FindOptionsDto) {
+    const where = { eventPricing: { event: { id: eventId } } };
+
+    const skip = options?.skip ?? 0;
+    const requestedTake = options?.take ?? 5;
+    // Limit page size to avoid large payloads, but allow more than 5 if needed.
+    const take = Math.min(requestedTake, 100);
+
+    // Global stats (total registrations, active/cancelled counts, collected amount) are computed
+    // independently of pagination so they remain stable across pages.
+    const baseQuery = this.eventsRegisterRepository
+      .createQueryBuilder('register')
+      .leftJoin('register.eventPricing', 'eventPricing')
+      .leftJoin('eventPricing.event', 'event')
+      .where('event.id = :eventId', { eventId });
+
+    const total = await baseQuery.getCount();
+    const activeCount = await baseQuery.clone().andWhere('register.cancelledAt IS NULL').getCount();
+    const cancelledCount = total - activeCount;
+
+    const totalCollectedRaw = await baseQuery
+      .clone()
+      .select('COALESCE(SUM(eventPricing.amount), 0)', 'totalCollected')
+      .andWhere('register.cancelledAt IS NULL')
+      .getRawOne();
+
+    const totalCollected = Number(totalCollectedRaw?.totalCollected ?? 0);
+
+    const findOptions: any = {
       ...options,
-      where: { eventPricing: { event: { id: eventId } } },
+      where,
       relations: ['user', 'eventPricing'],
-    });
+      skip,
+      take,
+    };
+
+    const [registers, _] = await this.eventsRegisterRepository.findAndCount(findOptions);
+
+    return {
+      data: registers,
+      meta: {
+        total,
+        active: activeCount,
+        cancelled: cancelledCount,
+        collected: totalCollected,
+        page: Math.floor(skip / take) + 1,
+        limit: take,
+        totalPages: Math.ceil(total / take),
+      },
+    };
   }
 
   async findUserRegisters(eventId: string, userId: string) {

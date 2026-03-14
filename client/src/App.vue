@@ -1,14 +1,14 @@
 <template>
-  <div class="flex min-h-screen flex-col">
-    <div v-if="$route.meta.dashboard !== true">
-      <Navbar />
+  <div v-if="$route.meta.dashboard !== true">
+    <Navbar />
+    <div class="flex min-h-screen flex-col">
       <main class="w-full grow">
         <router-view />
       </main>
       <Footer />
     </div>
-    <router-view v-else />
   </div>
+  <router-view v-else />
 </template>
 
 <script setup lang="ts">
