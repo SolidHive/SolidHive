@@ -41,11 +41,11 @@ describe('PermissionAccessService', () => {
       permissionAccessRepositoryMock.create.mockReturnValue(dto);
       permissionAccessRepositoryMock.save.mockResolvedValue(created);
 
-      const _result = await service.create(dto as any, 'user-1');
+      const _result = await service.create(dto as any);
 
       expect(permissionAccessRepositoryMock.create).toHaveBeenCalledWith(dto);
       expect(permissionAccessRepositoryMock.save).toHaveBeenCalledWith(dto);
-      expect(result).toEqual(created);
+      expect(_result).toEqual(created);
     });
   });
 

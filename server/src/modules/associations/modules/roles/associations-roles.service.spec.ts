@@ -51,7 +51,7 @@ describe('AssociationsRolesService', () => {
       const _result = await service.create(dto as any, userAssociation as any);
 
       expect(associationRoleRepositoryMock.save).toHaveBeenCalled();
-      expect(result).toEqual(saved);
+      expect(_result).toEqual(saved);
     });
   });
 
