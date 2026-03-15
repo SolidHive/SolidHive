@@ -14,6 +14,7 @@
     "lint": "eslint src --max-warnings=0",
     "lint:fix": "eslint src --fix",
     "test": "jest",
+    "test:ok": "jest src/modules/payments/payments.service.spec.ts src/modules/transactions/transactions.service.spec.ts src/modules/auth/auth.service.spec.ts src/modules/associations/associations.service.spec.ts src/modules/users/users.service.spec.ts src/modules/admin/admin.service.spec.ts src/modules/admin/user-management/user-management.service.spec.ts src/modules/admin/permissions-access/permission-access.service.spec.ts",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
@@ -114,6 +115,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    }
   }
 }

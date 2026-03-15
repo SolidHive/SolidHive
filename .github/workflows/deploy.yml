@@ -6,9 +6,40 @@ on:
       - develop
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies (server)
+        run: |
+          cd server
+          npm ci
+
+      - name: Run unit tests
+        run: |
+          cd server
+          npm run test:ok -- --coverage --watchAll=false
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: server/coverage/
+
   deploy_vps:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/develop' }}
+    needs: test
+    if: ${{ github.ref == 'refs/heads/develop' && success() }}
 
     steps:
       - name: Déploiement SSH sur VPS
