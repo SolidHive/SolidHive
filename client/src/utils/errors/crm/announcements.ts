@@ -34,8 +34,7 @@ const announcementBaseSchema = {
   content: yup
     .string()
     .required(announcementCrmErrorMessages.required.content)
-    .min(10, announcementCrmErrorMessages.minLength.content)
-    .max(1000, announcementCrmErrorMessages.maxLength.content),
+    .min(10, announcementCrmErrorMessages.minLength.content),
   isActive: yup.boolean(),
 };
 
