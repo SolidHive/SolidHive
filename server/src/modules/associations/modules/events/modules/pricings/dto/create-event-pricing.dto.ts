@@ -21,8 +21,8 @@ export class CreateEventPricingDto {
   })
   @IsString({ message: 'La description doit être une chaîne de caractères' })
   @IsOptional()
-  @Length(5, 200, {
-    message: 'La description doit contenir entre 5 et 200 caractères',
+  @Length(5, 1000, {
+    message: 'La description doit contenir entre 5 et 1000 caractères',
   })
   description?: string;
 
