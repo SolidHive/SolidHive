@@ -33,7 +33,6 @@
         </div>
 
         <!-- Content -->
-        /* eslint-disable vue/no-v-html */
         <div
           class="rich-content rounded-lg bg-gray-50 p-6 text-base text-gray-700"
           v-html="announcement?.content"
