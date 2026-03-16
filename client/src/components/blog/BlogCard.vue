@@ -27,9 +27,10 @@
       </h3>
 
       <!-- Content Preview -->
-      <p class="font-paragraph line-clamp-3 overflow-hidden text-sm text-ellipsis text-gray-600">
-        {{ announcement.content }}
-      </p>
+      <div
+        class="rich-content rich-content-preview overflow-hidden text-sm text-gray-600"
+        v-html="announcement.content"
+      ></div>
 
       <!-- Date -->
       <div class="mt-auto flex items-center gap-2 text-xs text-gray-500">

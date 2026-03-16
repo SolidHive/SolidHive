@@ -19,9 +19,6 @@ export class CreateAnnouncementDto {
   })
   @IsString({ message: 'Le contenu doit être une chaîne de caractères' })
   @IsOptional()
-  @Length(5, 1000, {
-    message: 'Le contenu doit contenir entre 5 et 1000 caractères',
-  })
   content?: string;
 
   @ApiProperty({
