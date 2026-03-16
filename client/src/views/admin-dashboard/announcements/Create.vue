@@ -36,7 +36,7 @@
           </template>
         </InputForm>
 
-        <TextareaForm
+        <!-- <TextareaForm
           v-model="formData.content"
           input-name="announcement-content"
           placeholder="Décrivez votre annonce..."
@@ -51,7 +51,24 @@
             Contenu
             <span class="text-destructive">*</span>
           </template>
-        </TextareaForm>
+        </TextareaForm> -->
+
+        <label for="announcement-content" class="mb-1 block text-sm font-medium">
+          Contenu
+          <span class="text-destructive">*</span>
+        </label>
+        <div class="[&_.ql-editor]:max-h-52 [&_.ql-editor]:min-h-52">
+          <QuillEditor
+            id="announcement-content"
+            v-model:content="formData.content"
+            content-type="html"
+            placeholder="Décrivez votre annonce..."
+            :error-message="getErrorMessage('content')"
+            :error-state="showError('content')"
+            @input="clearValidationErrors(validationErrors, 'content')"
+            @blur="() => (touchedFields.content = true)"
+          />
+        </div>
 
         <div class="flex items-center space-x-2">
           <input
@@ -73,7 +90,6 @@
 <script setup lang="ts">
   import { Create } from '@/components/dashboard/crud';
   import InputForm from '@/components/form/InputForm.vue';
-  import TextareaForm from '@/components/form/TextareaForm.vue';
   import ImageUpload from '@/components/form/ImageUpload.vue';
   import Database from '@/utils/database.utils';
   import { computed, reactive, ref, watch } from 'vue';
@@ -81,6 +97,7 @@
   import { createAnnouncementValidationSchema } from '@/utils/errors/crm/announcements';
   import { validateWithYup, clearValidationErrors } from '@/utils/validation.utils';
   import { useToast } from 'vue-toastification';
+  import { QuillEditor } from '@vueup/vue-quill';
 
   const router = useRouter();
   const toast = useToast();
@@ -141,10 +158,11 @@
   });
 
   const handleBeforeSubmit = async () => {
+    console.log('Form data before submit:', formData);
     formSubmitted.value = true;
 
     const isValid = await validateForm();
-
+    console.log('Form validation result:', isValid, validationErrors);
     if (!isValid) {
       return false;
     }

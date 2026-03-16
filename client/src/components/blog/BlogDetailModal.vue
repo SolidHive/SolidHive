@@ -1,6 +1,8 @@
 <template>
   <Dialog v-model:open="isOpen">
-    <DialogContent class="flex max-h-[90vh] w-[calc(100%-2rem)] max-w-4xl flex-col sm:w-full">
+    <DialogContent
+      class="flex max-h-[90vh] w-[calc(100%-2rem)] flex-col sm:w-full sm:max-w-[90vw]!"
+    >
       <DialogHeader>
         <DialogTitle class="font-title text-secondary text-2xl">
           {{ announcement?.title }}
@@ -31,11 +33,11 @@
         </div>
 
         <!-- Content -->
+        /* eslint-disable vue/no-v-html */
         <div
-          class="font-paragraph rounded-lg bg-gray-50 p-6 text-base leading-relaxed break-words whitespace-pre-wrap text-gray-700"
-        >
-          {{ announcement?.content }}
-        </div>
+          class="rich-content rounded-lg bg-gray-50 p-6 text-base text-gray-700"
+          v-html="announcement?.content"
+        ></div>
       </div>
     </DialogContent>
   </Dialog>

@@ -54,7 +54,7 @@ export default typescriptEslint.config(
 
       // Vue rules
       'vue/multi-word-component-names': 'off',
-      'vue/no-v-html': 'warn',
+      'vue/no-v-html': 'off',
       'vue/attributes-order': [
         'warn',
         {

@@ -181,4 +181,128 @@
     font-family: 'Montserrat', system-ui, sans-serif;
     font-weight: 500; /* Montserrat Medium */
   }
+
+  .rich-content {
+    font-family: 'Montserrat', system-ui, sans-serif;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .rich-content > :first-child {
+    margin-top: 0;
+  }
+
+  .rich-content > :last-child {
+    margin-bottom: 0;
+  }
+
+  .rich-content :where(p, ul, ol, blockquote, pre, table) {
+    margin-block: 1rem;
+  }
+
+  .rich-content :where(h1, h2, h3, h4, h5, h6) {
+    color: var(--secondary);
+    font-family: 'Montserrat', system-ui, sans-serif;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    text-wrap: balance;
+  }
+
+  .rich-content h1 {
+    font-size: 1.875rem;
+  }
+
+  .rich-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .rich-content h3 {
+    font-size: 1.25rem;
+  }
+
+  .rich-content h4 {
+    font-size: 1.125rem;
+  }
+
+  .rich-content h5,
+  .rich-content h6 {
+    font-size: 1rem;
+  }
+
+  .rich-content a {
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.2em;
+    transition: color 0.2s ease;
+  }
+
+  .rich-content a:hover {
+    color: var(--accent);
+  }
+
+  .rich-content :where(ul, ol) {
+    padding-left: 1.5rem;
+  }
+
+  .rich-content ul {
+    list-style: disc;
+  }
+
+  .rich-content ol {
+    list-style: decimal;
+  }
+
+  .rich-content li + li {
+    margin-top: 0.35rem;
+  }
+
+  .rich-content blockquote {
+    border-left: 4px solid var(--accent);
+    color: color-mix(in oklab, var(--foreground) 78%, white 22%);
+    font-style: italic;
+    padding-left: 1rem;
+  }
+
+  .rich-content strong {
+    font-weight: 700;
+  }
+
+  .rich-content em {
+    font-style: italic;
+  }
+
+  .rich-content img {
+    border-radius: var(--radius-md);
+    height: auto;
+    margin-block: 1rem;
+    max-width: 100%;
+  }
+
+  .rich-content hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin-block: 1.5rem;
+  }
+
+  .rich-content-preview {
+    display: -webkit-box;
+    line-height: 1.6;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .rich-content-preview :where(h1, h2, h3, h4, h5, h6) {
+    font-size: 1em;
+    margin-top: 0;
+    margin-bottom: 0.25rem;
+  }
+
+  .rich-content-preview :where(p, ul, ol, blockquote) {
+    margin-block: 0.25rem;
+  }
 }
