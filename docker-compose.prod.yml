@@ -107,16 +107,21 @@ services:
       - ./certbot/conf:/etc/letsencrypt
     networks:
       - app-network
-    restart: unless-stopped
+    restart: "no"
 
   certbot-renewer:
-    image: docker:stable
+    image: alpine:3.20
     container_name: solidhive-certbot-renewer
     volumes:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock
-    entrypoint: ["/bin/sh", "-c", "apk add --no-cache py3-pip openssl && pip3 install certbot && \n+      while true; do \n+        certbot renew --webroot -w /var/www/certbot --deploy-hook 'docker kill -s HUP solidhive-nginx' || true; \n+        sleep 43200; \n+      done"]
+    command: >
+      sh -c "apk add --no-cache certbot docker-cli >/dev/null &&
+      while true; do
+        certbot renew --webroot -w /var/www/certbot --deploy-hook 'docker kill -s HUP solidhive-nginx' || true;
+        sleep 43200;
+      done"
     networks:
       - app-network
     restart: unless-stopped

@@ -14,25 +14,20 @@ docker-compose -f docker-compose.prod.yml exec nginx nginx -t && docker-compose 
 
 2) Automatiser le renouvellement
 
-- Option hôte (cron/systemd) : ajouter une tâche cron qui exécute `certbot renew` et recharge Nginx.
-- Option conteneurisée (fourni ici) : le service `certbot-renewer` dans `docker-compose.prod.yml` exécute périodiquement `certbot renew` et demande le reload de Nginx via le socket Docker.
 
 3) Vérifications
 
-- Lister certificats: `docker-compose -f docker-compose.prod.yml run --rm certbot certificates`
-- Tester renouvellement: `docker-compose -f docker-compose.prod.yml run --rm certbot renew --dry-run`
-- Vérifier Nginx: `docker-compose -f docker-compose.prod.yml exec nginx nginx -t`
 
 4) Renouvellement automatique dans Docker
 
-Le service `certbot-renewer` (si activé) :
+Le service `certbot-renewer` :
 
-- monte `/var/run/docker.sock` pour pouvoir envoyer un HUP au conteneur `solidhive-nginx` après renouvellement
-- exécute `certbot renew --webroot -w /var/www/certbot` toutes les 12 heures
 
 Pré-requis:
-- Le service a besoin d'accéder au socket Docker (`/var/run/docker.sock`) pour reloader le conteneur `solidhive-nginx`.
-- Assurez-vous que le nom du conteneur Nginx dans `docker-compose.prod.yml` est `solidhive-nginx` (c'est le cas par défaut ici).
 
 Sécurité:
-- Monter le socket Docker dans un conteneur donne des droits étendus sur l'hôte; si cela pose problème, utilisez la solution cron côté hôte.
+
+```sh
+docker-compose -f docker-compose.prod.yml logs -f certbot-renewer
+```
+Pré-requis:
