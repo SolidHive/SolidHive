@@ -7,10 +7,12 @@
 ```sh
 docker-compose -f docker-compose.prod.yml up -d nginx certbot
 docker-compose -f docker-compose.prod.yml run --rm certbot certonly --webroot -w /var/www/certbot \
-  -d theotime.pagies.lille.mds-project.fr -d www.theotime.pagies.lille.mds-project.fr \
+  -d theotime.pagies.lille.mds-project.fr \
   --email admin@theotime.pagies.lille.mds-project.fr --agree-tos --no-eff-email
 docker-compose -f docker-compose.prod.yml exec nginx nginx -t && docker-compose -f docker-compose.prod.yml exec nginx nginx -s reload
 ```
+
+Si vous voulez aussi utiliser `www.theotime.pagies.lille.mds-project.fr`, il faut d'abord créer un enregistrement DNS `A` ou `CNAME` pour `www`.
 
 2) Automatiser le renouvellement
 
