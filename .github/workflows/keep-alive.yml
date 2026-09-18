@@ -1,0 +1,25 @@
+# Empêche l'instance gratuite Render de s'endormir : elle se met en veille après
+# 15 minutes sans requête et met 30 à 60 s à se réveiller. Un appel toutes les
+# 10 minutes suffit. GitHub peut décaler un cron de quelques minutes, ce qui
+# reste sous le seuil. Une seule instance tient dans les 750 h mensuelles.
+#
+# GitHub suspend les crons d'un dépôt sans activité depuis 60 jours : un commit
+# ou un lancement manuel les réactive.
+
+name: Keep API awake
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health
+        run: |
+          URL="${{ vars.API_URL || 'https://solidhive-api.onrender.com' }}/health"
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 90 "$URL")
+          echo "$URL -> $code"
+          test "$code" = "200"

@@ -10,6 +10,7 @@ import { EmailModule } from './common/utils/email/email.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { getNestConfig } from './config/database.config';
+import { HealthController } from './health.controller';
 import { SecurityModule } from './modules/security/security.module';
 import { AssociationsModule } from './modules/associations/associations.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
@@ -59,7 +60,7 @@ import { ContactModule } from './modules/contact/contact.module';
     ContactModule,
     RedisModule,
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [
     {
       provide: APP_GUARD,

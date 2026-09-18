@@ -10,6 +10,7 @@ import { EventRegister } from '../associations/modules/events/modules/registers/
 import { FilesService } from '../files/files.service';
 import { File } from '../files/entities/file.entity';
 import puppeteer from 'puppeteer';
+import { CHROMIUM_ARGS } from '../../common/utils/chromium';
 import { join } from 'path';
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
 
@@ -542,7 +543,7 @@ export class InvoicesService {
     try {
       browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: CHROMIUM_ARGS,
       });
 
       const page = await browser.newPage();

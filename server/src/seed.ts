@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import { getBaseConfig } from './config/database.config';
 import {
   seedUsers,
   seedAssociations,
@@ -68,15 +69,11 @@ export default seed;
  * Standalone seeding script that can be run directly
  */
 async function runSeed(): Promise<void> {
+  // Même connexion que l'application (DATABASE_URL + DB_SSL, ou DB_*), seules
+  // les entités changent : celles du code source, ce script tourne via ts-node.
   const dataSource = new DataSource({
-    type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'password',
-    database: process.env.DB_NAME || 'solidhive',
+    ...getBaseConfig(),
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
-    synchronize: false,
   });
 
   await dataSource.initialize();

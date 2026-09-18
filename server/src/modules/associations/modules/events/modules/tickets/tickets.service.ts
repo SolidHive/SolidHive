@@ -9,6 +9,7 @@ import { File } from '../../../../../files/entities/file.entity';
 import { EmailService } from '../../../../../../common/utils/email/email.service';
 import { Transaction } from '../../../../../transactions/entities/transaction.entity';
 import puppeteer from 'puppeteer';
+import { CHROMIUM_ARGS } from '../../../../../../common/utils/chromium';
 import { join } from 'path';
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
 import * as Handlebars from 'handlebars';
@@ -244,7 +245,7 @@ export class TicketsService {
   private async generatePDF(html: string): Promise<Buffer> {
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: CHROMIUM_ARGS,
     });
 
     const page = await browser.newPage();

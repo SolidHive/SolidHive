@@ -1,0 +1,93 @@
+# Déploiement gratuit sur Render (Blueprint) : voir docs/deploiement-render.md
+#
+# - solidhive-api   : l'API NestJS + Chromium, construite depuis server/Dockerfile
+# - solidhive-redis : sessions et cache (Render Key Value, réseau privé)
+# - solidhive       : le client Vue en site statique ; /api, /files et /uploads
+#                     sont réécrits vers l'API pour rester sur la même origine
+#                     (cookies de session en first-party).
+#
+# La base PostgreSQL est chez Neon : renseigner DATABASE_URL à la création.
+
+services:
+  - name: solidhive-api
+    type: web
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # URL Neon, avec ?sslmode=require
+      - key: DB_SSL
+        value: "true"
+      - key: REDIS_URL
+        fromService:
+          name: solidhive-redis
+          type: keyvalue
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: FRONTEND_URL
+        value: https://solidhive.onrender.com # à ajuster si Render suffixe le nom
+      - key: USE_STRIPE_MOCK
+        value: "false"
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: EMAIL_HOST
+        value: smtp-relay.brevo.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_SECURE
+        value: "false"
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_FROM_NAME
+        value: SolidHive
+      - key: EMAIL_SUPPORT
+        sync: false
+
+  - name: solidhive-redis
+    type: keyvalue
+    plan: free
+    region: frankfurt
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: [] # accessible uniquement depuis le réseau privé Render
+
+  - name: solidhive
+    type: web
+    runtime: static
+    region: frankfurt
+    buildCommand: cd client && npm ci && npm run build
+    staticPublishPath: ./client/dist
+    autoDeployTrigger: commit
+    envVars:
+      - key: VITE_API_URL
+        value: /api
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://solidhive-api.onrender.com/*
+      - type: rewrite
+        source: /files/*
+        destination: https://solidhive-api.onrender.com/files/*
+      - type: rewrite
+        source: /uploads/*
+        destination: https://solidhive-api.onrender.com/uploads/*
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -59,14 +59,14 @@ RUN apk add --no-cache \
     ttf-freefont
 
 COPY package*.json ./
-RUN npm install --omit=dev && npm install @nestjs/cli
+RUN npm install --omit=dev
 
 COPY --from=builder /usr/src/app/dist ./dist
-RUN echo "Contents of dist folder:" && ls -la dist/ && echo "Checking for index.js:" && ls -la dist/index.js || echo "index.js not found"
-
-# Copy source files for development mode
-COPY . .
 
 ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["node", "dist/index.js"]
+
+# Les migrations tournent au démarrage, depuis dist/ : la CLI TypeORM y trouve
+# les entités et migrations compilées avec les chemins relatifs de la config.
+# Puis l'API démarre (nest build compile main.ts en dist/src/main.js).
+CMD ["sh", "-c", "cd dist && node ../node_modules/typeorm/cli.js migration:run -d typeorm.config.js && cd .. && node dist/src/main.js"]

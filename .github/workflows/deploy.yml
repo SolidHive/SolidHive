@@ -1,9 +1,10 @@
 name: Deploy to Production
 
+# Déploiement VPS en pause : l'hébergement est passé sur Render (voir
+# render.yaml et docs/deploiement-render.md). Relançable à la main depuis l'onglet
+# Actions ; pour le réactiver au push, remettre le déclencheur push sur develop.
 on:
-  push:
-    branches:
-      - develop
+  workflow_dispatch:
 
 jobs:
   test:
