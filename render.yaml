@@ -70,8 +70,7 @@ services:
 
   - name: solidhive
     type: web
-    runtime: static
-    region: frankfurt
+    runtime: static # servi par le CDN Render, pas de région à choisir
     buildCommand: cd client && npm ci && npm run build
     staticPublishPath: ./client/dist
     autoDeployTrigger: commit
