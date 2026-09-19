@@ -1,23 +1,16 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
-import { Response, Request } from 'express';
-import * as fs from 'fs';
+import { Response } from 'express';
 
+/**
+ * Met en forme les erreurs de l'envoi de fichier. Le fichier reçu ne vit qu'en
+ * mémoire (Multer `memoryStorage`) : rien à nettoyer sur disque en cas d'échec,
+ * le stockage n'est écrit qu'une fois les vérifications passées.
+ */
 @Catch()
 export class FileCleanupFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const req = ctx.getRequest<Request>();
-    const res = ctx.getResponse<Response>();
+    const res = host.switchToHttp().getResponse<Response>();
 
-    // Nettoyage du fichier uploadé en cas d'erreur
-    const file = (req as any).file;
-    if (file && file.path && typeof file.path === 'string') {
-      fs.unlink(file.path as fs.PathLike, (err) => {
-        if (err) console.error('Error deleting file:', err);
-      });
-    }
-
-    // Gestion des différents types d'exceptions
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let response: any = {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,

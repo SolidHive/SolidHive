@@ -2,22 +2,28 @@
 
 Hébergement sans carte bancaire, à partir du `render.yaml` à la racine du dépôt.
 
-| Brique              | Où                                     | Gratuit                                      |
-| ------------------- | -------------------------------------- | -------------------------------------------- |
-| API NestJS + PDF    | Render, web service Docker `solidhive-api` | 512 Mo, veille après 15 min sans requête |
-| Sessions et cache   | Render Key Value `solidhive-redis`     | 25 Mo, réseau privé                          |
-| Client Vue          | Render static site `solidhive`         | illimité, ne dort jamais                     |
-| PostgreSQL          | Neon                                   | 0,5 Go, réveil automatique                   |
-| Emails              | Brevo (SMTP)                           | 300 par jour                                 |
-| Paiements           | Stripe en mode test                    | aucun vrai paiement                          |
+| Brique                 | Où                                         | Gratuit                                  |
+| ---------------------- | ------------------------------------------ | ---------------------------------------- |
+| API NestJS + PDF       | Render, web service Docker `solidhive-api` | 512 Mo, veille après 15 min sans requête |
+| Sessions et cache      | Render Key Value `solidhive-redis`         | 25 Mo, réseau privé                      |
+| Client Vue             | Render static site `solidhive`             | illimité, ne dort jamais                 |
+| PostgreSQL             | Neon                                       | 0,5 Go, réveil automatique               |
+| Fichiers (images, PDF) | Neon Object Storage, compatible S3         | 5 Go par projet                          |
+| Emails                 | Brevo (SMTP)                               | 300 par jour                             |
+| Paiements              | Stripe en mode test                        | aucun vrai paiement                      |
 
-Le client réécrit `/api/*`, `/files/*` et `/uploads/*` vers l'API : tout reste sur
+Le client réécrit `/api/*` et `/files/*` vers l'API : tout reste sur
 une seule origine, le cookie de session est first-party et le CORS ne joue pas.
 
 ## 1. Neon
 
 1. Créer un projet sur [neon.tech](https://neon.tech), région Frankfurt, base `solidhive`.
 2. Copier la chaîne de connexion **pooled** (`...-pooler...neon.tech/solidhive?sslmode=require`).
+3. Onglet **Object storage** de la branche → **New bucket**, nom `solidhive`, accès
+   `private` : les fichiers passent par l'API, qui vérifie les droits.
+4. Barre latérale **Credentials** → **Create credential**, scopes `storage:read` et
+   `storage:write`. Neon affiche une seule fois `AWS_ENDPOINT_URL_S3`,
+   `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` et `AWS_REGION` : les copier.
 
 ## 2. Brevo
 
@@ -28,7 +34,8 @@ Créer une clé SMTP dans Brevo : le login SMTP devient `EMAIL_USER`, la clé
 
 1. Dashboard → **New** → **Blueprint** → choisir le dépôt `SolidHive/SolidHive`,
    branche `develop`. Render lit `render.yaml` et propose les trois services.
-2. Renseigner les variables marquées `sync: false` : `DATABASE_URL` (Neon),
+2. Renseigner les variables marquées `sync: false` : `DATABASE_URL` (Neon), les trois
+   `AWS_*` du stockage objet (et vérifier que `AWS_REGION` correspond à l'endpoint),
    `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `EMAIL_USER`, `EMAIL_PASS`,
    `EMAIL_FROM`, `EMAIL_SUPPORT`. `SESSION_SECRET` et `JWT_SECRET` sont générés.
 3. Lancer. Le premier build de l'API prend 5 à 8 minutes (Chromium + npm).
@@ -37,10 +44,13 @@ Créer une clé SMTP dans Brevo : le login SMTP devient `EMAIL_USER`, la clé
    statique, puis les reporter dans `render.yaml`.
 
 Au démarrage, le conteneur joue les migrations TypeORM puis lance l'API. Les
-données de démonstration se chargent une fois depuis un poste local :
+données de démonstration se chargent une fois depuis un poste local, avec les mêmes
+variables que l'API pour que les images partent dans le bucket :
 
 ```bash
-cd server && DATABASE_URL='<url Neon>' DB_SSL=true npm run seed
+cd server && DATABASE_URL='<url Neon>' DB_SSL=true \
+  AWS_ENDPOINT_URL_S3=... AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... \
+  AWS_REGION=eu-central-1 STORAGE_BUCKET=solidhive npm run seed
 ```
 
 ## 4. Garder l'API éveillée
@@ -55,11 +65,9 @@ workflow les relance.
 
 ## Limites à connaître
 
-- **Fichiers envoyés** (`uploads/`) : le disque de Render est effacé à chaque
-  déploiement et à chaque redémarrage. Les images ajoutées via l'interface
-  disparaissent ; celles du seed se rechargent avec le seed. La solution durable
-  est un stockage objet (Supabase Storage, 1 Go gratuit sans carte) à la place
-  de `diskStorage` dans `server/src/modules/files/file-storage.ts`.
+- **Fichiers** : images, factures et billets vivent dans le bucket Neon via
+  `server/src/common/storage/storage.ts`. Sans les variables `AWS_*`, l'API retombe
+  sur le dossier `uploads/` local, que Render efface à chaque déploiement.
 - **PDF** : Chromium tourne en un seul processus dans 512 Mo
   (`server/src/common/utils/chromium.ts`). Un PDF à la fois passe ; en cas de
   redémarrage pour mémoire, remplacer Puppeteer par une bibliothèque légère

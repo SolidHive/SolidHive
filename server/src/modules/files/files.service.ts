@@ -10,9 +10,8 @@ import { UpdateFileDto } from './dto/update-file.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { File } from './entities/file.entity';
-import { createReadStream } from 'fs';
-import { unlink } from 'fs/promises';
-import { join } from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { fileKey, storage } from '../../common/storage/storage';
 import { Role } from '../users/entities/role.entity';
 import { AssociationRole } from '../associations/modules/roles/entities/association-role.entity';
 import { User } from '../users/entities/user.entity';
@@ -33,6 +32,7 @@ export class FilesService {
 
   async create(createFileDto: CreateFileDto, file: Express.Multer.File, userId: string) {
     const extension = file.originalname.split('.').pop();
+    const filename = uuidv4();
 
     // Vérifie que la cible existe
     const targetRepo = this.dataSource.getRepository(createFileDto.relatedTo);
@@ -66,11 +66,12 @@ export class FilesService {
       oldFilename: file.originalname,
       size: file.size,
       mimetype: file.mimetype,
-      filename: file.filename,
+      filename,
       allowedSystemRoles,
       allowedAssociationRoles,
     });
 
+    await storage.put(fileKey(userId, filename), file.buffer, file.mimetype);
     return this.filesRepository.save(addFile);
   }
 
@@ -177,9 +178,7 @@ export class FilesService {
         return null;
       }
 
-      const fileStream = createReadStream(
-        join(process.cwd(), 'uploads', file.userId, file.filename)
-      );
+      const fileStream = await storage.stream(fileKey(file.userId, file.filename));
 
       return new StreamableFile(fileStream, {
         type: file.mimetype,
@@ -197,9 +196,7 @@ export class FilesService {
 
     if (file) {
       try {
-        // Supprimer le fichier physique du système de fichiers
-        const filePath = join(process.cwd(), 'uploads', file.userId, file.filename);
-        await unlink(filePath);
+        await storage.delete(fileKey(file.userId, file.filename));
       } catch (error) {
         console.error(`Erreur lors de la suppression du fichier physique ${file.filename}:`, error);
       }

@@ -4,56 +4,8 @@ import { AssociationAnnouncement } from '../modules/associations/modules/announc
 import { Association } from '../modules/associations/entities/association.entity';
 import { UserAssociation } from '../modules/associations/modules/users/entities/user-association.entity';
 import { File } from '../modules/files/entities/file.entity';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as https from 'https';
-
-/**
- * Download an image from Lorem Picsum and save it locally
- */
-async function downloadImage(
-  url: string,
-  filepath: string
-): Promise<{ size: number; mimetype: string }> {
-  return new Promise((resolve, reject) => {
-    const request = https.get(url, (res) => {
-      if (res.statusCode === 302 || res.statusCode === 301) {
-        // Follow redirect
-        const redirectUrl = res.headers.location;
-        if (redirectUrl) {
-          return downloadImage(redirectUrl, filepath).then(resolve).catch(reject);
-        } else {
-          reject(new Error('Redirect without location'));
-          return;
-        }
-      }
-
-      if (res.statusCode !== 200) {
-        reject(new Error(`Failed to download: ${res.statusCode}`));
-        return;
-      }
-
-      const mimetype = res.headers['content-type'] || 'image/jpeg';
-      let size = 0;
-      const fileStream = fs.createWriteStream(filepath);
-
-      res.on('data', (chunk) => {
-        size += chunk.length;
-      });
-
-      res.pipe(fileStream);
-
-      fileStream.on('finish', () => {
-        fileStream.close();
-        resolve({ size, mimetype });
-      });
-
-      fileStream.on('error', reject);
-    });
-
-    request.on('error', reject);
-  });
-}
+import { fileKey, storage } from '../common/storage/storage';
+import { downloadImage } from './download-image';
 
 export async function seedAnnouncements(
   dataSource: DataSource,
@@ -73,12 +25,6 @@ export async function seedAnnouncements(
   }
 
   const announcements: AssociationAnnouncement[] = [];
-  const uploadsDir = path.join(process.cwd(), 'uploads');
-
-  // Ensure uploads directory exists
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-  }
 
   for (const association of associations) {
     // Get accepted user associations for this association
@@ -105,12 +51,6 @@ export async function seedAnnouncements(
       const savedAnnouncement = await announcementRepository.save(announcement);
       announcements.push(savedAnnouncement);
 
-      // Create user-specific directory for announcement images
-      const userDir = path.join(uploadsDir, randomUser.userId);
-      if (!fs.existsSync(userDir)) {
-        fs.mkdirSync(userDir, { recursive: true });
-      }
-
       // Create an image for this announcement
       const width = faker.number.int({ min: 800, max: 1200 });
       const height = faker.number.int({ min: 600, max: 900 });
@@ -118,11 +58,11 @@ export async function seedAnnouncements(
 
       const imageUrl = `https://picsum.photos/id/${imageId}/${width}/${height}`;
       const filename = `announcement_${savedAnnouncement.id}_image`;
-      const filepath = path.join(userDir, filename);
 
       try {
-        // Download the image
-        const { size, mimetype } = await downloadImage(imageUrl, filepath);
+        // Télécharge l'image et la dépose dans le stockage
+        const { buffer, size, mimetype } = await downloadImage(imageUrl);
+        await storage.put(fileKey(randomUser.userId, filename), buffer, mimetype);
 
         // Create file entity
         const file = fileRepository.create({

@@ -19,6 +19,7 @@ import { InvoicesService } from '../../invoices/invoices.service';
 import { EmailService } from '../../../common/utils/email/email.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileKey, storage } from '../../../common/storage/storage';
 import * as handlebars from 'handlebars';
 
 export interface DonationSessionResult {
@@ -315,13 +316,9 @@ export class DonationPaymentService {
         return;
       }
 
-      const { join } = await import('path');
-      const { existsSync } = await import('fs');
-
-      const invoicePath = join(process.cwd(), 'uploads', userId, invoiceFile.filename);
-
-      if (!existsSync(invoicePath)) {
-        this.logger.error(`Fichier facture introuvable: ${invoicePath}`);
+      const invoiceKey = fileKey(userId, invoiceFile.filename);
+      if (!(await storage.exists(invoiceKey))) {
+        this.logger.error(`Fichier facture introuvable: ${invoiceKey}`);
         return;
       }
 
@@ -350,7 +347,7 @@ export class DonationPaymentService {
         attachments: [
           {
             filename: invoiceFile.oldFilename || 'recu-fiscal.pdf',
-            path: invoicePath,
+            content: await storage.get(invoiceKey),
           },
         ],
       });

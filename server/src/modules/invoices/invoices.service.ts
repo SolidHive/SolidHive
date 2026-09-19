@@ -12,7 +12,8 @@ import { File } from '../files/entities/file.entity';
 import puppeteer from 'puppeteer';
 import { CHROMIUM_ARGS } from '../../common/utils/chromium';
 import { join } from 'path';
-import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
+import { fileKey, storage } from '../../common/storage/storage';
 
 interface InvoiceContactInfo {
   firstName: string;
@@ -579,20 +580,11 @@ export class InvoicesService {
     transactionId: string,
     userId: string
   ): Promise<string> {
-    // Créer le répertoire s'il n'existe pas
-    const uploadsDir = join(process.cwd(), 'uploads', userId);
-    if (!existsSync(uploadsDir)) {
-      mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    // Générer un nom de fichier unique
     const { v4: uuidv4 } = await import('uuid');
     const filename = `${uuidv4()}.pdf`;
-    const filePath = join(uploadsDir, filename);
 
     try {
-      // Écrire le fichier
-      writeFileSync(filePath, pdfBuffer);
+      await storage.put(fileKey(userId, filename), pdfBuffer, 'application/pdf');
 
       // Créer l'entrée en base de données
       const fileEntity = this.fileRepository.create({

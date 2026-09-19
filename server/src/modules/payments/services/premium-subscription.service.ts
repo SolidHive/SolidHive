@@ -16,6 +16,7 @@ import { InvoicesService } from '../../invoices/invoices.service';
 import { EmailService } from '../../../common/utils/email/email.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileKey, storage } from '../../../common/storage/storage';
 import * as handlebars from 'handlebars';
 
 export interface PremiumSessionResult {
@@ -279,9 +280,9 @@ export class PremiumSubscriptionService {
         return;
       }
 
-      const invoicePath = path.join(process.cwd(), 'uploads', userId, invoiceFile.filename);
-      if (!fs.existsSync(invoicePath)) {
-        this.logger.error(`Fichier facture introuvable: ${invoicePath}`);
+      const invoiceKey = fileKey(userId, invoiceFile.filename);
+      if (!(await storage.exists(invoiceKey))) {
+        this.logger.error(`Fichier facture introuvable: ${invoiceKey}`);
         return;
       }
 
@@ -300,7 +301,7 @@ export class PremiumSubscriptionService {
         attachments: [
           {
             filename: invoiceFile.oldFilename || 'facture.pdf',
-            path: invoicePath,
+            content: await storage.get(invoiceKey),
           },
         ],
       });

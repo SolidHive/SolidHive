@@ -7,6 +7,7 @@ import { File } from './entities/file.entity';
 import { Role } from '../users/entities/role.entity';
 import { AssociationRole } from '../associations/modules/roles/entities/association-role.entity';
 import { User } from '../users/entities/user.entity';
+import { storage } from '../../common/storage/storage';
 
 describe('FilesService', () => {
   let service: FilesService;
@@ -40,6 +41,9 @@ describe('FilesService', () => {
   };
 
   beforeEach(async () => {
+    // Le stockage est simulé : ces tests ne touchent ni disque ni bucket.
+    jest.spyOn(storage, 'put').mockResolvedValue(undefined);
+    jest.spyOn(storage, 'delete').mockResolvedValue(undefined);
     jest.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
@@ -65,7 +69,7 @@ describe('FilesService', () => {
       const dto = { relatedTo: 'Association', relatedBy: 'assoc-1', type: 'image' };
       const file: Express.Multer.File = {
         originalname: 'test.jpg',
-        filename: 'test-123.jpg',
+        buffer: Buffer.from('test'),
         size: 1024,
         mimetype: 'image/jpeg',
       } as any;
@@ -82,6 +86,11 @@ describe('FilesService', () => {
 
       expect(dataSourceMock.getRepository).toHaveBeenCalledWith('Association');
       expect(targetRepositoryMock.findOne).toHaveBeenCalledWith({ where: { id: 'assoc-1' } });
+      expect(storage.put).toHaveBeenCalledWith(
+        expect.stringMatching(new RegExp('^user-1/')),
+        file.buffer,
+        'image/jpeg'
+      );
       expect(filesRepositoryMock.save).toHaveBeenCalledWith(created);
       expect(result).toEqual(saved);
     });

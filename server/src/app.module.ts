@@ -3,8 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { RedisModule } from './common/redis/redis.module';
 import { EmailModule } from './common/utils/email/email.module';
 import { UsersModule } from './modules/users/users.module';
@@ -27,13 +25,6 @@ import { ContactModule } from './modules/contact/contact.module';
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads'),
-      serveRoot: '/uploads',
-      serveStaticOptions: {
-        index: false,
-      },
-    }),
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot(getNestConfig()),
     ThrottlerModule.forRoot([

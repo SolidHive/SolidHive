@@ -13,6 +13,7 @@ import { InvoicesService } from '../../../../../invoices/invoices.service';
 import { File } from '../../../../../files/entities/file.entity';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileKey, storage } from '../../../../../../common/storage/storage';
 import * as Handlebars from 'handlebars';
 
 @Injectable()
@@ -261,7 +262,7 @@ export class EventsRegistersService {
         });
 
         if (invoiceFile) {
-          invoicePath = path.join(process.cwd(), 'uploads', userId, invoiceFile.filename);
+          invoicePath = fileKey(userId, invoiceFile.filename);
         }
       } catch (error) {
         console.error(
@@ -334,11 +335,12 @@ export class EventsRegistersService {
       };
 
       // Ajouter la facture en pièce jointe si disponible
-      if (invoicePath && fs.existsSync(invoicePath)) {
+      // invoicePath est une clé de stockage (<userId>/<filename>), pas un chemin disque
+      if (invoicePath && (await storage.exists(invoicePath))) {
         emailOptions.attachments = [
           {
             filename: 'avoir-remboursement.pdf',
-            path: invoicePath,
+            content: await storage.get(invoicePath),
           },
         ];
       }

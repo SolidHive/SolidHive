@@ -11,7 +11,8 @@ import { Transaction } from '../../../../../transactions/entities/transaction.en
 import puppeteer from 'puppeteer';
 import { CHROMIUM_ARGS } from '../../../../../../common/utils/chromium';
 import { join } from 'path';
-import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
+import { fileKey, storage } from '../../../../../../common/storage/storage';
 import * as Handlebars from 'handlebars';
 import * as QRCode from 'qrcode';
 
@@ -84,15 +85,10 @@ export class TicketsService {
       'ticket'
     );
 
-    let ticketPath: string;
-
-    if (existingTicket) {
-      // Utiliser le billet existant
-      ticketPath = join(process.cwd(), 'uploads', registration.user.id, existingTicket.filename);
-    } else {
-      // Générer un nouveau billet
-      ticketPath = await this.generateTicketPDF(registration);
-    }
+    // Clé de stockage du billet, réutilisé s'il existe déjà
+    const ticketKey = existingTicket
+      ? fileKey(registration.user.id, existingTicket.filename)
+      : await this.generateTicketPDF(registration);
 
     // Récupérer la facture associée à l'événement (chercher par userId et eventId)
     const event = registration.eventPricing.event;
@@ -107,20 +103,20 @@ export class TicketsService {
     });
 
     // Chercher la facture correspondant à l'événement via les transactions
-    let invoicePath: string | null = null;
+    let invoiceKey: string | null = null;
     for (const file of invoiceFiles) {
       const transaction = await this.transactionRepository.findOne({
         where: { id: file.relatedBy },
       });
 
       if (transaction && transaction.relatedBy === event.id) {
-        invoicePath = join(process.cwd(), 'uploads', registration.user.id, file.filename);
+        invoiceKey = fileKey(registration.user.id, file.filename);
         break;
       }
     }
 
     // Envoyer l'email avec les pièces jointes
-    await this.sendTicketEmail(registration, ticketPath, invoicePath);
+    await this.sendTicketEmail(registration, ticketKey, invoiceKey);
   }
 
   /**
@@ -136,17 +132,11 @@ export class TicketsService {
     // Convertir en PDF
     const pdfBuffer = await this.generatePDF(html);
 
-    // Sauvegarder le fichier
-    const uploadsDir = join(process.cwd(), 'uploads', registration.user!.id);
-    if (!existsSync(uploadsDir)) {
-      mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    // Générer un nom de fichier unique
+    // Sauvegarder le fichier dans le stockage
     const { v4: uuidv4 } = await import('uuid');
     const filename = uuidv4();
-    const filePath = join(uploadsDir, filename);
-    writeFileSync(filePath, pdfBuffer);
+    const key = fileKey(registration.user!.id, filename);
+    await storage.put(key, pdfBuffer, 'application/pdf');
 
     // Créer l'entrée de fichier en base de données
     const fileEntity = this.fileRepository.create({
@@ -166,7 +156,7 @@ export class TicketsService {
 
     await this.fileRepository.save(fileEntity);
 
-    return filePath;
+    return key;
   }
 
   /**
@@ -272,8 +262,8 @@ export class TicketsService {
    */
   private async sendTicketEmail(
     registration: EventRegister,
-    ticketPath: string,
-    invoicePath: string | null
+    ticketKey: string,
+    invoiceKey: string | null
   ): Promise<void> {
     const event = registration.eventPricing.event;
     const user = registration.user;
@@ -309,18 +299,18 @@ export class TicketsService {
       ticketCode: registration.id.slice(-8).toUpperCase(),
     });
 
-    // Préparer les pièces jointes
-    const attachments: any[] = [
+    // Préparer les pièces jointes, lues depuis le stockage
+    const attachments: { filename: string; content: Buffer }[] = [
       {
         filename: `billet-${event.title.replace(/\s+/g, '-')}.pdf`,
-        path: ticketPath,
+        content: await storage.get(ticketKey),
       },
     ];
 
-    if (invoicePath) {
+    if (invoiceKey) {
       attachments.push({
         filename: `facture-${registration.id.slice(-8)}.pdf`,
-        path: invoicePath,
+        content: await storage.get(invoiceKey),
       });
     }
 
@@ -354,17 +344,15 @@ export class TicketsService {
 
     const event = registrations[0].eventPricing.event;
     const user = registrations[0].user;
-    const ticketPaths: string[] = [];
+    const attachments: { filename: string; content: Buffer }[] = [];
 
-    for (const registration of registrations) {
-      const ticketPath = await this.generateTicketPDF(registration);
-      ticketPaths.push(ticketPath);
+    for (const [index, registration] of registrations.entries()) {
+      const ticketKey = await this.generateTicketPDF(registration);
+      attachments.push({
+        filename: `billet-${index + 1}.pdf`,
+        content: await storage.get(ticketKey),
+      });
     }
-
-    const attachments = ticketPaths.map((path, index) => ({
-      filename: `billet-${index + 1}.pdf`,
-      path,
-    }));
 
     if (transactionId) {
       const invoiceFile = await this.fileRepository.findOne({
@@ -372,11 +360,11 @@ export class TicketsService {
       });
 
       if (invoiceFile) {
-        const invoicePath = join(process.cwd(), 'uploads', user!.id, invoiceFile.filename);
-        if (existsSync(invoicePath)) {
+        const invoiceKey = fileKey(user!.id, invoiceFile.filename);
+        if (await storage.exists(invoiceKey)) {
           attachments.push({
             filename: invoiceFile.oldFilename || 'facture.pdf',
-            path: invoicePath,
+            content: await storage.get(invoiceKey),
           });
         }
       }
