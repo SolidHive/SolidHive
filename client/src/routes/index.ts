@@ -17,9 +17,14 @@ router.beforeEach(async (to, _from, next) => {
 
   const authStore = useAuthStore();
 
-  // Attend que l'état soit chargé pour éviter les redirections inutiles
+  // Tant que l'API n'a pas confirmé l'état, on la sollicite en arrière-plan.
+  // Seules les pages qui dépendent de cet état l'attendent : une page publique
+  // s'affiche tout de suite, même si l'API met une minute à se réveiller.
   if (authStore.isLoading) {
-    await authStore.loadUser();
+    const ready = authStore.loadUser();
+    if (to.meta.requiresAuth || to.meta.guestOnly) {
+      await ready;
+    }
   }
 
   // Redirection si l'utilisateur est déjà connecté

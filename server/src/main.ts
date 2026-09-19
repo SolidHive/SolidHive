@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -8,22 +9,14 @@ import * as crypto from 'crypto';
 import helmet from 'helmet';
 import { RedisStore } from 'connect-redis';
 import { createClient } from 'redis';
-import { join } from 'path';
-import * as express from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // 1. Servir les fichiers statiques du dossier uploads (avant les autres middlewares)
-  console.log('Setting up static files for uploads at:', join(process.cwd(), 'uploads'));
-  app.use(
-    '/uploads',
-    (req, res, next) => {
-      console.log('Request to /uploads:', req.path);
-      next();
-    },
-    express.static(join(process.cwd(), 'uploads'))
-  );
+  // Derrière un proxy TLS (Render, Nginx) la connexion entrante est en HTTP :
+  // sans cette ligne express-session refuse de poser le cookie `secure` et le
+  // limiteur de débit voit une seule adresse IP pour tous les visiteurs.
+  app.set('trust proxy', 1);
 
   // 2. Protection des en-têtes HTTP
   app.use(
