@@ -63,6 +63,10 @@ RUN npm install --omit=dev
 
 COPY --from=builder /usr/src/app/dist ./dist
 
+# Les gabarits d'emails et de PDF (.html, .mjml) sont lus à l'exécution depuis
+# src/… via process.cwd() : nest build ne les copie pas dans dist, on les embarque.
+COPY --from=builder /usr/src/app/src ./src
+
 ENV NODE_ENV=production
 EXPOSE 3000
 
