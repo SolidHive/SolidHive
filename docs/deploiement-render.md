@@ -66,12 +66,12 @@ cd server && DATABASE_URL='<url Neon>' DB_SSL=true \
 ## 4. Garder l'API éveillée
 
 L'instance gratuite s'endort après 15 minutes sans requête et met 30 à 60 s à
-se réveiller. Un moniteur externe qui appelle  toutes les 5 à
+se réveiller. Un moniteur externe qui appelle `/health` toutes les 5 à
 10 minutes suffit à l'éviter. Deux options :
 
 - **Uptime Kuma**, open source et auto-hébergé : un conteneur Docker
-  (), un moniteur HTTP sur
-   toutes les 5 minutes, et un
+  (`louislam/uptime-kuma`), un moniteur HTTP sur
+  `https://solidhive-api.onrender.com/health` toutes les 5 minutes, et un
   tableau de bord qui affiche disponibilité et temps de réponse. Il doit tourner
   sur une machine allumée en permanence (serveur, NAS, Raspberry Pi) : sur un PC,
   l'API se rendort dès qu'il est éteint.
