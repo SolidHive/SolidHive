@@ -39,8 +39,10 @@ services:
         value: 'true'
       - key: FRONTEND_URL
         value: https://solidhive.onrender.com # à ajuster si Render suffixe le nom
+      # Démo : Stripe en clés de test sans comptes Connect réels ; les paiements passent
+      # par Checkout test (carte 4242…) et les virements vers les associations sont simulés.
       - key: USE_STRIPE_MOCK
-        value: 'false'
+        value: 'true'
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_PUBLISHABLE_KEY
