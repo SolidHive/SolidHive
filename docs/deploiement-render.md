@@ -9,7 +9,7 @@ Hébergement sans carte bancaire, à partir du `render.yaml` à la racine du dé
 | Client Vue             | Render static site `solidhive`             | illimité, ne dort jamais                 |
 | PostgreSQL             | Neon                                       | 0,5 Go, réveil automatique               |
 | Fichiers (images, PDF) | Neon Object Storage, compatible S3         | 5 Go par projet                          |
-| Emails                 | Brevo (SMTP)                               | 300 par jour                             |
+| Emails                 | Brevo, par API HTTP (SMTP bloqué)          | 300 par jour                             |
 | Paiements              | Stripe en mode test                        | aucun vrai paiement                      |
 
 Le client réécrit `/api/*` et `/files/*` vers l'API : tout reste sur
@@ -25,10 +25,20 @@ une seule origine, le cookie de session est first-party et le CORS ne joue pas.
    `storage:write`. Neon affiche une seule fois `AWS_ENDPOINT_URL_S3`,
    `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` et `AWS_REGION` : les copier.
 
-## 2. Brevo
+## 2. Emails : particularité de Render
 
-Créer une clé SMTP dans Brevo : le login SMTP devient `EMAIL_USER`, la clé
-`EMAIL_PASS`. `EMAIL_FROM` doit être une adresse validée dans Brevo.
+Les web services gratuits de Render bloquent le trafic sortant vers les ports
+SMTP 25, 465 et 587 (changelog Render, septembre 2025). Nodemailer y échoue sur
+`Connection timeout` quel que soit le serveur : Brevo SMTP, Gmail, Mailjet.
+
+Le projet garde son envoi SMTP partout (local avec Mailtrap, docker-compose,
+VPS). Sur Render seulement, `EMAIL_TRANSPORT=brevo-api` bascule l'envoi sur
+l'API HTTPS de Brevo (`server/src/common/utils/email/brevo-api.transport.ts`),
+avec le même contenu et les mêmes pièces jointes.
+
+Dans Brevo : menu **SMTP & API** → onglet **Clés API** → **Générer une nouvelle
+clé API**. C'est cette clé (`xkeysib-…`), pas la clé SMTP, qui va dans
+`BREVO_API_KEY`. `EMAIL_FROM` doit être une adresse validée dans **Expéditeurs**.
 
 ## 3. Render
 
@@ -36,8 +46,8 @@ Créer une clé SMTP dans Brevo : le login SMTP devient `EMAIL_USER`, la clé
    branche `develop`. Render lit `render.yaml` et propose les trois services.
 2. Renseigner les variables marquées `sync: false` : `DATABASE_URL` (Neon), les trois
    `AWS_*` du stockage objet (et vérifier que `AWS_REGION` correspond à l'endpoint),
-   `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `EMAIL_USER`, `EMAIL_PASS`,
-   `EMAIL_FROM`, `EMAIL_SUPPORT`. `SESSION_SECRET` et `JWT_SECRET` sont générés.
+   `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `BREVO_API_KEY`, `EMAIL_FROM`,
+   `EMAIL_SUPPORT`. `SESSION_SECRET` et `JWT_SECRET` sont générés.
 3. Lancer. Le premier build de l'API prend 5 à 8 minutes (Chromium + npm).
 4. Si Render a suffixé les noms (`solidhive-api-xyz1`), corriger dans le dashboard
    `FRONTEND_URL` de l'API et les destinations des règles de réécriture du site

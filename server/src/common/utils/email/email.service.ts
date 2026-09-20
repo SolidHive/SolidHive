@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { isBrevoApiEnabled, sendViaBrevoApi } from './brevo-api.transport';
 
 @Injectable()
 export class EmailService {
@@ -42,6 +43,12 @@ export class EmailService {
       text: options.text,
       attachments: options.attachments,
     };
+
+    // Render uniquement (ports SMTP bloqués) : voir brevo-api.transport.ts
+    if (isBrevoApiEnabled()) {
+      await sendViaBrevoApi(mailOptions);
+      return;
+    }
 
     await this.transporter.sendMail(mailOptions);
   }

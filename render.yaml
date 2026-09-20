@@ -45,16 +45,12 @@ services:
         sync: false
       - key: STRIPE_PUBLISHABLE_KEY
         sync: false
-      - key: EMAIL_HOST
-        value: smtp-relay.brevo.com
-      - key: EMAIL_PORT
-        value: '587'
-      - key: EMAIL_SECURE
-        value: 'false'
-      - key: EMAIL_USER
-        sync: false
-      - key: EMAIL_PASS
-        sync: false
+      # Spécifique à Render : ses instances gratuites bloquent les ports SMTP sortants.
+      # Le transport HTTP de common/utils/email/brevo-api.transport.ts prend le relais.
+      - key: EMAIL_TRANSPORT
+        value: brevo-api
+      - key: BREVO_API_KEY
+        sync: false # clé API v3 de Brevo (xkeysib-…), pas la clé SMTP
       - key: EMAIL_FROM
         sync: false
       - key: EMAIL_FROM_NAME
