@@ -8,7 +8,7 @@ import type { User, UserAssociation } from '@/interfaces';
 /**
  * Dernier état d'authentification connu, gardé dans le navigateur. Au
  * chargement, l'interface s'affiche tout de suite avec cet état, puis le
- * profil est revérifié en arrière-plan : seule une réponse 401 déconnecte.
+ * profil est revérifié en arrière-plan : seule une réponse 401 ou 403 déconnecte.
  * Une panne réseau ou une API en train de se réveiller ne change rien.
  */
 const CACHE_KEY = 'solidhive:auth';
@@ -55,7 +55,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   /**
    * Recharge le profil. Les appels simultanés partagent la même requête.
-   * Un 401 déconnecte ; toute autre erreur conserve l'état courant.
+   * Un 401 ou un 403 déconnecte ; toute autre erreur conserve l'état courant.
    */
   function loadUser(force = false): Promise<void> {
     if (user.value && !force && !isLoading.value) {
@@ -71,7 +71,8 @@ export const useAuthStore = defineStore('auth', () => {
         writeCache(user.value ? { user: user.value, associations: associations.value } : null);
       } catch (err) {
         const axiosError = err as AxiosError<{ message: string }>;
-        if (axiosError.response?.status === 401) {
+        const status = axiosError.response?.status;
+        if (status === 401 || status === 403) {
           resetUserData();
         } else {
           error.value = axiosError.response?.data?.message || 'Erreur lors du chargement du profil';
