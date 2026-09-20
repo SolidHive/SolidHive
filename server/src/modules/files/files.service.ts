@@ -11,7 +11,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { File } from './entities/file.entity';
 import { v4 as uuidv4 } from 'uuid';
-import sharp from 'sharp';
+import * as sharpModule from 'sharp';
+
+// sharp est un module CommonJS (`module.exports = sharp`) : sans esModuleInterop,
+// `import sharp from 'sharp'` compile en `sharp_1.default`, qui vaut undefined à
+// l'exécution. On prend `default` s'il existe, sinon le module lui-même.
+type SharpFn = typeof sharpModule.default;
+const sharp: SharpFn =
+  (sharpModule as { default?: SharpFn }).default ?? (sharpModule as unknown as SharpFn);
 import { fileKey, storage } from '../../common/storage/storage';
 import { Role } from '../users/entities/role.entity';
 import { AssociationRole } from '../associations/modules/roles/entities/association-role.entity';
@@ -43,7 +50,8 @@ async function optimizeImage(
       ? await image.png({ compressionLevel: 9, palette: true }).toBuffer()
       : await image.jpeg({ quality: 82, mozjpeg: true }).toBuffer();
     return { buffer, mimetype: png ? 'image/png' : 'image/jpeg', size: buffer.length };
-  } catch {
+  } catch (error) {
+    console.warn('Image conservée telle quelle, sharp a échoué :', (error as Error).message);
     return original;
   }
 }
