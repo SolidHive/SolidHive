@@ -65,13 +65,22 @@ cd server && DATABASE_URL='<url Neon>' DB_SSL=true \
 
 ## 4. Garder l'API éveillée
 
-Le workflow `.github/workflows/keep-alive.yml` appelle `/health` toutes les
-10 minutes, ce qui empêche la mise en veille. Si l'URL de l'API n'est pas
-`https://solidhive-api.onrender.com`, définir la variable de dépôt `API_URL`
-dans GitHub → Settings → Secrets and variables → Actions → Variables.
+L'instance gratuite s'endort après 15 minutes sans requête et met 30 à 60 s à
+se réveiller. Un moniteur externe qui appelle  toutes les 5 à
+10 minutes suffit à l'éviter. Deux options :
 
-GitHub suspend les crons après 60 jours sans commit : un lancement manuel du
-workflow les relance.
+- **Uptime Kuma**, open source et auto-hébergé : un conteneur Docker
+  (), un moniteur HTTP sur
+   toutes les 5 minutes, et un
+  tableau de bord qui affiche disponibilité et temps de réponse. Il doit tourner
+  sur une machine allumée en permanence (serveur, NAS, Raspberry Pi) : sur un PC,
+  l'API se rendort dès qu'il est éteint.
+- **UptimeRobot**, service en ligne gratuit jusqu'à 50 moniteurs à 5 minutes
+  d'intervalle : rien à héberger.
+
+L'ancien workflow GitHub Actions a été retiré : GitHub décale ou saute les crons
+aux heures chargées et les suspend après 60 jours sans commit, ce qui laissait
+l'API s'endormir.
 
 ## Limites à connaître
 
