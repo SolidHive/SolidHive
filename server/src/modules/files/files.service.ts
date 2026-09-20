@@ -11,10 +11,42 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
 import { File } from './entities/file.entity';
 import { v4 as uuidv4 } from 'uuid';
+import sharp from 'sharp';
 import { fileKey, storage } from '../../common/storage/storage';
 import { Role } from '../users/entities/role.entity';
 import { AssociationRole } from '../associations/modules/roles/entities/association-role.entity';
 import { User } from '../users/entities/user.entity';
+
+/** Durée de validité d'une URL de lecture directe : au-delà, le navigateur redemande à l'API. */
+export const FILE_URL_TTL_SECONDS = 60 * 60;
+
+const MAX_IMAGE_WIDTH = 1600;
+
+/**
+ * Les photos arrivent souvent en plusieurs mégaoctets ; ramenées à 1600 px et
+ * recompressées, elles pèsent dix fois moins sans perte visible à l'écran.
+ * Les PNG gardent leur transparence (logos), le reste devient JPEG. Un
+ * fichier qui n'est pas une image, ou que sharp ne lit pas, repart tel quel.
+ */
+async function optimizeImage(
+  file: Express.Multer.File
+): Promise<{ buffer: Buffer; mimetype: string; size: number }> {
+  const original = { buffer: file.buffer, mimetype: file.mimetype, size: file.size };
+  if (!file.mimetype?.startsWith('image/') || file.mimetype === 'image/svg+xml') return original;
+  try {
+    const image = sharp(file.buffer, { failOn: 'none' }).rotate().resize({
+      width: MAX_IMAGE_WIDTH,
+      withoutEnlargement: true,
+    });
+    const png = file.mimetype === 'image/png';
+    const buffer = png
+      ? await image.png({ compressionLevel: 9, palette: true }).toBuffer()
+      : await image.jpeg({ quality: 82, mozjpeg: true }).toBuffer();
+    return { buffer, mimetype: png ? 'image/png' : 'image/jpeg', size: buffer.length };
+  } catch {
+    return original;
+  }
+}
 
 @Injectable()
 export class FilesService {
@@ -71,7 +103,10 @@ export class FilesService {
       allowedAssociationRoles,
     });
 
-    await storage.put(fileKey(userId, filename), file.buffer, file.mimetype);
+    const { buffer, mimetype, size } = await optimizeImage(file);
+    addFile.mimetype = mimetype;
+    addFile.size = size;
+    await storage.put(fileKey(userId, filename), buffer, mimetype);
     return this.filesRepository.save(addFile);
   }
 
@@ -163,6 +198,21 @@ export class FilesService {
       { relatedTo, relatedBy, index },
       { ...updateFileDto, allowedSystemRoles, allowedAssociationRoles }
     );
+  }
+
+  /**
+   * URL de lecture directe du fichier (stockage objet), après contrôle des
+   * droits ; `null` en stockage local, où l'API diffuse elle-même le fichier.
+   */
+  async getFileUrl(
+    relatedTo: string,
+    relatedBy: string,
+    index: number = 0,
+    purpose?: string
+  ): Promise<string | null> {
+    const file = await this.findOne(relatedTo, relatedBy, index, undefined, purpose);
+    if (!file) return null;
+    return storage.url(fileKey(file.userId, file.filename), FILE_URL_TTL_SECONDS);
   }
 
   async getFileStream(

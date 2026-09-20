@@ -5,6 +5,7 @@ import {
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { createReadStream } from 'fs';
 import { access, mkdir, readFile, unlink, writeFile } from 'fs/promises';
 import { dirname, join } from 'path';
@@ -29,6 +30,12 @@ export interface ObjectStorage {
   stream(key: string): Promise<Readable>;
   exists(key: string): Promise<boolean>;
   delete(key: string): Promise<void>;
+  /**
+   * URL de lecture directe, limitée dans le temps, ou `null` si le moteur ne
+   * sait pas en produire : le navigateur va alors chercher l'objet lui-même au
+   * lieu de le faire transiter par l'API.
+   */
+  url(key: string, ttlSeconds: number): Promise<string | null>;
 }
 
 export const fileKey = (userId: string, filename: string): string => `${userId}/${filename}`;
@@ -61,6 +68,10 @@ class LocalStorage implements ObjectStorage {
     } catch {
       return false;
     }
+  }
+
+  async url(): Promise<string | null> {
+    return null;
   }
 
   async delete(key: string): Promise<void> {
@@ -129,6 +140,12 @@ class S3Storage implements ObjectStorage {
   async delete(key: string): Promise<void> {
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
   }
+
+  url(key: string, ttlSeconds: number): Promise<string | null> {
+    return getSignedUrl(this.client, new GetObjectCommand({ Bucket: this.bucket, Key: key }), {
+      expiresIn: ttlSeconds,
+    });
+  }
 }
 
 export const createStorage = (env: NodeJS.ProcessEnv = process.env): ObjectStorage => {
@@ -149,4 +166,5 @@ export const storage: ObjectStorage = {
   stream: (...args) => (instance ??= createStorage()).stream(...args),
   exists: (...args) => (instance ??= createStorage()).exists(...args),
   delete: (...args) => (instance ??= createStorage()).delete(...args),
+  url: (...args) => (instance ??= createStorage()).url(...args),
 };

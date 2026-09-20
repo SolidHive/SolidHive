@@ -9,8 +9,7 @@ import { EventPricing } from '../associations/modules/events/modules/pricings/en
 import { EventRegister } from '../associations/modules/events/modules/registers/entities/event-register.entity';
 import { FilesService } from '../files/files.service';
 import { File } from '../files/entities/file.entity';
-import puppeteer from 'puppeteer';
-import { CHROMIUM_ARGS } from '../../common/utils/chromium';
+import { htmlToPdf } from '../../common/utils/pdf';
 import { join } from 'path';
 import { readFileSync } from 'fs';
 import { fileKey, storage } from '../../common/storage/storage';
@@ -539,36 +538,11 @@ export class InvoicesService {
    * Générer un PDF à partir du HTML
    */
   private async generatePDF(html: string): Promise<Buffer> {
-    let browser;
-
     try {
-      browser = await puppeteer.launch({
-        headless: true,
-        args: CHROMIUM_ARGS,
-      });
-
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
-
-      const pdfBuffer = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        margin: {
-          top: '20px',
-          right: '20px',
-          bottom: '20px',
-          left: '20px',
-        },
-      });
-
-      return Buffer.from(pdfBuffer);
+      return await htmlToPdf(html);
     } catch (error) {
       this.logger.error('Failed to generate PDF', error);
       throw new Error('Failed to generate invoice PDF');
-    } finally {
-      if (browser) {
-        await browser.close();
-      }
     }
   }
 

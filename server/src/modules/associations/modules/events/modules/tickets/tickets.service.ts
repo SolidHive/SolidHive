@@ -8,8 +8,7 @@ import { FilesService } from '../../../../../files/files.service';
 import { File } from '../../../../../files/entities/file.entity';
 import { EmailService } from '../../../../../../common/utils/email/email.service';
 import { Transaction } from '../../../../../transactions/entities/transaction.entity';
-import puppeteer from 'puppeteer';
-import { CHROMIUM_ARGS } from '../../../../../../common/utils/chromium';
+import { htmlToPdf } from '../../../../../../common/utils/pdf';
 import { join } from 'path';
 import { readFileSync } from 'fs';
 import { fileKey, storage } from '../../../../../../common/storage/storage';
@@ -232,29 +231,8 @@ export class TicketsService {
   /**
    * Convertit le HTML en PDF avec Puppeteer
    */
-  private async generatePDF(html: string): Promise<Buffer> {
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: CHROMIUM_ARGS,
-    });
-
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
-
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20px',
-        right: '20px',
-        bottom: '20px',
-        left: '20px',
-      },
-    });
-
-    await browser.close();
-
-    return Buffer.from(pdfBuffer);
+  private generatePDF(html: string): Promise<Buffer> {
+    return htmlToPdf(html);
   }
 
   /**
