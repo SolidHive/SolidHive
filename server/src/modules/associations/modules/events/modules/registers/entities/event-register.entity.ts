@@ -30,7 +30,7 @@ export class EventRegister {
     type: EventPricing,
     description: "Tarif de l'événement",
   })
-  @ManyToOne(() => EventPricing, (eventPricing) => eventPricing.registers)
+  @ManyToOne(() => EventPricing, (eventPricing) => eventPricing.registers, { onDelete: 'CASCADE' })
   eventPricing: EventPricing;
 
   @ApiProperty({

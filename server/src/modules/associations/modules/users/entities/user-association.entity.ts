@@ -52,7 +52,7 @@ export class UserAssociation {
     type: Association,
     description: "Association liée à l'utilisateur",
   })
-  @ManyToOne(() => Association, (association) => association.users)
+  @ManyToOne(() => Association, (association) => association.users, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'associationId' })
   association: Association;
 

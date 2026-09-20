@@ -80,6 +80,9 @@ async function bootstrap() {
       secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
+      // Chaque requête repousse l'expiration : un utilisateur actif n'est plus
+      // déconnecté une heure pile après s'être connecté.
+      rolling: true,
       name: cookieName,
       cookie: {
         maxAge: 3600000, // 1 heure en millisecondes

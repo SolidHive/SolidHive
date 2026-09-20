@@ -70,6 +70,6 @@ export class Event {
     type: Association,
     description: "Association organisatrice de l'événement",
   })
-  @ManyToOne(() => Association, (association) => association.events)
+  @ManyToOne(() => Association, (association) => association.events, { onDelete: 'CASCADE' })
   association: Association;
 }

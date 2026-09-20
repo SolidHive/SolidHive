@@ -48,6 +48,6 @@ export class AssociationAnnouncement {
     type: Association,
     description: "Association liée à l'annonce",
   })
-  @ManyToOne(() => Association, (association) => association.announcements)
+  @ManyToOne(() => Association, (association) => association.announcements, { onDelete: 'CASCADE' })
   association: Association;
 }

@@ -1,146 +1,161 @@
 <template>
   <div class="overflow-x-hidden">
-    <AssociationHero v-if="association" :association="association" @don="faireUnDon" />
-    <PageContainer>
-      <AssociationMenu :current-tab="currentTab" @change-tab="onTabChange" />
-      <div v-if="currentTab === 'accueil'" class="mt-8">
-        <div v-if="loadingAnnonces">
-          <LoadingOverlay message="Chargement des annonces..." />
-        </div>
-        <AnnouncementsSlider
-          v-else
-          :items="annonces"
-          :color="association?.primaryColor"
-          @view-details="viewAnnouncementDetails"
-        />
-
-        <div class="mt-8">
-          <div v-if="loadingCagnottes">
-            <LoadingOverlay message="Chargement des cagnottes..." />
-          </div>
-          <CagnottesSlider
-            v-else
-            :items="cagnottes"
-            :color="association?.primaryColor"
-            @view-details="viewCagnotteDetails"
-          />
-        </div>
-
-        <div class="mt-8">
-          <div v-if="loadingEvents">
-            <LoadingOverlay message="Chargement des événements..." />
-          </div>
-          <EventsSlider
-            v-else
-            :items="eventsList"
-            :color="association?.primaryColor"
-            @view-details="viewEventDetails"
-          />
-        </div>
-        <div v-if="association?.aboutText" class="mt-8">
-          <AboutUs :about-text="association?.aboutText" :about-image="association?.aboutImage" />
-        </div>
-        <div class="mt-8">
-          <ImageGallery :images="association?.images" />
-        </div>
+    <LoadingOverlay
+      v-if="loading"
+      :show="true"
+      message="Chargement de l'association..."
+      class="min-h-[60vh]"
+    />
+    <PageContainer v-else-if="error || !association">
+      <div class="bg-muted/30 border-border my-16 rounded-xl border border-dashed p-12 text-center">
+        <p class="font-paragraph text-muted-foreground text-lg">
+          {{ error || "Cette association n'existe pas ou n'est plus disponible." }}
+        </p>
       </div>
-      <div v-if="currentTab === 'annonces'" class="mt-8">
-        <div v-if="loadingAnnonces">
-          <LoadingOverlay message="Chargement des annonces..." />
-        </div>
-        <div
-          v-else-if="annonces.length === 0"
-          class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
-        >
-          <p class="font-paragraph text-muted-foreground text-lg">
-            Aucune annonce n'a été publiée pour le moment.
-          </p>
-        </div>
-        <div v-else>
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <AnnouncementCard
-              v-for="(annonce, index) in paginatedAnnonces"
-              :key="`annonce-${annoncesPage}-${index}`"
-              :item="annonce"
-              :color="association?.primaryColor"
-              @view-details="viewAnnouncementDetails"
-            />
+    </PageContainer>
+    <template v-else>
+      <AssociationHero :association="association" @don="faireUnDon" />
+      <PageContainer>
+        <AssociationMenu :current-tab="currentTab" @change-tab="onTabChange" />
+        <div v-if="currentTab === 'accueil'" class="mt-8">
+          <div v-if="loadingAnnonces">
+            <LoadingOverlay :show="true" message="Chargement des annonces..." />
           </div>
-          <Pagination
-            :total-items="annonces.length"
-            :items-per-page="itemsPerPage"
-            :current-page="annoncesPage"
-            @update:current-page="annoncesPage = $event"
+          <AnnouncementsSlider
+            v-else
+            :items="annonces"
+            :color="association?.primaryColor"
+            @view-details="viewAnnouncementDetails"
           />
-        </div>
-      </div>
-      <div v-if="currentTab === 'cagnottes'" class="mt-8">
-        <div v-if="loadingCagnottes">
-          <LoadingOverlay message="Chargement des cagnottes..." />
-        </div>
-        <div
-          v-else-if="cagnottes.length === 0"
-          class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
-        >
-          <p class="font-paragraph text-muted-foreground text-lg">
-            Aucune cagnotte de financement n'est active pour le moment.
-          </p>
-        </div>
-        <div v-else>
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <CagnotteCard
-              v-for="(cagnotte, index) in paginatedCagnottes"
-              :key="`cagnotte-${cagnottesPage}-${index}`"
-              :item="cagnotte"
+
+          <div class="mt-8">
+            <div v-if="loadingCagnottes">
+              <LoadingOverlay :show="true" message="Chargement des cagnottes..." />
+            </div>
+            <CagnottesSlider
+              v-else
+              :items="cagnottes"
               :color="association?.primaryColor"
               @view-details="viewCagnotteDetails"
             />
           </div>
-          <Pagination
-            :total-items="cagnottes.length"
-            :items-per-page="itemsPerPage"
-            :current-page="cagnottesPage"
-            @update:current-page="cagnottesPage = $event"
-          />
-        </div>
-      </div>
-      <div v-if="currentTab === 'evenements'" class="mt-8">
-        <div v-if="loadingEvents">
-          <LoadingOverlay message="Chargement des événements..." />
-        </div>
-        <div
-          v-else-if="eventsList.length === 0"
-          class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
-        >
-          <p class="font-paragraph text-muted-foreground text-lg">
-            Aucun événement n'est prévu pour le moment.
-          </p>
-        </div>
-        <div v-else>
-          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <EventCard
-              v-for="(event, index) in paginatedEvents"
-              :key="`event-${eventsPage}-${index}`"
-              :item="event"
+
+          <div class="mt-8">
+            <div v-if="loadingEvents">
+              <LoadingOverlay :show="true" message="Chargement des événements..." />
+            </div>
+            <EventsSlider
+              v-else
+              :items="eventsList"
               :color="association?.primaryColor"
               @view-details="viewEventDetails"
             />
           </div>
-          <Pagination
-            :total-items="eventsList.length"
-            :items-per-page="itemsPerPage"
-            :current-page="eventsPage"
-            @update:current-page="eventsPage = $event"
-          />
+          <div v-if="association?.aboutText" class="mt-8">
+            <AboutUs :about-text="association?.aboutText" :about-image="association?.aboutImage" />
+          </div>
+          <div class="mt-8">
+            <ImageGallery :images="association?.images" />
+          </div>
         </div>
+        <div v-if="currentTab === 'annonces'" class="mt-8">
+          <div v-if="loadingAnnonces">
+            <LoadingOverlay :show="true" message="Chargement des annonces..." />
+          </div>
+          <div
+            v-else-if="annonces.length === 0"
+            class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
+          >
+            <p class="font-paragraph text-muted-foreground text-lg">
+              Aucune annonce n'a été publiée pour le moment.
+            </p>
+          </div>
+          <div v-else>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <AnnouncementCard
+                v-for="(annonce, index) in paginatedAnnonces"
+                :key="`annonce-${annoncesPage}-${index}`"
+                :item="annonce"
+                :color="association?.primaryColor"
+                @view-details="viewAnnouncementDetails"
+              />
+            </div>
+            <Pagination
+              :total-items="annonces.length"
+              :items-per-page="itemsPerPage"
+              :current-page="annoncesPage"
+              @update:current-page="annoncesPage = $event"
+            />
+          </div>
+        </div>
+        <div v-if="currentTab === 'cagnottes'" class="mt-8">
+          <div v-if="loadingCagnottes">
+            <LoadingOverlay :show="true" message="Chargement des cagnottes..." />
+          </div>
+          <div
+            v-else-if="cagnottes.length === 0"
+            class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
+          >
+            <p class="font-paragraph text-muted-foreground text-lg">
+              Aucune cagnotte de financement n'est active pour le moment.
+            </p>
+          </div>
+          <div v-else>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <CagnotteCard
+                v-for="(cagnotte, index) in paginatedCagnottes"
+                :key="`cagnotte-${cagnottesPage}-${index}`"
+                :item="cagnotte"
+                :color="association?.primaryColor"
+                @view-details="viewCagnotteDetails"
+              />
+            </div>
+            <Pagination
+              :total-items="cagnottes.length"
+              :items-per-page="itemsPerPage"
+              :current-page="cagnottesPage"
+              @update:current-page="cagnottesPage = $event"
+            />
+          </div>
+        </div>
+        <div v-if="currentTab === 'evenements'" class="mt-8">
+          <div v-if="loadingEvents">
+            <LoadingOverlay :show="true" message="Chargement des événements..." />
+          </div>
+          <div
+            v-else-if="eventsList.length === 0"
+            class="bg-muted/30 border-border rounded-xl border border-dashed p-12 text-center"
+          >
+            <p class="font-paragraph text-muted-foreground text-lg">
+              Aucun événement n'est prévu pour le moment.
+            </p>
+          </div>
+          <div v-else>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <EventCard
+                v-for="(event, index) in paginatedEvents"
+                :key="`event-${eventsPage}-${index}`"
+                :item="event"
+                :color="association?.primaryColor"
+                @view-details="viewEventDetails"
+              />
+            </div>
+            <Pagination
+              :total-items="eventsList.length"
+              :items-per-page="itemsPerPage"
+              :current-page="eventsPage"
+              @update:current-page="eventsPage = $event"
+            />
+          </div>
+        </div>
+        <div v-if="currentTab === 'contact'" class="mt-8">
+          <ContactForm :association-id="association?.id || ''" />
+        </div>
+      </PageContainer>
+      <div class="mt-8">
+        <ContactSection v-if="currentTab !== 'contact'" @change-tab="onTabChange" />
       </div>
-      <div v-if="currentTab === 'contact'" class="mt-8">
-        <ContactForm :association-id="association?.id || ''" />
-      </div>
-    </PageContainer>
-    <div class="mt-8">
-      <ContactSection v-if="currentTab !== 'contact'" @change-tab="onTabChange" />
-    </div>
+    </template>
   </div>
 </template>
 
@@ -216,6 +231,10 @@
 
       // Récupérer l'association et ses fichiers
       const associationData = await Database.getOne('association', id);
+      if (!associationData?.id) {
+        error.value = "Cette association n'existe pas ou n'est plus disponible.";
+        return;
+      }
       const files = await loadAssociationFiles(id);
 
       // Construire l'objet association avec les URLs des images
@@ -228,6 +247,10 @@
           .filter((f) => f.purpose === 'gallery')
           .map((f) => `/files/Association/${id}?index=${f.index}`),
       };
+
+      // Le hero s'affiche dès l'association reçue ; chaque section a son propre chargement.
+      loading.value = false;
+      error.value = null;
 
       // Charger les données en parallèle
       await Promise.all([

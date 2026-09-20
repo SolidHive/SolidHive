@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="loading" class="py-12 text-center">
-      <LoadingOverlay message="Chargement..." />
+      <LoadingOverlay :show="true" message="Chargement..." />
     </div>
 
     <div v-else class="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-9">
@@ -14,7 +14,7 @@
           @update:solid-hive-percentage="solidHivePercentage = $event"
         />
 
-        <TaxReductionInfo />
+        <TaxReductionInfo :association-name="association?.name" />
       </div>
 
       <!-- Right column: Summary -->

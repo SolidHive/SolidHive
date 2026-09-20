@@ -10,8 +10,9 @@
     </div>
 
     <p class="text-secondary mb-3 text-xs sm:mb-4 sm:text-sm">
-      Le don à Human Appeal ouvre droit à une réduction fiscale car il remplit les conditions
-      générales prévues aux articles 200 et 238 bis du code général des impôts.
+      Votre don{{ associationName ? ` à l'association ${associationName}` : '' }} peut ouvrir droit
+      à une réduction fiscale s'il remplit les conditions générales prévues aux articles 200 et 238
+      bis du code général des impôts.
     </p>
 
     <div class="rounded-xl bg-[#D9E6B34D] p-3 sm:p-4">
@@ -31,4 +32,8 @@
 
 <script setup lang="ts">
   import { Receipt } from 'lucide-vue-next';
+
+  defineProps<{
+    associationName?: string;
+  }>();
 </script>

@@ -105,7 +105,11 @@ export class TransactionsService {
         const transactionWithRelations: any = { ...transaction };
 
         // Charger l'entité liée selon relatedTo
-        if (relations.includes('association') && transaction.relatedTo === 'Association') {
+        // Un abonnement Premium pointe aussi vers une association par `relatedBy`.
+        if (
+          relations.includes('association') &&
+          (transaction.relatedTo === 'Association' || transaction.relatedTo === 'Premium')
+        ) {
           const repo = this.dataSource.getRepository('Association');
           transactionWithRelations.association = await repo.findOne({
             where: { id: transaction.relatedBy },

@@ -44,7 +44,7 @@ export class EventPricing {
     type: Event,
     description: 'Événement associé à ce tarif',
   })
-  @ManyToOne(() => Event, (event) => event.pricings)
+  @ManyToOne(() => Event, (event) => event.pricings, { onDelete: 'CASCADE' })
   event: Event;
 
   @ApiProperty({

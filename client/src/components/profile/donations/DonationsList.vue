@@ -342,6 +342,7 @@
   const getEntityType = (transaction: Transaction): string => {
     if (transaction.relatedTo === 'Fundraising') return 'Cagnotte';
     if (transaction.relatedTo === 'Event') return 'Inscription événement';
+    if (transaction.relatedTo === 'Premium') return 'Abonnement Premium';
     return 'Association';
   };
 

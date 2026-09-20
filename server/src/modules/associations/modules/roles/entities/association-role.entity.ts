@@ -40,7 +40,7 @@ export class AssociationRole {
     type: Association,
     description: 'Association liée au rôle',
   })
-  @ManyToOne(() => Association, (association) => association.roles)
+  @ManyToOne(() => Association, (association) => association.roles, { onDelete: 'CASCADE' })
   association: Association;
 
   @ApiProperty({
