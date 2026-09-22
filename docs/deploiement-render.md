@@ -12,8 +12,8 @@ Hébergement sans carte bancaire, à partir du `render.yaml` à la racine du dé
 | Emails                 | Brevo, par API HTTP (SMTP bloqué)          | 300 par jour                             |
 | Paiements              | Stripe en mode test                        | aucun vrai paiement                      |
 
-Le client réécrit `/api/*` et `/files/*` vers l'API : tout reste sur
-une seule origine, le cookie de session est first-party et le CORS ne joue pas.
+Le client réécrit `/api/*`, `/files/*` et `/uploads/*` vers l'API : tout reste
+sur une seule origine, le cookie de session est first-party et le CORS ne joue pas.
 
 ## 1. Neon
 
@@ -63,7 +63,25 @@ cd server && DATABASE_URL='<url Neon>' DB_SSL=true \
   AWS_REGION=eu-central-1 STORAGE_BUCKET=solidhive npm run seed
 ```
 
-## 4. Garder l'API éveillée
+## 4. Nom de domaine
+
+Le site statique répond sur `solidhive.theotimepagies.com`, déclaré dans
+`render.yaml` sous `domains:` : un domaine ajouté seulement depuis le dashboard
+disparaît à la synchronisation suivante du blueprint.
+
+Côté DNS, le domaine est géré par Vercel : **Domains** › `theotimepagies.com` ›
+**DNS Records** › `CNAME`, nom `solidhive`, valeur `solidhive.onrender.com`.
+Render émet le certificat dès que la résolution est vérifiée.
+
+`FRONTEND_URL` suit la même adresse. Elle sert d'origine CORS
+(`server/src/main.ts`), de base aux redirections Stripe et aux liens des emails
+de vérification, de réinitialisation et d'invitation : une valeur périmée ne casse
+pas le site, mais renvoie les destinataires sur l'ancienne adresse.
+
+L'API garde son `*.onrender.com` : les visiteurs ne l'atteignent qu'à travers les
+réécritures du site statique, jamais en direct.
+
+## 5. Garder l'API éveillée
 
 L'instance gratuite s'endort après 15 minutes sans requête et met 30 à 60 s à
 se réveiller. Un moniteur externe qui appelle `/health` toutes les 5 à
